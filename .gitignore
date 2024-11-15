@@ -16,9 +16,9 @@ src/**/*.css
 src/**/__snapshots__
 
 # misc
-.todo.txt
+todo.txt
 note.txt
-.refs.txt
+refs.txt
 
 npm-debug.log*
 yarn-debug.log*
