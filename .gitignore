@@ -17,6 +17,7 @@ src/**/__snapshots__
 
 # misc
 .todo.txt
+.note.txt
 .refs.txt
 
 npm-debug.log*
