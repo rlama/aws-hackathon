@@ -2,23 +2,20 @@
 
 # dependencies
 /node_modules
+node_modules
 
 # testing
 /coverage
 
 # production
 /build
+build
 
 # css
 src/**/*.css
 src/**/__snapshots__
 
 # misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 .todo.txt
 .refs.txt
 
