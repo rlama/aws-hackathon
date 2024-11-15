@@ -1,8 +1,0 @@
-https://42rwgbhyzj2wy3awckxgfwymra0oowvx.lambda-url.us-east-1.on.aws/australia/0/0/0.mvt
-
-"http://localhost:8080/tiles/{z}/{x}/{y}.mvt"
-
-
-https://d22k1rjhhtgsug.cloudfront.net
-
- "https://42rwgbhyzj2wy3awckxgfwymra0oowvx.lambda-url.us-east-1.on.aws/australia/{z}/{x}/{y}.mvt"
