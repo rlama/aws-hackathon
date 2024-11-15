@@ -1,0 +1,188 @@
+/*
+  Text input autocomplete
+
+  November 7, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A mix-in that adds styles to the autocomplete options appended to a text input when using 
+  Awesomplete-style autocompletion.
+
+  Your SCSS:
+
+  ```
+  // The class of the element containing the text input you want to have autocomplete
+  .elementContainingTextInput {
+    
+    .awesomplete {
+      @include autocomplete("standard");
+    }
+  }
+  ```
+
+  Your HTML:
+  ```
+  <div class="elementContainingTextInput">
+    <input type="text" id="text-input-with-autocomplete" />
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.2/awesomplete.js"></script>
+  <script>
+    var data = ["Derpit", "Burpit", "Fartit", "McGardit", "Lardit", "Dingo", "Brunswick", "Brunton", "Brunsby"]
+
+    var auto = new Awesomplete("#text-input-with-autocomplete", {
+      minChars: 2,
+      maxItems: 5,
+      list: data
+    });
+  </script>
+  ```
+*/
+
+@use "sass:math";
+
+@mixin _autocomplete(
+  $font-size: 1rem,
+  $border: 1px solid $color__blue--medium-2,
+  $color: $color__black--medium,
+  $focus-color: $color__black--medium,
+  $background: #fff,
+  $focus-background: $color__gray--very-light,
+  $mark-background: $color__gray--very-light,
+  $focus-mark-background: $color__gray--light) {
+
+  $new-font-size: to-unit(rem, $font-size);
+  $fallback-font-size: to-unit(px, $new-font-size);
+
+  $proportion-of-default-size: to-num(math.div($new-font-size, 1rem));
+
+  // Containing element
+  position: relative;
+
+  &[hidden] {
+    display: none;
+  }
+
+  & .visually-hidden {
+    position: absolute;
+    clip: rect(0, 0, 0, 0); 
+  }
+
+  // Input to be autocomplated
+  & > input {
+    display: block;
+  }
+
+  // List of suggestions
+  & > ul {
+    position: absolute;    
+    left: 0;
+    top: 98%;
+    z-index: 1;
+    list-style: none;
+
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    width: 100%;
+
+    background: $background;
+    border-radius: 4px;
+    border: $border;
+
+    text-shadow: none;
+
+    transition: 
+      300ms transform cubic-bezier(.4,.2,.5,1.4),
+      300ms opacity ease;
+    transform-origin: 1.43em -.43em;
+    transform: translateY(0px);
+  }
+  
+  & > ul[hidden],
+  & > ul:empty {
+    opacity: 0;
+
+    transform: translateY(50px);
+
+    display: block;
+    pointer-events: none;
+
+    transition-timing-function: ease;
+  }
+
+  // Items in suggestion list
+  & > ul > li {
+    position: relative;
+    padding: (12px * $proportion-of-default-size) (14px * $proportion-of-default-size);
+
+    cursor: pointer;
+
+    color: $color;
+    @include fonts__sans-serif();
+    font-weight: 400;
+    font-size: $fallback-font-size;
+    font-size: $new-font-size;
+    text-align: left;
+  }
+
+  // Items in suggestion list, when in focus
+  & > ul > li:hover {
+    background: $focus-background;
+    font-weight: 700;
+    color: $focus-color;
+  }
+
+  & > ul > li[aria-selected="true"] {
+    background: $focus-background;
+    font-weight: 700;
+    color: $focus-color;
+
+    &:first-child {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+
+    &:last-child {
+      border-bottom-right-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+  }
+
+  // Text highlighting for sections of suggestion that match the input
+
+  // When suggested
+  & mark {
+    background: $mark-background;
+  }
+  
+  // When suggested and in-focus
+  & li:hover mark {
+    background: $focus-mark-background;
+  }
+    
+  & li[aria-selected="true"] mark {
+    background: $focus-mark-background;
+    color: inherit;
+  }
+}
+
+/*
+  Autocomplete
+
+  @param { String } style - String describing style of autocomplete 
+*/
+
+@mixin autocomplete($style: "standard") {
+
+  @if ($style == "standard") {
+    @include _autocomplete(
+      1rem,
+      1px solid $color__blue--medium-2,
+      $color__black--medium,
+      $color__black--medium,
+      #fff,
+      $color__gray--very-light,
+      $color__gray--light
+    );
+  }
+}

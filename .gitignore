@@ -1,0 +1,32 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# production
+/build
+
+# css
+src/**/*.css
+src/**/__snapshots__
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.todo.txt
+.refs.txt
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+src/lib/ffx-iframe-messenger
+src/lib/ffx-prez-common-utilities
+src/lib/ffx-prez-share
+src/lib/ffx-prez-styles

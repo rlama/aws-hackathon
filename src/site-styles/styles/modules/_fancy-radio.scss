@@ -1,0 +1,272 @@
+/*
+  Fancy radio
+
+  April 9, 2018
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A pair of mix-ins to help users implement tab-like 'fancy' radio buttons.
+
+  All mix-ins result in radio button collections that can signify the buttons are deactivated (apply 
+  the '.is--deactivated' class).
+
+  You can use this style as follows.
+
+  Example SCSS:
+  ```
+  .yourFancyRadioClass {
+    @include fancy-radio('standard');
+  }
+  ```
+
+  Example HTML:
+  ```
+  <div class="fancy-radio">
+    <p>
+      Options label
+    </p>
+    <div>
+      <input 
+        type="radio" 
+        name="options" 
+        id="option-1"
+        value="option-1"
+        checked>
+      <label 
+        for="option-1">
+        Option 1
+      </label>
+      <input 
+        type="radio" 
+        name="options" 
+        id="option-2"
+        value="option-2">
+      <label 
+        for="option-2">
+        Option 2
+      </label>
+      <input 
+        type="radio" 
+        name="options" 
+        id="option-3"
+        value="option-3">
+      <label 
+        for="option-3">
+        Option 3
+      </label>
+      <input 
+        type="radio" 
+        name="options" 
+        id="option-4"
+        value="option-4">
+      <label 
+        for="option-4">
+        Option 4
+      </label>
+      <input 
+        type="radio" 
+        name="options" 
+        id="option-5"
+        value="option-5">
+      <label 
+        for="option-5">
+        Option 5
+      </label>
+    </div>
+  </div>
+  ```
+*/
+
+// *---> Private mix-ins
+
+/*
+  Fancy radio
+
+  @param { Color } color - Colour of the radio buttons' text
+  @param { Color } checked-color - Colour of the radio buttons' text when they are checked
+  @param { Color } background - Background colour of the radio buttons
+  @param { Color } checked-background - Background colour of the radio buttons when they are checked
+  @param { Color } hover-background - Background colour of the radio buttons when they are checked
+  @param { String } internal-border - Border between the radio buttons
+  @param { String } external-border - Border surrounding the collection of radio buttons
+  @param { Number with unit } font-size - Size of the radio buttons' text
+  @param { Color } label-color - Colour of the radio button group's label's text
+*/
+
+@use "sass:math";
+
+@mixin _fancy-radio(
+  $color,
+  $checked-color,
+  $background,
+  $checked-background,
+  $hover-background,
+  $internal-border,
+  $external-border,
+  $font-size,
+  $label-color) {
+
+  $new-font-size: to-unit(rem, $font-size);
+  $fallback-font-size: to-unit(px, $font-size);
+
+  $proportion-of-default-size: to-num(math.div($new-font-size, 1rem)); 
+
+  $corner-border-radius: 4px * $proportion-of-default-size;  
+
+  margin-bottom: 12px * $proportion-of-default-size;  
+
+  p {
+    @include fonts__sans-serif;
+    font-size: $fallback-font-size;
+    font-size: $new-font-size;
+
+    margin: 0;
+    padding-bottom: 8px * $proportion-of-default-size;
+
+    color: $label-color;
+  }
+
+  div {
+    display: flex;
+
+    border-radius: $corner-border-radius;
+
+    pointer-events: all;
+  }
+
+  input[type=radio] {
+    display: none;
+  }
+
+  label {
+    @include fonts__sans-serif;
+    font-size: $fallback-font-size;
+    font-size: $new-font-size;
+
+    $label-vert-padding: 12px * $proportion-of-default-size;
+    $label-hori-padding: 15px * $proportion-of-default-size;
+
+    padding: $label-vert-padding $label-hori-padding;
+    flex-grow: 1;
+    display: block;
+
+    user-select: none;
+    cursor: pointer;
+    transition: 350ms ease background;
+
+    color: $color;
+    background: $background;
+
+    border-top: $external-border;
+    border-bottom: $external-border;
+    border-right: $internal-border;
+
+    &:hover {
+      background: $hover-background;
+    }
+
+    &:first-of-type {
+      border-radius: $corner-border-radius 0 0 $corner-border-radius;
+      border-left: $external-border;
+    }
+
+    &:last-of-type {
+      border-radius: 0 $corner-border-radius $corner-border-radius 0;
+    }
+
+    &.is--deactivated {
+      background: $color__gray--light;
+      color: $color__gray--dark;
+      cursor: default;
+      border-color: $color__gray--dark;
+
+      &:hover {
+        background: $color__gray--light;
+        color: $color__gray--dark;
+        border-color: $color__gray--dark;
+      }
+    }
+  }
+
+  input[type=radio]:checked + label {
+    background: $checked-background;
+    color: $checked-color;
+  }
+}
+
+// *---> Public mix-ins
+
+/*
+  Fancy radio
+
+  @param { String } style - String denoting style of fancy radio (e.g. 'standard', 'standard--dark')
+*/
+
+@mixin fancy-radio($style: "standard") {
+
+  @if ($style == "standard") {
+    @include _fancy-radio(
+      $color__action,
+      #fff,
+      #fff,
+      $color__action,
+      #eee,
+      1px solid $color__border-gray,
+      1px solid $color__border-gray,
+      15px,
+      $color__mine-shaft
+    );
+  }
+
+  @if ($style == "standard--dark") {
+    @include _fancy-radio(
+      $color__mine-shaft,
+      #fff,
+      #fff,
+      $color__action,
+      #eee,
+      1px solid $color__brand,
+      none,
+      15px,
+      #fff
+    );
+  }
+}
+
+/*
+  Custom fancy radio
+
+  @param { Number with unit } font-size - Size of the radio buttons' text
+  @param { Color } color - Colour of the radio buttons' text
+  @param { Color } checked-color - Colour of the radio buttons' text when they are checked
+  @param { Color } background - Background colour of the radio buttons
+  @param { Color } checked-background - Background colour of the radio buttons when they are checked
+  @param { Color } hover-background - Background colour of the radio buttons when they are checked
+  @param { String } internal-border - Border between the radio buttons
+  @param { String } external-border - Border surrounding the collection of radio buttons
+  @param { Color } label-color - Colour of the radio button group's label's text
+*/
+
+@mixin fancy-radio-custom(
+  $font-size: 15px,
+  $color: $color__action,
+  $checked-color: #fff,
+  $background: #fff,
+  $checked-background: $color__action,
+  $hover-background: #eee,
+  $internal-border: 1px solid $color__border-gray,
+  $external-border: 1px solid $color__border-gray,
+  $label-color: $color__mine-shaft
+  ) {
+
+  @include _fancy-radio(
+    $color,
+    $checked-color,
+    $background,
+    $checked-background,
+    $hover-background,
+    $internal-border,
+    $external-border,
+    $font-size,
+    $label-color
+  );
+}

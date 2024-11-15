@@ -1,0 +1,372 @@
+/*
+  Feature article header
+
+  November 7, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A mix-in that styles a container and its contents to become the header section of a long-form
+  feature article, including the article's header, subtitle, author credits, date and header
+  sharing buttons.
+
+  Your SCSS:
+
+  ```
+  // The class of your feature article header
+  .yourFeatureArticleHeaderClass {
+    @include feature-article-header("standard", true, false);
+  }
+  ```
+
+  If you're using the `standard-typography` mix-in elsewhere in your style-sheet, you can set that
+  last variable - the `false` - to `true`. When set to `true`, that parameter will make the
+  `feature-article-header` mix-in assume that `standard-typography` is active, and so rely on
+  styles associated with that mix-in, resulting in less-bloated styles.
+
+  For example: 
+
+  ```
+  // The class of your feature article header
+  .yourFeatureArticleHeaderClass {
+    @include feature-article-header("standard", true, true);
+  }
+  ```
+
+  Your HTML:
+  ```
+  <header class="yourFeatureArticleHeaderClass">
+
+    <p class="feature-article-header__topic">
+      <a href="/national">Your feature article's topic</a>
+    </p>
+    
+    <h1 class="feature-article-header__title">
+      Your feature article title here
+    </h1>
+
+    <div class="feature-article-header__break"></div>
+
+    <!-- Article header social media sharing buttons -->
+    <ul class="feature-article-header__social">
+      <li class="feature-article-header__social__button social-button__facebook">
+        <a href="javascript:void(0);">
+          <span>Share on Facebook</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-facebook"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="feature-article-header__social__button social-button__twitter">
+        <a href="javascript:void(0);">
+          <span>Share on Twitter</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-twitter"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="feature-article-header__social__button social-button__whatsapp">
+        <a href="javascript:void(0);">
+          <span>Share on WhatsApp</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-whatsapp"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="feature-article-header__social__button social-button__email">
+        <a href="javascript:void(0);">
+          <span>Share on Email</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-email"></use>
+          </svg>
+        </a>
+      </li>
+    </ul>
+
+    <p class="feature-article-header__subtitle">
+      Here, you'll input a subtitle of around a sentence in length, usually running over two lines..
+    </p>
+
+    <p class="feature-article-header__author">
+      by Soren Frederiksen &amp; Donald Trump
+    </p>
+
+    <p class="feature-article-header__date">
+      February 6, 2018
+    </p>
+
+  </header>
+  ```
+*/
+
+// *---> Private mix-ins
+
+/*
+  Feature article header
+
+  @param { Color } title-color - Colour used to colour the feature header's title
+  @param { Color } subtitle-color - Colour used to colour the feature header's subtitle
+  @param { Color } topic-color - Colour used to colour the feature header's topic
+  @param { Color } break-color - Colour used to colour the feature header's break between its title,
+  subtitle and other elements
+  @param { Color } author-and-date-color - Colour used to colour the feature header's author and
+  date elements
+  @param { Color } social-button-color - Colour used to colour the feature header's social buttons
+  @param { Boolean } sharing-only-on-mobile - Boolean denoting whether or not feature article header
+  sharing buttons wills be shown on devices larger than mobile
+  @param { Boolean } standard-typography-in-us - Boolean indicating whether or not the 
+  'standard-typography' mix-in is in use elsewhere in this style-sheet
+*/
+
+@mixin _feature-article-header(
+  $title-color: $color__brand,
+  $subtitle-color: $color__mine-shaft,
+  $topic-color: $color__action,
+  $break-color: $color__mischka,
+  $author-and-date-color: $color__dove-gray,
+  $social-button-color: $color__brand,
+  $sharing-only-on-mobile: true,
+  $standard-typography-in-use: true
+) {
+
+  $padding-top: 8rem;
+  $padding-other: 1.2rem;
+  $padding-top-px: to-unit(px, $padding-top);
+  $padding-other-px: to-unit(px, $padding-top);
+
+  // Containing element
+  text-align: center;
+
+  padding: $padding-top-px $padding-other-px $padding-other-px $padding-other-px;
+  padding: $padding-top $padding-other $padding-other $padding-other;
+
+  .feature-article-header__topic {
+    
+    @include fonts__sans-serif;
+    letter-spacing: 1px;
+    font-size: 11px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+
+    a {
+      text-decoration: none;
+      color: $topic-color;
+      transition: color 300ms ease;
+    }
+
+    a:hover {
+
+      // If the topic color is the standard action color, use the hover color provided by product
+      @if ($topic-color == $color__action) {
+        color: $color__action-dark;
+      }
+      // Otherwise, darken the color the user has chosen
+      @else {
+        color: darken($topic-color, 10);
+      }
+
+      text-decoration: underline;
+    }
+
+    a:active {
+
+      // If the topic color is the standard action color, use the hover color provided by product
+      @if ($topic-color == $color__action) {
+        color: $color__action-darkest;
+      }
+      // Otherwise, darken the color the user has chosen
+      @else {
+        color: darken($topic-color, 20);
+      }
+    }
+  }
+
+  .feature-article-header__title {
+
+    // If standard typography mix-in (see 'ffx-prez-styles/base/_type.scss') is in use, we take from
+    // that the title's font size, font family and other text-related attributes. 
+    //
+    // If not, we have to apply them here.
+    @if ($standard-typography-in-use == false) {
+      @include _standard-typography__h1();
+    } 
+
+    // Only include title colour if it's not the colour included in standard typographical styles
+    @if ($title-color != $color__brand) {
+      color: $title-color;
+    }
+
+    margin: 0 auto 16px auto;
+
+    max-width: 720px;
+  }
+
+  .feature-article-header__break {
+
+    max-width: 167px;
+    border-top: 1px solid $break-color;
+    margin: 36px auto 0 auto;
+  }
+
+  .feature-article-header__subtitle {
+
+    @include fonts__serif;
+    font-size: to-unit(px, 1.25rem);
+    font-size: 1.25rem;
+
+    max-width: 720px;
+
+    margin: 0 auto 16px auto;
+
+    // Only include subtitle colour if it's not the colour included in standard typographical styles
+    @if ($subtitle-color != $color__mine-shaft) {
+      color: $subtitle-color;
+    }
+  }
+
+  .feature-article-header__author {
+  
+    @include fonts__sans-serif;
+    font-size: to-unit(px, 1rem);
+    font-size: 1rem;
+    color: $author-and-date-color;
+    margin-bottom: 0;
+  }
+
+  .feature-article-header__date {
+
+    @include fonts__sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: to-unit(px, 0.8rem);
+    font-size: 0.8rem;
+    color: $author-and-date-color;
+  }
+
+  .feature-article-header__social {
+
+    @include social-button-container();
+
+    padding: 8px 0;
+    margin-bottom: 16px;
+  }
+
+  .feature-article-header__social__button {
+    // If the user has chosen the standard social button colour, just allow the social button
+    // mix-in to apply the standard main and action (i.e. hover) colours
+    @if ($social-button-color == $color__brand) {
+      @include social-button();
+    }
+    // Otherwise, darken the user's input colour and use that as the action colour
+    @else {
+      @include social-button(1rem, $social-button-color, darken($social-button-color, 10));
+    } 
+  }
+
+  @include break-point("at least", "small") {
+    
+    .feature-article-header__subtitle {
+
+      font-size: to-unit(px, 1.5rem);
+      font-size: 1.5rem;
+    }
+  }
+  
+  @include break-point("at least", "medium") {
+    
+    @if ($sharing-only-on-mobile) {
+      .feature-article-header__social {
+
+        display: none;
+      }
+    }
+
+    .feature-article-header__break {
+
+      border-top: 2px solid $break-color;
+
+      @if ($sharing-only-on-mobile) {
+        margin: 36px auto;
+      }
+    }
+  }
+}
+
+
+// *---> Public mix-ins
+
+/*
+  Feature article header
+
+  @param { String } style - String describing style of feature article header (e.g. 'standard' or
+  'standard--dark')
+  @param { Boolean } sharing-only-on-mobile - Boolean denoting whether or not feature article header
+  sharing buttons wills be shown on devices larger than mobile
+  @param { Boolean } standard-typography-in-us - Boolean indicating whether or not the 
+  'standard-typography' mix-in is in use elsewhere in this style-sheet
+*/
+
+@mixin feature-article-header(
+  $style: "standard", 
+  $sharing-only-on-mobile: true, 
+  $standard-typography-in-use: true) {
+
+  @if ($style == "standard") {
+    @include _feature-article-header();
+  }
+  @else if ($style == "standard--dark") {
+    @include _feature-article-header(
+      $color__athens-gray,
+      $color__athens-gray,
+      $color__action-on-dark,
+      $color__athens-gray,
+      $color__athens-gray,
+      $color__action-on-dark,
+      $sharing-only-on-mobile,
+      $standard-typography-in-use
+    );
+  }
+  @else {
+    @include _feature-article-header();
+    @warn "`#{$style}` is not a valid feature article header style. Using 'standard' instead.";
+  }
+}
+
+/*
+  Custom feature article header
+
+  @param { Color } title-color - Colour used to colour the feature header's title
+  @param { Color } subtitle-color - Colour used to colour the feature header's subtitle
+  @param { Color } topic-color - Colour used to colour the feature header's topic
+  @param { Color } break-color - Colour used to colour the feature header's break between its title,
+  subtitle and other elements
+  @param { Color } author-and-date-color - Colour used to colour the feature header's author and
+  date elements
+  @param { Color } social-button-color - Colour used to colour the feature header's social buttons
+  @param { Boolean } sharing-only-on-mobile - Boolean denoting whether or not feature article header
+  sharing buttons wills be shown on devices larger than mobile
+  @param { Boolean } standard-typography-in-us - Boolean indicating whether or not the 
+  'standard-typography' mix-in is in use elsewhere in this style-sheet
+*/
+
+@mixin feature-article-header-custom(
+  $title-color: $color__brand,
+  $subtitle-color: $color__mine-shaft,
+  $topic-color: $color__action,
+  $break-color: $color__mischka,
+  $author-and-date-color: $color__dove-gray,
+  $social-button-color: $color__brand,
+  $sharing-only-on-mobile: true,
+  $standard-typography-in-use: true
+  ) {
+
+  @include _feature-article-header(
+    $title-color,
+    $subtitle-color,
+    $topic-color,
+    $break-color,
+    $author-and-date-color,
+    $social-button-color,
+    $sharing-only-on-mobile,
+    $standard-typography-in-use
+  );
+}

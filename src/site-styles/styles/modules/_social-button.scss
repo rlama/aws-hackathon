@@ -1,0 +1,144 @@
+/*
+  Social button
+
+  October 24, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A mix-in to facilitate the use of standard social media sharing buttons, including those for 
+  Facebook, Twitter, Instagram, WhatsApp, Google Plus and Email.
+
+  To use social buttons, add this to the top of your HTML document (or add the symbol elements to 
+  an existing svg container):
+
+    <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute; width: 0; height: 0;">
+      <symbol viewBox="0 0 32 32" id="icon-twitter">
+        <path d="M32 6.371c-1.16.525-2.139.542-3.177.023 1.34-.811 1.4-1.38 1.884-2.916a12.91 12.91 0 0 1-4.115 1.596A6.431 6.431 0 0 0 21.864 3c-3.578 0-6.479 2.94-6.479 6.564 0 .515.058 1.016.167 1.496C10.167 10.787 5.394 8.173 2.2 4.2a6.612 6.612 0 0 0-.879 3.302 6.584 6.584 0 0 0 2.883 5.463 6.402 6.402 0 0 1-2.934-.82l-.001.082c0 3.18 2.234 5.833 5.198 6.437a6.43 6.43 0 0 1-2.927.112c.825 2.607 3.218 4.505 6.052 4.559A12.903 12.903 0 0 1 0 26.052 18.167 18.167 0 0 0 9.93 29c11.919 0 18.433-10.001 18.433-18.675 0-.286-.004-.566-.017-.85C29.61 8.551 31.132 7.69 32 6.371" fill="currentColor" fill-rule="evenodd"></path>
+      </symbol>
+      <symbol viewBox="0 0 32 32" id="icon-email">
+        <g fill="currentColor" fill-rule="evenodd">
+          <path d="M16.086 17.334L30.627 6.502A3.267 3.267 0 0 0 28.885 6h-25.6c-.621 0-1.194.177-1.685.47l14.486 10.864z"></path>
+          <path d="M16.464 18.857a.805.805 0 0 1-.931-.002L.413 7.538C.158 7.98 0 8.478 0 9.018v13.847c0 1.695 1.435 3.077 3.2 3.077h25.6c1.765 0 3.2-1.382 3.2-3.077V9.018c0-.518-.147-1-.382-1.429L16.464 18.857z"></path>
+        </g>
+      </symbol>
+      <symbol viewBox="0 0 32 32" id="icon-whatsapp">
+        <path d="M22.189 24.818c-.856.078-.856.701-5.6-1.165-4.74-1.868-7.733-6.732-7.967-7.044-2.187-2.91-2.762-5.991-.273-8.715.79-.86 2.748-.824 3.19.235.387.934 1.32 3.229 1.438 3.462.117.235.194.507.037.817-.186.375-.38.814-1.166 1.596-.233.233-.475.484-.203.95.272.468 1.206 1.995 2.594 3.231 1.782 1.59 3.284 2.081 3.75 2.315.467.233.74.195 1.012-.117.271-.313 1.167-1.362 1.476-1.829.312-.467.624-.388 1.05-.233.428.155 2.72 1.283 3.188 1.518.466.23.778.35.895.544.701 1.177-.963 4.212-3.421 4.435M16 0C7.178 0 0 7.177 0 16c0 3.5 1.133 6.744 3.048 9.38L1.05 31.324l6.149-1.97A15.897 15.897 0 0 0 16 32c8.821 0 16-7.177 16-16 0-8.822-7.178-16-16-16" fill="currentColor" fill-rule="evenodd"></path>
+      </symbol>
+      <symbol viewBox="0 0 32 32" id="icon-facebook">
+        <path d="M18.7 17.4h5.1l.7-5.6h-5.8V8.1c0-1.6.5-2.7 2.8-2.7h3V.2c-.5 0-2.3-.2-4.4-.2-4.4 0-7.9 2.7-7.9 7.7v4.1H7.6v5.6h4.6V32h6.5V17.4z" fill="currentColor"></path>
+      </symbol>
+      <symbol viewBox="0 0 32 32" id="icon-google">
+        <path d="M28.6 14.6v-3.4H26v3.4h-3.4v2.6H26v3.4h2.6v-3.4H32v-2.6zm-8-.6a8.2 8.2 0 0 1 .2 2.2c0 5.9-4 10.3-10.2 10.3A10.65 10.65 0 0 1 0 16 10.65 10.65 0 0 1 10.6 5.5a10.48 10.48 0 0 1 7.2 2.8l-3 3A6.38 6.38 0 0 0 4.2 16a6.24 6.24 0 0 0 6.4 6.3c3.2 0 5.4-1.8 5.8-4.3h-5.8v-3.9l10-.1z" fill="currentColor" fill-rule="evenodd"></path>
+      </symbol>
+      <symbol viewBox="0 0 32 32" id="icon-instagram">
+        <g stroke="currentColor" fill="currentColor">
+          <path d="M8.5 2.9h15c1.6 0 3 .7 3.9 1.7 1 .9 1.7 2.3 1.7 3.9v15c0 1.6-.7 3-1.7 3.9-.9 1-2.3 1.7-3.9 1.7h-15c-1.6 0-3-.7-3.9-1.7-1-.9-1.7-2.3-1.7-3.9v-15c0-1.6.7-3 1.7-3.9.9-1.1 2.3-1.7 3.9-1.7m15-1.9h-15C4.4 1 1 4.4 1 8.5v15C1 27.6 4.4 31 8.5 31h15c4.1 0 7.5-3.4 7.5-7.5v-15C31 4.4 27.6 1 23.5 1" stroke-width="2"></path>
+          <path d="M16 21c-1.4 0-2.6-.6-3.5-1.5-.9-.9-1.5-2.1-1.5-3.5s.6-2.6 1.5-3.5c.9-.9 2.2-1.5 3.5-1.5 1.4 0 2.6.6 3.5 1.5.9.9 1.5 2.2 1.5 3.5 0 1.4-.6 2.6-1.5 3.5-.9.9-2.1 1.5-3.5 1.5m0-12c-3.9 0-7 3.1-7 7s3.1 7 7 7 7-3.1 7-7-3.1-7-7-7" stroke-width="2"></path>
+          <path d="M24 9.5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5m0-4c-1.4 0-2.5 1.1-2.5 2.5s1.1 2.5 2.5 2.5 2.5-1.1 2.5-2.5-1.1-2.5-2.5-2.5"></path>
+        </g>
+      </symbol>
+    </svg>
+  
+  (In future, it might be that the above isn't necessary, as mastheads in the Fairfax Blue style
+  appear to include the symbols above on every page the site.)
+
+  With the above in your HTML document, you can use this style as follows.
+
+  Your SCSS:
+
+    .yourSocialButtonContainerStyle {
+      @include social-button-container();
+    }
+
+    .yourSocialButtonStyle {
+      @include social-button(15px, #000, #ccc); 
+    }
+
+  Your HTML:
+
+    <ul class="yourSocialButtonContainerStyle">
+      <li class="yourSocialButtonStyle">
+        <a href="javascript:void(0);">
+          <span>Share on Facebook</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-facebook"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="yourSocialButtonStyle">
+        <a href="javascript:void(0);">
+          <span>Share on Facebook</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-twitter"></use>
+          </svg>
+        </a>
+      </li>
+      <li class="yourSocialButtonStyle">
+        <a href="javascript:void(0);">
+          <span>Share on Facebook</span>
+          <svg height="1em" width="1em" aria-hidden="true" focusable="false">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-email"></use>
+          </svg>
+        </a>
+      </li>
+    </ul>
+*/
+
+/*
+  Social button
+
+  @param { Number with unit } side-length - Figure with unit that determines width and height of 
+  button
+  @param { Color } color - Color of the button 
+  @param { Color } actionColor - Color of button in hover and focus states
+*/
+
+@use "sass:math";
+
+@mixin social-button($icon-size: 1rem, $color: $color__brand, $action-color: $color__action) {
+  $new-icon-size: to-unit(rem, $icon-size);
+  $fallback-icon-size: to-unit(px, $icon-size);
+  $proportion-of-default-size: to-num(math.div($new-icon-size, 1rem));
+
+  font-size: $fallback-icon-size;
+  font-size: $new-icon-size;
+  line-height: 1;
+  display: inline-block;
+  padding: (7px * $proportion-of-default-size) (8px * $proportion-of-default-size);
+  cursor: pointer;
+
+  a,
+  div {
+    color: $color;
+  }
+
+  span {
+    position: absolute;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    white-space: nowrap;
+    border: 0;
+  }
+
+  &:not(:first-child) {
+    margin-left: 8px;
+  }
+
+  &:hover,
+  &:focus {
+    a,
+    div {
+      color: $action-color;
+    }
+  }
+}
+
+/*
+  Social button container
+*/
+
+@mixin social-button-container() {
+  list-style: none;
+}

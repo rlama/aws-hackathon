@@ -1,0 +1,35 @@
+/*
+  Colors - Charts
+
+  January 1, 2017
+  Ask sorenfrederiksen@fairfaxmedia.com.au
+
+  Colors for use in data visualisations. These and other styles are documented here:
+
+  https://ffxblue.atlassian.net/wiki/spaces/PROD/pages/32577164/Infogram+Style
+*/
+
+// *---> Sequential data colours
+//                                            Color   | Lightness        | Shade information
+$color__seq-data__1: $color__brand-offset; // Blue    - very dark        - navy, grayish
+$color__seq-data__2: #354A7A;              // Blue    - dark             - navy
+$color__seq-data__3: #7083AF;              // Blue    - medium
+$color__seq-data__4: #a8b9e0;              // Blue    - light
+$color__seq-data__5: #d9e2f7;              // Blue    - very light
+
+// *---> Divergent data colours
+//                                              Color   | Lightness        | Shade information
+$color__div-data__a-1: $color__brand-offset; // Blue    - very dark        - navy, grayish
+$color__div-data__a-2: #354A7A;              // Blue    - dark             - navy
+$color__div-data__a-3: #7083AF;              // Blue    - medium
+$color__div-data__b-1: #ff8b00;              // Orange  - dark
+$color__div-data__b-2: #ffac47;              // Orange  - medium
+$color__div-data__b-3: #ffd78e;              // Orange  - light
+
+// *---> Qualitative data colours
+//                                             Color   | Lightness        | Shade information
+$color__qual-data__a: $color__brand-offset; // Blue    - very dark        - navy, grayish
+$color__qual-data__b: #fbc52c;              // Yellow  - medium           - mustard
+$color__qual-data__c: #a9d345;              // Green   - medium
+$color__qual-data__d: #ff8b00;              // Orange  - medium
+$color__qual-data__e: $color__blood-red;    // Red     - medium

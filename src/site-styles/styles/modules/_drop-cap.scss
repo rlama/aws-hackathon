@@ -1,0 +1,54 @@
+/*
+  Drop-cap
+
+  February 6, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A large capital letter used to start a section of a feature article.
+  
+  With the above in your HTML document, you can use this style as follows.
+
+  Your SCSS:
+
+  ```
+  .yourDropCapClass {
+    @include drop-cap(1rem);
+  }
+  ```
+
+  Your HTML:
+  ```
+  <p>
+    <span class="yourDropCapClass">T</span>here are about 17,000 rips at beaches around Australia 
+    on any given day. Chances are that – unless you’re a skilled surf lifesaver or an extremely 
+    experienced surfer – you’d prefer not to be dicing with them.
+  </p>
+  ```
+*/
+
+/*
+  Drop cap
+
+  @param { Number with unit } normal-font-size - Size of most of the text in the drop-cap's 
+  section
+*/
+
+@mixin drop-cap($normal-font-size) {
+
+  $normal-font-size-as-rem: to-unit('rem', $normal-font-size);
+  $drop-cap-font-size: $normal-font-size-as-rem * 4.3;
+  $drop-cap-font-size-as-px: to-unit('px', $drop-cap-font-size);
+
+  @include fonts__serif;
+  font-size: $drop-cap-font-size-as-px;
+  font-size: $drop-cap-font-size;
+  line-height: $drop-cap-font-size - 1.5;
+
+  display: block;
+  margin: 8px 8px 0 0;
+  float: left;
+
+  @include break-point("at least", "small") {
+    margin: 12px 8px 0 0;
+  }
+}

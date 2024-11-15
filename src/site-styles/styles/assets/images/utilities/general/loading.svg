@@ -1,0 +1,6 @@
+<svg viewBox="0 0 40 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" stroke="#096DD2" stroke-width="3" fill="transparent" class="loading">
+  <g class="loading__icon" transform="translate(6.5 6.5)" >
+      <circle class="loading__icon__circle" opacity="0" cx="15.8" cy="15" r="15"></circle>
+      <path d="M27.8084006,22.8842813 C29.5771785,20.6011257 30.6299412,17.7353365 30.6299412,14.6236613 C30.6299412,9.67647577 27.9688583,5.35081946 24,3" class="loading__icon__active-segment"></path>
+  </g>
+</svg>

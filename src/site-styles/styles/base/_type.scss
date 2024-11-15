@@ -1,0 +1,222 @@
+/*
+  Type
+
+  Standard and other type styles.
+
+  October 24, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+*/
+
+// *---> Private mix-ins
+
+/*
+  These mix-ins are not used in the main, public 'standard-typography' mix-in, because they would 
+  burden projects with bulkier styles expressed in long- rather than the short-form of that main 
+  mix-in.
+
+  (As in, if we're assuming the user wants to apply all standard typographic styles, we can apply
+  styles to 'h1, h2, h3, h4, h5' all at once, saving many lines of code. Without that assumption,
+  we have to repeat our styles for each individual type of heading element.)
+
+  Individual typographical mix-ins are provided only for 'h1', 'h2', 'h3' and 'p' elements, as these
+  are considered most likely to prove of use.
+
+  The utility of all of these mix-ins is debatable, and subject to future consideration.
+*/
+
+/*
+  Standard typography - h1
+*/
+
+@mixin _standard-typography__h1() {
+  // Small and above
+  @include fonts__serif-heading;
+  font-size: 32px;
+  font-size: to-unit(rem, 28px);
+  font-weight: 500;
+  color: $color__blue-zodiac;
+  line-height: to-line-height(28px, 32px);
+
+  // Medium and above
+  @include break-point('at least', 'medium') {
+    font-size: 48px;
+    font-size: to-unit(rem, 48px);
+    line-height: to-line-height(48px, 56px);
+  }
+}
+
+/*
+  Standard typography - h2
+*/
+
+@mixin _standard-typography__h2() {
+  // Small and above
+  @include fonts__serif-heading;
+  font-weight: 500;
+  color: $color__blue-zodiac;
+  font-size: 20px;
+  font-size: to-unit(rem, 20px);
+  line-height: to-line-height(20px, 24px);
+
+  // Medium and above
+  @include break-point('at least', 'medium') {
+    font-size: 28px;
+    font-size: to-unit(rem, 28px);
+    line-height: to-line-height(28px, 32px);
+  }
+  // Large and above
+  @include break-point('at least', 'large') {
+    font-size: 36px;
+    font-size: to-unit(rem, 36px);
+    line-height: to-line-height(36px, 40px);
+  }
+}
+
+/*
+  Standard typography - h3
+*/
+
+@mixin _standard-typography__h3() {
+  // Small and above
+  @include fonts__serif-heading;
+  font-weight: 500;
+  color: $color__blue-zodiac;
+  font-size: 20px;
+  font-size: to-unit(rem, 20px);
+  line-height: to-line-height(20px, 24px);
+
+  // Medium and above
+  @include break-point('at least', 'medium') {
+    font-size: 28px;
+    font-size: to-unit(rem, 28px);
+    line-height: to-line-height(28px, 32px);
+  }
+}
+
+/*
+  Standard typography - p
+*/
+
+@mixin _standard-typography__p() {
+  // Small and above
+  @include fonts__serif;
+  color: $color__mine-shaft;
+  font-size: 17px;
+  font-size: to-unit(rem, 17px);
+  line-height: to-line-height(17px, 24px);
+  margin-bottom: 16px;
+
+  // Medium and above
+  @include break-point('at least', 'medium') {
+    @include fonts__serif;
+    color: $color__mine-shaft;
+    font-size: 18px;
+    font-size: to-unit(rem, 18px);
+    line-height: to-line-height(18px, 32px);
+  }
+}
+
+// *---> Public mix-ins
+
+/*
+  Standard typography
+*/
+
+@mixin standard-typography() {
+  // Small and above
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @include fonts__sans-serif;
+
+    //@include fonts__serif-heading;
+    font-weight: 700;
+    color: $color__blue-zodiac;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-size: to-unit(rem, 28px);
+    line-height: to-line-height(28px, 32px);
+  }
+
+  h2,
+  h3 {
+    font-size: 20px;
+    font-size: to-unit(rem, 20px);
+    line-height: to-line-height(20px, 24px);
+  }
+
+  h4,
+  h5 {
+    font-size: 16px;
+    font-size: to-unit(rem, 16px);
+    line-height: to-line-height(16px, 20px);
+  }
+
+  p {
+    @include fonts__serif;
+    color: $color__mine-shaft;
+    font-size: 17px;
+    font-size: to-unit(rem, 17px);
+    line-height: to-line-height(17px, 24px);
+    margin-bottom: 16px;
+  }
+
+  strong {
+    font-weight: 500;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  // Medium and above
+  @include break-point('at least', 'medium') {
+    h1 {
+      font-size: 48px;
+      font-size: to-unit(rem, 48px);
+      line-height: to-line-height(48px, 56px);
+    }
+
+    h2,
+    h3 {
+      font-size: 28px;
+      font-size: to-unit(rem, 28px);
+      line-height: to-line-height(28px, 32px);
+    }
+
+    h4 {
+      font-size: 20px;
+      font-size: to-unit(rem, 20px);
+      line-height: to-line-height(20px, 24px);
+    }
+
+    // h5 is the same as small
+
+    p {
+      @include fonts__sans-serif;
+
+     // @include fonts__serif;
+      color: $color__mine-shaft;
+      font-size: 18px;
+      font-size: to-unit(rem, 18px);
+      line-height: to-line-height(18px, 32px);
+    }
+  }
+
+  // Large and above
+  @include break-point('at least', 'large') {
+    // h1 is same as in medium
+
+    h2 {
+      font-size: 36px;
+      font-size: to-unit(rem, 36px);
+      line-height: to-line-height(36px, 40px);
+    }
+
+    // h3, h4, h5 and p are the same as in medium
+  }
+}

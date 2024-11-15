@@ -1,0 +1,126 @@
+/*
+  Scrollbar
+
+  March 1, 2018
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A couple mix-ins that add a custom scrollbar to a scrolling container.
+  
+  You can use this style as follows.
+
+  Example SCSS:
+
+  ```
+  .yourScrollingContainerClass {
+    @include scrollbar("standard");
+  }
+  ```
+
+  Example HTML:
+
+  ```
+  <div class="yourScrollingContainerClass">
+    <!-- Lots of elements -->
+  </div>
+  ```
+*/
+
+// *---> Private mix-ins
+
+/*
+  Scrollbar
+
+  @param { Number with unit } width - Width of the scrollbar
+  @param { Color } track-color - Color of the scrollbar track
+  @param { Color } thumb-color - Color of the scrollbar thumb (i.e. the movable control in the 
+  scrollbar)
+  @param { Number with unit } track-border-radius - Border radius of the scrollbar track
+  @param { Number with unit } thumb-border-radius - Border radius of the scrollbar thumb (i.e. the
+  movable control in the scrollbar)
+  @param { Number with unit } thumb-padding - Gap between the thumb and the track
+*/
+
+@mixin _scrollbar (
+  $width,
+  $track-color,
+  $thumb-color, 
+  $track-border-radius,
+  $thumb-border-radius,
+  $thumb-padding
+  ) {
+
+  overflow-y: auto;
+
+  &::-webkit-scrollbar-track {
+    background-color: $track-color;
+
+    border-radius: $track-border-radius;
+
+    margin: 2px 0;
+  }
+
+  &::-webkit-scrollbar {
+    width: $width;
+    border-radius: $track-border-radius;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $thumb-color;
+
+    border: $thumb-padding solid $track-color;
+    border-radius: $thumb-border-radius;
+    cursor: pointer;
+  }
+}
+
+// *---> Public mix-ins
+
+/*
+  Scrollbar
+
+  @param { String } style - String describing the style of the scrollbar
+*/
+
+@mixin scrollbar($style: "standard") {
+
+  @if ($style == "standard") {
+    @include _scrollbar(
+      10px,
+      $color__gray--light,
+      $color__action,
+      5px,
+      5px,
+      2px
+    );
+  }
+}
+
+/*
+  Custom scrollbar
+
+  @param { Number with unit } width - Width of the scrollbar
+  @param { Color } track-color - Color of the scrollbar track
+  @param { Color } thumb-color - Color of the scrollbar thumb (i.e. the movable control in the 
+  scrollbar)
+  @param { Number with unit } track-border-radius - Border radius of the scrollbar track
+  @param { Number with unit } thumb-border-radius - Border radius of the scrollbar thumb (i.e. the
+  movable control in the scrollbar)
+*/
+
+@mixin scrollbar-custom(
+  $width: 10px,
+  $track-color: $color__gray--light,
+  $thumb-color: $color__action, 
+  $track-border-radius: 5px,
+  $thumb-border-radius: 5px
+  ) {
+  
+  @include _scrollbar(
+    $width,
+    $track-color,
+    $thumb-color,
+    $track-border-radius,
+    $thumb-border-radius,
+    $width * 0.2
+  );
+}

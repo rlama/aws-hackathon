@@ -1,0 +1,52 @@
+/*
+  Colours - Australian politics
+
+  November 9, 2017
+  ask sorenfrederiksen@fairfaxmedia.comau
+*/
+
+// Acronyms
+
+$color__auspol__alp: #D0011B; // Medium-dark red
+$color__auspol__lnp: #0187D0; // Medium-light blue
+$color__auspol__onp: #FF8B00; // Medium-light orange
+$color__auspol__grn: #A9D345; // Light green
+$color__auspol__kap: #8B572A; // Medium-light brown
+$color__auspol__ntp: #7D198D; // Medium-light purple
+$color__auspol__ind: #707070; // Medium-light gray
+$color__auspol__oth: #404040; // Dark gray-brown
+
+// Long-names
+
+// Australian Labor Party
+$color__auspol__labor: $color__auspol__alp;
+
+// 'The Coalition'
+// Australian Liberal Party
+// Liberal-National Party
+$color__auspol__coalition: $color__auspol__lnp;
+$color__auspol__liberals: $color__auspol__lnp;
+
+// One Nation Party
+$color__auspol__one-nation: $color__auspol__onp;
+
+// The Greens
+$color__auspol__greens: $color__auspol__grn;
+
+// Katter's Australia Party
+$color__auspol__katter: $color__auspol__kap;
+$color__auspol__katters-australia-party: $color__auspol__kap;
+
+// Independent
+$color__auspol__independent: $color__auspol__ind;
+
+// Other
+$color__auspol__other: $color__auspol__oth;
+
+// *---> Alternate shades
+
+$color__auspol__alp-alt: #A90002; // Dark red
+$color__auspol__lnp-alt: #116796; // Medium blue
+$color__auspol__onp-alt: #995300; // Dark orange
+$color__auspol__ind-alt: #404040; // Dark gray-brown
+$color__auspol__oth-alt: #404040; // Dark gray-brown

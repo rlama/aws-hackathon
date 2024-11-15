@@ -1,0 +1,350 @@
+/*
+  Text input
+
+  November 7, 2017
+  ask sorenfrederiksen@fairfaxmedia.com.au
+
+  A couple of mix-ins to help users get standard form-based text inputs up and running.
+
+  All mix-ins result in inputs that can be made to declare the user's input is invalid (apply the 
+  '.is--invalid' class to your button) or to signify the input is deactivated (apply the 
+  '.is--deactivated' class).
+
+  To use text inputs, add this to the top of your HTML document (or add the symbol elements to 
+  an existing svg container):
+
+  ```
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute; width: 0; height: 0;">
+    <symbol viewBox="0 0 16 16" id="icon-validation-alert">
+      <circle r="8" cx="8" cy="8" fill="currentColor"></circle>
+      <text 
+        text-anchor="middle" 
+        x="8" 
+        y="13" 
+        fill="#fff" 
+        style="font-size: 13px; font-weight: 700; font-family: 'PT Sans', sans-serif">!</text>
+    </symbol>
+  </svg>
+  ```
+  
+  You can use this style as follows.
+
+  Example SCSS:
+
+  ```
+  .yourTextInputClass {
+    @include text-input("standard");
+  }
+  ```
+
+  Example HTML:
+
+  ```
+  <div class="yourTextInputClass">
+    <label>Some input label</label>
+    <div>
+      <input type="text" placeholder="Some input text"></input>
+      <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" 
+           xmlns:xlink="http://www.w3.org/1999/xlink" class="validation-alert">
+        <use 
+          xmlns:xlink="http://www.w3.org/1999/xlink" 
+          xlink:href="#icon-validation-alert" 
+          class="validation-alert__icon">
+      </svg>
+    </div>
+    <p class="validation-error">
+      You input the wrong thing.
+    </p>
+  </div>
+  ```
+
+  Example HTML where the user's input is invalid:
+
+  ```
+  <div class="yourTextInputClass is--invalid">
+    <label>Some input label</label>
+    <div>
+      <input type="text" placeholder="Some input text"></input>
+      <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" 
+           xmlns:xlink="http://www.w3.org/1999/xlink" class="validation-alert">
+        <use 
+          xmlns:xlink="http://www.w3.org/1999/xlink" 
+          xlink:href="#icon-validation-alert" 
+          class="validation-alert__icon">
+      </svg>
+    </div>
+    <p class="validation-error">
+      You input the wrong thing.
+    </p>
+  </div>
+  ```
+
+  (Note the 'label', 'validation-alert' and 'validation-error' elements are optional.)
+*/
+
+// *---> Private mix-ins
+
+/*
+  Text input
+
+  @param { Color } color - Colour of the input's text
+  @param { String } border - Border property of input
+  @param { Color } focus-color - Colour of the input's text when in focus state
+  @param { Color } focus-border - Border property of input when in focus state
+  @param { Number with unit } font-size - Size of the input's text
+  @param { Color } background - Background colour of the input
+  @param { Color } label-color - Color of the input's label
+  @param { Number with unit } label-font-size - Size of the input's label's font
+  @param { Color } outline - Color of the outline shown when the input is in focus
+*/
+
+@use "sass:math";
+
+@mixin _text-input(
+  $color, 
+  $border, 
+  $focus-color, 
+  $focus-border, 
+  $font-size, 
+  $background,
+  $label-color, 
+  $label-font-size,
+  $outline: initial) {
+
+  $new-font-size: to-unit(rem, $font-size);
+  $proportion-of-default-size: to-num(math.div($new-font-size, 1rem)); 
+
+  @include _text-input-without-validation-error(
+    $color, 
+    $border, 
+    $focus-color, 
+    $focus-border, 
+    $font-size, 
+    $background,
+    $label-color, 
+    $label-font-size,
+    $outline
+  ); 
+
+  // Validation text
+  .validation-error {
+    @include fonts__sans-serif();
+    font-weight: 400;
+    color: $color__red--medium;
+    font-size: 13px;
+    font-size: to-unit(rem, 13px);
+    line-height: 1.3;
+
+    margin: 4px 0 0 0;
+    max-height: 16px;
+    min-height: 16px;
+
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  &.is--invalid {
+
+    input[type=text] {
+      border-color: $color__red--medium;
+    }
+
+    .validation-error {
+      opacity: 1;
+      max-height: initial;
+    }
+  }
+
+  // Validation icon
+  .validation-alert {
+    color: $color__red--medium;
+
+    opacity: 0;
+    transition: opacity 300ms ease;
+    
+    user-select: none;
+    pointer-events: none;
+
+    height: 36%;
+    position: absolute;
+    top: 50%;
+    right: (15px * $proportion-of-default-size);
+    transform: translateY(-50%);
+  }
+
+  &.is--invalid {
+    .validation-alert {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+  Text input without validation error
+
+  Included for use in other mix-ins where including validation error styles would add excessively
+  and needlessly to the stylesheet produced (e.g. with the 'search-input' mix-in).
+
+  @param { Color } color - Colour of the input's text
+  @param { String } border - Border property of input
+  @param { Color } focus-color - Colour of the input's text when in focus state
+  @param { Color } focus-border - Border property of input when in focus state
+  @param { Number with unit } font-size - Size of the input's text
+  @param { Color } background - Background colour of the input
+  @param { Color } label-color - Color of the input's label
+  @param { Number with unit } label-font-size - Size of the input's label's font
+  @param { Color } outline - Color of the outline shown when the input is in focus
+*/
+
+@mixin _text-input-without-validation-error(
+  $color, 
+  $border, 
+  $focus-color, 
+  $focus-border, 
+  $font-size, 
+  $background,
+  $label-color, 
+  $label-font-size,
+  $outline: initial) {
+
+  $new-font-size: to-unit(rem, $font-size);
+  $fallback-font-size: to-unit(px, $new-font-size);
+
+  $new-label-font-size: to-unit(rem, $label-font-size);
+  $fallback-label-font-size: to-unit(px, $new-label-font-size);
+
+  $proportion-of-default-size: to-num(math.div($new-font-size, 1rem));
+
+  margin: 0 0 12px 0;
+  
+  // Label
+  label {
+    font-size: $fallback-label-font-size;
+    font-size: $new-label-font-size;
+    color: $label-color;
+    @include fonts__sans-serif();
+    font-weight: 400;
+
+    padding-bottom: $fallback-label-font-size * 0.5;
+    display: block;
+  }
+
+  // Input container
+  div {
+    position: relative;
+  }
+
+  // Input
+  input[type=text] {
+    font-size: $fallback-font-size;
+    font-size: $new-font-size;
+    color: $color;
+    @include fonts__sans-serif();
+    font-weight: 400;
+
+    border: $border;
+    transition: border-color 300ms ease;
+    background: $background;
+    padding: (10px * $proportion-of-default-size) (15px * $proportion-of-default-size);
+    border-radius: 4px;
+    width: 100%;
+
+    display: block;
+
+    cursor: text;
+    outline: $outline;
+  }
+
+  input[type=text]:focus {
+    color: $focus-color;
+
+    border: $focus-border;
+  }
+
+  // Deactivated
+  &.is--deactivated {
+
+    input[type=text] {
+      background: $color__gray--light;
+      color: $color__gray--dark;
+      cursor: default;
+
+      &:focus {
+        background: $color__gray--light;
+        color: $color__gray--dark;
+        border: $border;
+      }
+    }
+  }
+}
+
+// *---> Public mix-ins
+
+/*
+  Text input
+
+  @param { String } style - String denoting style of text input
+*/
+
+@mixin text-input($style: "standard") {
+
+  @if ($style == "standard") {
+    @include _text-input(
+      $color__black--medium,
+      1px solid $color__input-border-gray,
+      $color__black--medium,
+      1px solid $color__blue--medium-2,
+      1rem,
+      #fff,
+      $color__black--medium,
+      0.9375rem,
+      initial
+    );
+  }
+
+  @if ($style == "standard--dark") {
+    @include _text-input(
+      $color__black--medium,
+      1px solid $color__brand,
+      $color__black--medium,
+      1px solid $color__blue--medium-2,
+      1rem,
+      #fff,
+      #fff,
+      0.9375rem,
+      initial
+    );
+  }
+}
+
+/*
+  Custom text input
+
+  @param { Color } border-color - Colour of the input's border
+  @param { Color } focus-border-color - Colour of the input's border in focus state
+  @param { Color } color - Colour of the input's text
+  @param { Number with unit } font-size - Size of input text (label is sized at 93.75% of this)
+  @param { Color } background - Colour of input's background
+  @param { Color } outline - Colour of outline shown around input when it is in focus
+*/
+
+@mixin text-input-custom(
+  $border-color: $color__input-border-gray, 
+  $focus-border-color: $color__blue--medium-2,
+  $color: $color__black--medium,
+  $font-size: 1rem,
+  $background: #fff,
+  $outline: initial) {
+
+  @include _text-input(
+    $color,
+    1px solid $border-color,
+    $color,
+    1px solid $focus-border-color,
+    $font-size, 
+    $background,
+    $color,
+    $font-size * 0.9375,
+    $outline
+  );
+}

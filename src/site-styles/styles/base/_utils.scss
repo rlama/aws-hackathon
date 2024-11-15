@@ -1,0 +1,131 @@
+/*
+  Convert between variable types
+
+  These functions are used to convert between variable types.
+
+  Adapted from: https://codepen.io/jakob-e/pen/AHunv
+*/
+
+/*
+  To string
+*/
+
+@use "sass:math";
+
+@function to-str($input){
+  @return #{$input}; 
+}    
+
+/*
+  To number
+*/
+
+@function to-num($input){
+  @if type-of($input) != number {
+    @error 'Could not convert `#{$input}` - must be `type-of number`';
+    @return null; 
+  }
+  @return math.div($input, $input * 0 + 1); 
+}
+
+/*
+  To integer
+*/ 
+
+@function to-int($input){ 
+  $num: num($input);
+  @return if($num < 0, ceil($num), floor($num));
+}
+
+/*
+  To U-integer
+*/
+
+@function to-u-int($input){ 
+  @return abs(int($input)); 
+}
+
+/*
+  Convert between unit types
+
+  These functions are used to convert unit values from one unit type to another.
+
+  Adapted from: https://codepen.io/jakob-e/pen/AHunv
+*/
+
+/*
+  To unit
+
+  @param { String } unit - String denoting unit type (e.g. 'px')
+  @param { Number } input - Number with unit suffix (if it has one, e.g. '10em')
+  @returns { Number } - Number of denoted unit, if a conversion is possible (e.g. '10em' to 'em'
+  results in '100px')
+*/
+
+@function to-unit($unit, $input){
+  $base-font-size: 16px !default; 
+
+  // Test against valid CSS units
+  $to-unit-zero-value: map-get((
+    px: 0px, pt: 0pt, pc: 0pc, in: 0in, mm: 0mm, cm: 0cm, // absolute length
+    em: 0em, rem: 0rem, ch: 0ch, ex: 0ex,                 // relative length - font based
+    vw: 0vw, vh: 0vh, vmin: 0vmin, vmax: 0vmax,           // relative length - viewport based
+    deg: 0deg, turn: 0turn, grad: 0grad, rad: 0rad,       // angle
+    s: 0s, ms: 0ms,                                       // time
+    hz: 0Hz, khz: 0kHz,                                   // frequency
+    dpi: 0dpi, dpcm: 0dpcm, dppx: 0dppx,                  // resolution
+    pct: 0%, percent: 0%, num: 0, number: 0               // percent or number  
+  ), $unit);
+
+  // Error handling – wrong $unit 
+  // Incomparable units are caught in convertion 
+  @if not $to-unit-zero-value {
+    @error 'Could not convert to `#{$unit}` – must be a valid CSS unit';
+    @return null; 
+  }  
+
+  // Number/incomparable conversion
+  @if index(num number ex ch vw vh vmin vmax, $unit) {
+    $value: to-num($input);
+  }
+
+  // EM/REM convertion using px as base
+  @if index(em rem, unit($input)) {
+    $input: 0px + math.div(to-num($input) * $base-font-size, 1px); 
+  } 
+  @if index(em rem, $unit) and not unitless($input) {
+    $input: 0px + $input;                
+    $input: math.div(to-num($input) * 1px, $base-font-size); 
+  } 
+  
+  // Bug fix – resolution units seems to be flipped   
+  @if index(dpi dpcm dppx, $unit) { 
+    $units: (dppx: 0dppx, dpcm: 0dpcm, dpi: 0dpi);
+    $input-unit: map-get($units, unit($input));
+    $input: if (1dppx < 95dpi, to-num($input-unit + (to-num($input) + $to-unit-zero-value)), $input);  
+  }    
+
+  // Convert 
+  @return $to-unit-zero-value + $input;
+}
+
+/*
+  To line height
+
+  Function takes a font size and returns an appropriate line-height.
+
+  @param { Number } font-size - Number (potentially with unit) denoting size of font
+  @param { Number } line-height - Number (potentially with unit) denoting line height desired
+*/
+
+@function to-line-height($font-size, $line-height: auto) {
+  $stripped-font-size: to-num(to-unit(px, $font-size));
+
+  @if $line-height == auto {
+    @return ceil(math.div($stripped-font-size, 1)) * math.div(1, $font-size);
+  }
+  @else if type-of($line-height) == number {
+    $stripped-line-height: to-num(to-unit(px, $line-height));
+    @return math.div($stripped-line-height, $stripped-font-size);
+  }
+}

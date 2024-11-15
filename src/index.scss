@@ -1,0 +1,42 @@
+
+/** Import custom styles **/
+@import "./site-styles/styles/";
+@import '_variables.scss';
+//@include reset();
+@include fonts(default);
+@include standard-typography();
+
+
+
+* {
+    -webkit-overflow-scrolling: touch;
+    // -webkit-backface-visibility: hidden; /* Chrome, Safari, Opera */
+    // backface-visibility: hidden;
+}
+
+
+html, body{
+    @include fonts__sans-serif() ;
+    margin: 0;
+    // overflow-y: auto;
+    // overflow-x: hidden;
+    // background: black;
+    // height: 100%;
+    background-color: #000000;
+
+}
+
+body {
+    text-rendering: optimizeLegibility;
+    /* -webkit-font-smoothing: antialiased; */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2{
+    // @include fonts__serif-heading();
+}
+
+p.pt-sans {
+    // @include fonts__sans-serif() ;
+}
+
