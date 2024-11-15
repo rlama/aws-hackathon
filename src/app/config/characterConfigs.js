@@ -4,7 +4,7 @@ import chadBarryImage from '../gameAssets/chad_atlas.png';
 import extraAtlasData from '../gameAssets/extra_atlas.json';
 import extraImage from '../gameAssets/extra_atlas.png';
 
-export const CHAD_CONFIG = {
+export const CHAD_CONFIG = { 
   name: 'chad',
   animations: {
     idle: {
@@ -23,8 +23,8 @@ export const CHAD_CONFIG = {
       next: "openMouth"
     }
   },
-  position: { x: 1/3, y: 1/2 },
-  scale: 1,
+  position: { x: 0.2, y: 0.65 },
+  scale: 0.8,
   defaultAnimation: 'idle',
   atlasData: chadBarryAtlasData,
   image: chadBarryImage
@@ -49,8 +49,8 @@ export const BARRY_CONFIG = {
         next: "openMouth"
       }
     },
-    position: { x: 0.7, y: 1/2 },
-    scale: 1,
+    position: { x: 0.6, y: 0.65 },
+    scale: 0.8,
     defaultAnimation: 'idle',
     atlasData: chadBarryAtlasData,
     image: chadBarryImage
@@ -76,7 +76,7 @@ export const EXTRAS = {
     }
   },
   position: { x: 2/3, y: 1/2 },
-  scale: 1,
+  scale: 0.6,
   defaultAnimation: 'dragon',
   atlasData: extraAtlasData,
   image: extraImage

@@ -1,0 +1,14 @@
+
+
+.game-canvas{
+        border: 1px solid white;
+        background-color: white;
+}
+
+.canvas-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh; // This ensures full viewport height
+}
