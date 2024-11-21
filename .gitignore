@@ -1,30 +1,24 @@
-# See https://help.github.com/ignore-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-node_modules
-
-# testing
-/coverage
-
-# production
-/build
-build
-
-# css
-src/**/*.css
-src/**/__snapshots__
-
-# misc
-todo.txt
-note.txt
-refs.txt
-
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-src/lib/ffx-iframe-messenger
-src/lib/ffx-prez-common-utilities
-src/lib/ffx-prez-share
-src/lib/ffx-prez-styles
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
