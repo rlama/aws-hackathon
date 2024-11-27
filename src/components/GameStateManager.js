@@ -87,7 +87,6 @@ export default class GameStateManager {
     }
 
 
-
     pauseGame() {
         this.isPaused = true;
         // this.game.isPaused = true;

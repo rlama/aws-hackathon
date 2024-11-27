@@ -16,11 +16,14 @@ export default class PreloadScene extends Phaser.Scene {
     console.log('Preloading assets...');
 
     // Load background
-    this.load.image('backgroundDesktop', 'images/background.png');
-    this.load.image('backgroundMobile', 'images/background-mobile.png');
-    this.load.image('gameNameDesktop', 'images/game-name.png');
-    this.load.image('gameNameMobile', 'images/game-name-mobile.png');
-    
+    this.load.image('backgroundDesktop', 'assets/images/background.png');
+    this.load.image('backgroundMobile', 'assets/images/background-mobile.png');
+    this.load.image('gameNameDesktop', 'assets/images/game-name.png');
+    this.load.image('gameNameMobile', 'assets/images/game-name-mobile.png');
+
+    // states geojson
+    this.load.json('mapData', 'assets/data/us-states.json');
+
     // Load atlases
     this.load.atlas(
       'characters',
@@ -36,12 +39,12 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Load buttons
     // Load button images with pixel art settings disabled
-    this.load.image('pause-button', 'images/pause-btn.png', {
+    this.load.image('pause-button', 'assets/images/pause-btn.png', {
         pixelArt: false,
         antialiasing: true,
         smoothing: true
     });
-    this.load.image('play-button', 'images/play-btn.png', {
+    this.load.image('play-button', 'assets/images/play-btn.png', {
       pixelArt: false,
       antialiasing: true,
       smoothing: true
@@ -98,37 +101,15 @@ export default class PreloadScene extends Phaser.Scene {
       background.displayWidth = cameraWidth;
       background.displayHeight = cameraHeight;
 
-      // console.log('Background created:', {
-      //   width: background.displayWidth,
-      //   height: background.displayHeight,
-      //   visible: background.visible,
-      //   active: background.active,
-      //   texture: background.texture.key
-      // });
-
       // Add a slight delay before starting the game scene
       this.time.delayedCall(2000, () => {
-        this.scene.start('CharacterSelectScene');
+        this.scene.start('StartScene');
       });
 
     } catch (error) {
       console.error('Error creating background:', error);
     }
   }
-
-
-  setupBackground() {
-    // Create background
-    this.background = this.add.image(0, 0, this.getBackgroundKey());
-    this.background.setOrigin(0, 0);
-    this.resizeBackground();
-  } 
-
-  getBackgroundKey() {
-    // Check device width
-    const width = this.scale.width;
-    return width <= 768 ? 'background-mobile' : 'background-desktop';
-}
 
 
   create() {

@@ -1,5 +1,4 @@
 import './assets/styles/style.css';
 import Phaser from 'phaser';
-import { gameConfig } from './config/gameConfig';
-
-new Phaser.Game(gameConfig);
+import './config/gameConfig'; 
+// const game =  new Phaser.Game(gameConfig);

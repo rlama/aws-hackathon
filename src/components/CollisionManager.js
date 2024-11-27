@@ -9,6 +9,8 @@ export default class CollisionManager {
 
     }
 
+    
+
     setupCollisions(extra, characters) {
         this.scene.physics.add.overlap(
             extra,
@@ -21,6 +23,7 @@ export default class CollisionManager {
         // Destroy when out of bounds
         extra.checkWorldBounds = true;
         extra.body.onWorldBounds = true;
+        
 
         this.scene.physics.world.on('worldbounds', (body) => {
             if (body.gameObject === extra) {
@@ -32,16 +35,21 @@ export default class CollisionManager {
     handleCollision(extra, character) {
         if (character.anims.currentAnim.key.includes('mouth_open')) {
 
+            const currentStateTotal = this.scene.extraManager.getTotalStateExtras()
+            const currentState = this.scene.extraManager.getCurrentState();
+            const statesCurrentData = {currentStateTotal, currentState}
+
+            
             const points = this.scoreManager.calculatePoints(extra.type);
             const extraType = extra.getData('type');
-            this.scoreManager.updateScore(character, extraType);
 
+            this.handleCharacterAnimationOnCollision(character, extraType);
 
-              // Call the existing updateScore method from GameStateManager
-            //   this.gameStateManager.updateScore(character, extraType);
+            // Handle collision for state
+            this.scene.extraManager.handleCollisionForState(character, extra, );
 
+            this.scoreManager.updateScore(character, extraType, currentState);
 
-            this.handleCharacterCollision(character, extraType);
             extra.destroy();
         }
     }
@@ -52,9 +60,10 @@ export default class CollisionManager {
         return extraCenter < characterCenter;
     }
 
-    handleCharacterCollision(character, extraType) {
+    handleCharacterAnimationOnCollision(character, extraType) {
         const { chad, barry } = this.characterManager.getCharacters();
         const isChad = character === chad;
+
         const characterObj = isChad ? chad : barry;
         const eatingAnim = isChad ? 'chad_eating' : 'barry_eating';
         const idleAnim = isChad ? 'chad_idle' : 'barry_idle';
@@ -85,7 +94,7 @@ export default class CollisionManager {
 
         // Set stuck state using CharacterManager
         this.characterManager.setStuckState(isChad ? 'chad' : 'barry', true);
-
+        
         // Remove only animation complete listeners
         characterObj.removeListener('animationcomplete');
 
@@ -95,7 +104,9 @@ export default class CollisionManager {
         // Reset after delay
         setTimeout(() => {
             this.characterManager.setStuckState(isChad ? 'chad' : 'barry', false);
-            characterObj.play(idleAnim);
+            if(characterObj){
+                characterObj.play(idleAnim);
+            }
         }, RESET_TO_IDLE_TIME);
     }
 }

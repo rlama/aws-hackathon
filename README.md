@@ -29,3 +29,9 @@ phaser-game/
 │       │   └── monsters.json
 │       └── styles/
 │           └── style.css
+
+
+
+TO DO:
+
+add state abbreviation to the state following

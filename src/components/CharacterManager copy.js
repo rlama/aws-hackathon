@@ -3,171 +3,192 @@ export default class CharacterManager {
     constructor(scene, selectedCharacter, gameStateManager) {
         this.scene = scene;
         this.characters = {};
-        this.characterScale = 0.7;
+        this.characterScale = 0.6;
         this.chadGotStuck = false;
         this.barryGotStuck = false;
         this.selectedCharacter = selectedCharacter; // Store selected character
         this.gameStateManager = gameStateManager;
-        this.isStartScene = this.scene.scene.key === 'StartScene';
 
     }
 
     createCharacters() {
-        // const width = this.scene.scale.width;
-        // const height = this.scene.scale.height;
-
-        const width = this.scene.cameras.main.width;
-        const height = this.scene.cameras.main.height;
-
+        const width = this.scene.scale.width;
+        const height = this.scene.scale.height;
         const isMobile = width <= 768;
 
-        // Create animations first
-        this.createCharacterAnimations();
+        // Fix for Chrome Android texture issue
+        const chadFrame = this.scene.textures.getFrame('characters', 'chad_idle');
+        const barryFrame = this.scene.textures.getFrame('characters', 'barry_idle');
 
-        const characterConfigs = {
-            startScene: {
-                chad: {
-                    x: width * (isMobile ? 0.25 : 0.3),
-                    y: height * (isMobile ? 0.77 : 0.5),
-                    scale: 0.8
-                },
-                barry: {
-                    x: width * (isMobile ? 0.75 : 0.7),
-                    y: height * (isMobile ? 0.77 : 0.5),
-                    scale: 0.8
-                }
-            },
-            gameScene: {
-                chad: {
-                    x: width * (isMobile ? 0.25 : 0.40),
-                    y: height * (isMobile ? 0.77 : 0.83),
-                    scale: 0.7
-                },
-                barry: {
-                    x: width * (isMobile ? 0.75 : 0.60),
-                    y: height * (isMobile ? 0.77 : 0.83),
-                    scale: 0.7
-                }
-            }
-        };
-
-        const sceneConfig = this.isStartScene ?
-            characterConfigs.startScene :
-            characterConfigs.gameScene;
-
-        // Create characters
-        ['chad', 'barry'].forEach(charKey => {
-            const charConfig = sceneConfig[charKey];
-            const frame = this.scene.textures.getFrame('characters', `${charKey}_idle`);
-
-            this.characters[charKey] = this.scene.add.sprite(
-                charConfig.x,
-                charConfig.y,
-                'characters'
+        // Create chad with explicit frame dimensions
+        this.characters.chad = this.scene.add.sprite(
+            width * (isMobile ? 0.25 : 0.40),
+            height * (isMobile ? 0.77 : 0.83),
+            'characters'
+        );
+        this.characters.chad.setFrame('chad_idle');
+        this.characters.chad.setScale(this.characterScale);
+        
+        // Set explicit frame dimensions
+        if (chadFrame) {
+            this.characters.chad.setDisplaySize(
+                chadFrame.width * this.characterScale,
+                chadFrame.height * this.characterScale
             );
-
-            this.characters[charKey]
-                .setFrame(`${charKey}_idle`)
-                .setScale(charConfig.scale);
-
-            if (frame) {
-                this.characters[charKey].setDisplaySize(
-                    frame.width * charConfig.scale,
-                    frame.height * charConfig.scale
-                );
-            }
-
-            // Set depth to ensure visibility
-            this.characters[charKey].setDepth(3);
-            this.characters[charKey].setVisible(true);
-
-            // Start idle animation
-            this.characters[charKey].play(`${charKey}_idle`);
-        });
-
-        // Add character labels for game scene
-        if (!this.isStartScene) {
-            this.addCharacterLabels(isMobile);
         }
 
-        // Add interactive elements for start scene
-        if (this.isStartScene) {
-            this.addStartSceneInteractivity(sceneConfig);
+        // Create barry with explicit frame dimensions
+        this.characters.barry = this.scene.add.sprite(
+            width * (isMobile ? 0.75 : 0.60),
+            height * (isMobile ? 0.77 : 0.83),
+            'characters'
+        );
+        this.characters.barry.setFrame('barry_idle');
+        this.characters.barry.setScale(this.characterScale);
+
+        // Set explicit frame dimensions
+        if (barryFrame) {
+            this.characters.barry.setDisplaySize(
+                barryFrame.width * this.characterScale,
+                barryFrame.height * this.characterScale
+            );
         }
 
+
+        // Add character names
+
+        this.scene.add.text(
+            width * (isMobile ? 0.25 : 0.40),
+            height * (isMobile ? 0.88 : 0.95),
+            this.selectedCharacter === "chad" ? "You" : "Robot",
+            {
+            fontSize: '16px',
+            fill: "#aedbe9",
+            fontFamily: 'Impact'
+        }).setOrigin(0.5);
+
+        this.scene.add.text(
+            width * (isMobile ? 0.75 : 0.60),
+            height *  (isMobile ? 0.88 : 0.95),
+            this.selectedCharacter === "barry" ? "You" : "Robot",
+            {
+            fontSize: '16px',
+            fill:  "#aedbe9",
+            fontFamily: 'Impact'
+        }).setOrigin(0.5);
+
+    
+        // Create animations after creating characters
+        this.createCharacterAnimations();
         return this.characters;
     }
 
 
-    addCharacterLabels(isMobile) {
+    createCharactersForStartScene() {
         const width = this.scene.scale.width;
         const height = this.scene.scale.height;
+        const isMobile = width <= 768;
 
-        ['chad', 'barry'].forEach(charKey => {
-            const xPos = charKey === 'chad' ? 
-                width * (isMobile ? 0.25 : 0.40) : 
-                width * (isMobile ? 0.75 : 0.60);
+        this.createCharacterAnimations();
 
-            this.scene.add.text(
-                xPos,
-                height * (isMobile ? 0.88 : 0.95),
-                this.selectedCharacter === charKey ? "You" : "Robot",
-                {
-                    fontSize: '16px',
-                    fill: "#aedbe9",
-                    fontFamily: 'Courier'
-                }
-            ).setOrigin(0.5);
-        });
-    }
+        const characters = [
+            { 
+                key: 'chad', 
+                frame: 'chad_idle', 
+                x: width * (isMobile ? 0.25 : 0.3),
+                y: height * (isMobile ? 0.77 : 0.5)
+            },
+            { 
+                key: 'barry', 
+                frame: 'barry_idle', 
+                x: width * (isMobile ? 0.75 : 0.7),
+                y: height * (isMobile ? 0.77 : 0.5),
+            }
+        ]
+        
+        const circleRadius = 100;
 
-    addStartSceneInteractivity(sceneConfig) {
-        const circleRadius = 110;
+        characters.forEach((item)=>{
 
-        ['chad', 'barry'].forEach(charKey => {
-            const circle = this.scene.add.circle(
-                sceneConfig[charKey].x,
-                sceneConfig[charKey].y,
-                circleRadius,
-                0x333333,
-                0.3
+            // Fix for Chrome Android texture issue
+            // const charFrame =  item.key+"Frame"
+            const characterFrame = this.scene.textures.getFrame('characters', item.key+'_idle');
+            
+            console.log(item.x, item.y)
+            // Create character with explicit frame dimensions
+            this.characters[item.key] = this.scene.add.sprite(
+                item.x,
+                item.y,
+                'characters'
+            );
+            this.characters[item.key].setFrame(item.key+'_idle');
+            this.characters[item.key].setScale(0.8);
+
+            // Set explicit frame dimensions
+            this.characters[item.key].setDisplaySize(
+                characterFrame.width * 0.8,
+                characterFrame.height * 0.8
             );
 
+            // Create circular background
+            const circle = this.scene.add.circle(item.x, item.y, circleRadius, 0x333333);
+
+            // Make interactive
             circle.setInteractive({
                 useHandCursor: true,
                 hitArea: new Phaser.Geom.Circle(circleRadius, circleRadius, circleRadius),
                 hitAreaCallback: Phaser.Geom.Circle.Contains
             });
 
-            this.setupCircleInteractivity(circle, charKey);
-        });
-    }
-
-    setupCircleInteractivity(circle, charKey) {
-        circle
-            .on('pointerover', () => {
+            // Hover effects
+            circle.on('pointerover', () => {
                 this.scene.tweens.add({
-                    targets: [circle, this.characters[charKey]],
+                    targets: [circle, this.characters[item.key]],
                     scaleX: 1.1,
                     scaleY: 1.1,
                     duration: 200,
                     ease: 'Power2'
                 });
-            })
-            .on('pointerout', () => {
+            });
+
+            // Click handler
+            circle.on('pointerdown', () => {
+                this.handleCharacterSelect(this.characters[item.key], [circle, this.characters[item.key]]);
+            });
+
+            circle.on('pointerout', () => {
                 this.scene.tweens.add({
-                    targets: [circle, this.characters[charKey]],
+                    targets: circle,
                     scaleX: 1,
                     scaleY: 1,
                     duration: 200,
                     ease: 'Power2'
                 });
-            })
-            .on('pointerdown', () => {
-                this.handleCharacterSelect(charKey, [circle, this.characters[charKey]]);
+
+                this.scene.tweens.add({
+                    targets: this.characters[item.key],
+                    scaleX: 0.8,
+                    scaleY: 0.8,
+                    duration: 200,
+                    ease: 'Power2'
+                });
             });
 
-        circle.setDepth(-1);
+            circle.setDepth(-1)
+
+            // Create container for better organization
+            const container = this.scene.add.container(0, 0, [circle, this.characters[item.key]]);
+
+            // Store references
+            this[`${characters[item.key]}Container`] = container;
+            this[`${characters[item.key]}Circle`] = circle;
+            this[`${characters[item.key]}Sprite`] = this.characters[item.key];
+
+            this.characters[item.key].play(item.key+"_idle")
+            // this.characters.barry.play("barry_idle")
+    
+        })
+        return this.characters;
     }
 
 
@@ -208,50 +229,51 @@ export default class CharacterManager {
     }
 
 
-    addTint() {
-        const characterWithTint = this.selectedCharacter === "chad" ? "barry" : "chad";
+    // Add this method to get the currently active character
+    getActiveCharacter() {
+        return this.characters[this.selectedCharacter];
+    }
+
+
+    addTint(){
+        const characterWithTint =  this.selectedCharacter === "chad" ? "barry" : "chad";
         const activeCharacter = this.characters[characterWithTint];
         const color = "#6aaa08";
-        const opacity = 0.95;
+        const opacity = 0.9;
 
         // Convert hex color string to number if using string format
-        const colorNum = color.startsWith('#') ? parseInt(color.slice(1), 16) : color;
+         const colorNum = color.startsWith('#') ? parseInt(color.slice(1), 16) : color;
         activeCharacter.setTint(colorNum);
         activeCharacter.setAlpha(opacity);
-
+    
     }
 
     setCharacterControlsKeyInputs() {
         const otherCharacterName = this.selectedCharacter === "chad" ? "barry" : "chad";
         const activeCharacter = this.characters[this.selectedCharacter];
         const otherCharacter = this.characters[otherCharacterName];
+        const charGotStuck = this.selectedCharacter === "chad" ? this.chadGotStuck : this.barryGotStuck;
 
         // Keyboard controls
         this.scene.input.keyboard.on('keydown-M', () => {
             if (!this.gameStateManager.isGamePaused()) {
-                this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName);
+                this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName, charGotStuck);
             }
         });
 
         // Add tap/touch control
         this.scene.input.on('pointerdown', (pointer) => {
             if (!this.gameStateManager.isGamePaused()) {
-                this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName);
+                console.log("ddddddd")
+                this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName, charGotStuck);
             }
         });
 
     }
 
     // Separate the action logic into its own method to avoid code duplication
-    handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName) {
-        
-        const charGotStuck = this.selectedCharacter === "chad" ? this.chadGotStuck : this.barryGotStuck;
-        
+    handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName, charGotStuck) {
         if (!charGotStuck) {
-            console.log("this.chadGotStuck : ", this.chadGotStuck )
-            console.log("this.barryGotStuck : ", this.barryGotStuck )
-
-            
             activeCharacter.play(this.selectedCharacter + '_mouth_open');
             if (otherCharacter.anims.currentAnim.key !== otherCharacterName + "_not_happy") {
                 otherCharacter.play(otherCharacterName + '_idle');
@@ -264,6 +286,7 @@ export default class CharacterManager {
         this.scene.input.keyboard.off('keydown-M');
         this.scene.input.off('pointerdown');
     }
+    
 
 
     createCharacterAnimations() {
@@ -411,6 +434,34 @@ export default class CharacterManager {
     }
 
 
+    // initializeCharacterPose(pose){
+    //     this.characters.chad.play("chad_"+pose)
+    //     this.characters.barry.play("barry_"+pose)
+    // }
+
+
+    updateCharacterPositions() {
+        const width = this.scene.scale.width;
+        const height = this.scene.scale.height;
+        const isMobile = width <= 768;
+
+        // Update chad position
+        if (this.characters.chad) {
+            this.characters.chad.setPosition(
+                width * (isMobile ? 0.25 : 0.40),
+                height * 0.8
+            );
+        }
+
+        // Update barry position
+        if (this.characters.barry) {
+            this.characters.barry.setPosition(
+                width * (isMobile ? 0.75 : 0.60),
+                height * 0.8
+            );
+        }
+    }
+
     setStuckState(character, isStuck) {
         if (character === 'chad') {
             this.chadGotStuck = isStuck;
@@ -425,15 +476,15 @@ export default class CharacterManager {
 
 
 
-    // Update method to handle eating effects for robot (autoplaying character)
-    updateAutoPlaying() {
+    // Update method to handle eating effects
+    update() {
         // Get all extras from the extras group
         const extras = this.scene.extraManager.extras.getChildren();
-
+        
         // Get the active character
-        const autoPlayingCharacterName = this.selectedCharacter === "chad" ? "barry" : "chad";
+        const autoPlayingCharacterName =  this.selectedCharacter === "chad" ? "barry" : "chad";
         const activeCharacter = this.characters[autoPlayingCharacterName];
-
+        
         if (!activeCharacter) return;
 
         // Find the closest extra to the active character
@@ -455,14 +506,10 @@ export default class CharacterManager {
         });
 
         // Update eat based on closest extra
-
         if (closestExtra && closestDistance <= 130) {
             const extraType = closestExtra.getData('type');
-
-            // Open/close mouth logic with random ness
-            
-            const condition = Phaser.Math.RND.pick(['open', 'close']);
-
+  
+            // Open/close mouth logic
             if (extraType !== 'onion' && !activeCharacter.mouthOpen) {
                 this.openMouth(activeCharacter, autoPlayingCharacterName);
             } else if (extraType === 'onion' && activeCharacter.mouthOpen) {
@@ -478,8 +525,8 @@ export default class CharacterManager {
 
 
     openMouth(activeCharacter, autoPlayingCharacterName) {
-        activeCharacter.play(`${autoPlayingCharacterName}_mouth_open`);
-        activeCharacter.mouthOpen = true;
+            activeCharacter.play(`${autoPlayingCharacterName}_mouth_open`);
+            activeCharacter.mouthOpen = true;
     }
 
     closeMouth(activeCharacter, autoPlayingCharacterName) {
@@ -494,8 +541,13 @@ export default class CharacterManager {
     }
 
 
+
     getCharacters() {
         return this.characters;
+    }
+
+    handleResize() {
+        this.updateCharacterPositions();
     }
 
     // Add any other character-related methods here
@@ -521,8 +573,8 @@ export default class CharacterManager {
         }
     }
 
-    // Clean up when scene changes
-    destroy() {
+        // Clean up when scene changes
+        destroy() {
 
-    }
+        }
 }

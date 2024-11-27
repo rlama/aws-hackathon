@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { AtlasDebugger } from '../utils/DebugUtils';
 import CharacterManager from '../components/CharacterManager';
 import ButtonManager from '../components/ButtonManager';
 import FocusManager from '../components/FocusManager';
@@ -7,15 +6,22 @@ import CollisionManager from '../components/CollisionManager';
 import GameStateManager from '../components/GameStateManager';
 import ExtraManager from '../components/ExtraManager';
 import ScoreManager from '../components/ScoreManager';
+import MapManager from '../components/MapManager';
+// import CursorManager from '../components/CursorManager';
 import { EXTRA_SCALE, EXTRA_TYPES } from '../config/gameConfig';
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
+
+        this.states = []; // Store state graphics
+        this.stateData = null; // JSON data for the map
+        this.playerPoints = 0;
+
     }
 
     init(data) {
-        this.selectedCharacter =  data.selectedCharacter; // Get the selected character from scene data
+        this.selectedCharacter = data.selectedCharacter; // Get the selected character from scene data
         this.autoPlayingCharacter = data.autoPlayingCharacter;
     }
 
@@ -41,26 +47,22 @@ export default class GameScene extends Phaser.Scene {
             console.error('Background texture not found in GameScene!');
         }
 
-
-        // Create the debug utility
-        const debugConfig = {
-            atlasKeys: ['characters', 'extras', backgroundImage],
-            frameWidth: 150,
-            frameHeight: 150,
-            padding: 10
-        };
-
-        this.atlasDebugger = new AtlasDebugger(this, debugConfig);
-        this.atlasDebugger.create();
+        //create map
+        this.cameras.main.setViewport(0, 0, this.gameWidth, this.gameHeight);
+        this.cameras.main.setBackgroundColor('#ffffff');
 
         // Initialize managers
         this.gameStateManager = new GameStateManager(this);
-        this.scoreManager = new ScoreManager(this);
+        this.mapManager = new MapManager(this);
         this.characterManager = new CharacterManager(this, this.selectedCharacter, this.gameStateManager);
-        this.extraManager = new ExtraManager(this, this.gameStateManager);
+        this.scoreManager = new ScoreManager(this);
+        this.extraManager = new ExtraManager(this, this.gameStateManager, this.scoreManager, this.mapManager);
         this.buttonManager = new ButtonManager(this);
         this.collisionManager = new CollisionManager(this, this.gameStateManager, this.scoreManager);
         this.focusManager = new FocusManager(this);
+
+         // Create the map
+         this.mapManager.createStateMap();
 
 
         // Create game elements
@@ -73,7 +75,7 @@ export default class GameScene extends Phaser.Scene {
 
 
         this.buttonManager.createButtons();
-        this.characterManager.setupInputs();
+        this.characterManager.setCharacterControlsKeyInputs();
 
         // Start game systems
         this.gameStateManager.startGame();
@@ -81,32 +83,37 @@ export default class GameScene extends Phaser.Scene {
         this.focusManager.initialize();
 
 
-        // Handle window resize
-        this.scale.on('resize', () => {
-            this.characterManager.handleResize();
-            this.buttonManager.updateButtonPositions();
-            this.scoreManager.handleResize({ width: this.gameWidth, height: this.gameHeight });
-        });
+        // // Handle window resize
+        // this.scale.on('resize', () => {
+        //     this.characterManager.handleResize();
+        //     // this.buttonManager.updateButtonPositions();
+        //     this.scoreManager.handleResize({ width: this.gameWidth, height: this.gameHeight });
+        // });
+
+        // Create a separate input scene that always stays active
+        this.scene.launch('InputScene', { parentScene: this });
+
+       
 
     }
 
+
     pauseGame() {
-        this.gameStateManager.pauseGame();
-        this.buttonManager.isPlaying = false;
+        this.scene.pause();
     }
 
     resumeGame() {
-        this.gameStateManager.resumeGame();
-        this.buttonManager.isPlaying = true;
+        this.scene.resume();
     }
 
     update(time, delta) {
         if (!this.gameStateManager.isGamePaused()) {
             this.gameStateManager.update(time, delta);
             this.extraManager.update(time, delta);
-            this.characterManager.update();
+            this.characterManager.updateAutoPlaying();
 
         }
     }
 
 }
+

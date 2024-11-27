@@ -7,73 +7,95 @@ export default class ButtonManager {
         this.isPlaying = true;
     }
 
+
     createButtons() {
-        const gameWidth = this.scene.scale.width;
-        
-        // Create pause button
-        this.buttons.pause = this.scene.add.image(
-            Math.round(gameWidth/2+30),
+        const gameWidth = this.scene.cameras.main.width;
+
+        // Create button with explicit texture reference
+        this.activeButton = this.scene.add.sprite(
+            gameWidth / 2,
             30,
             'pause-button'
         );
 
-        // Create play button
-        this.buttons.play = this.scene.add.image(
-            Math.round(gameWidth/2 - 15),
+        // Store actual texture objects
+        this.textureKeys = {
+            play: this.scene.textures.get('play-button'),
+            pause: this.scene.textures.get('pause-button')
+        };
+
+        this.activeButton.setScale(40 / 256);
+        this.activeButton.setDepth(27);
+
+        const overlay = this.addBtnOverlay();
+
+        return { active: this.activeButton };
+    }
+
+
+
+    addBtnOverlay() {
+        const gameWidth = this.scene.cameras.main.width;
+        const circleRadius = 30;
+
+        // Create circular background
+        const circle = this.scene.add.circle(
+            gameWidth / 2,
             30,
-            'play-button'
+            circleRadius,
+            0x333333
         );
 
-        // Configure buttons
-        Object.values(this.buttons).forEach(button => {
-            button.setInteractive(
-                { 
-                    useHandCursor: true,
-                    pixelPerfect: true 
-                }
-            );
-
-            const scaleX = 40 / 256;
-            const scaleY = 40 / 256;
-            
-            button.setScale(scaleX, scaleY);
-
-            // button.setScale(this.buttonScale);
-            button.setDepth(20); 
+        // Make interactive
+        circle.setInteractive({
+            useHandCursor: true,
+            hitArea: new Phaser.Geom.Circle(circleRadius, circleRadius, circleRadius),
+            hitAreaCallback: Phaser.Geom.Circle.Contains
         });
 
-        this.setupButtonListeners();
+        // Click handler for toggling play/pause
+        circle.on('pointerdown', (pointer, localX, localY, event) => {
+            event.stopPropagation();
+            this.togglePlayPauseState();
+        });
+
+        circle.setDepth(25);
+        return circle;
     }
 
-    setupButtonListeners() {
-        this.buttons.play.on('pointerdown', () => {
-            this.scene.resumeGame();
-        });
 
-        this.buttons.pause.on('pointerdown', () => {
-            this.scene.pauseGame();
-        });
-    }
-
-    updateButtonPositions() {
-        const gameWidth = this.scene.scale.width;
-
-        if (this.buttons.pause) {
-            this.buttons.pause.setPosition(gameWidth - 40, 40);
+    addOverlayScene() {
+        // Create a new scene for the overlay that stays active
+        if (!this.scene.scene.get('OverlayScene')) {
+            this.scene.scene.add('OverlayScene', OverlayScene, true);
         }
-        if (this.buttons.play) {
-            this.buttons.play.setPosition(gameWidth - 70, 40);
-        }
+
+        this.scene.scene.launch('OverlayScene', {
+            parentScene: this.scene,
+            buttonManager: this
+        });
     }
 
-    togglePlayPause() {
-        if (this.isPlaying) {
+
+    togglePlayPauseState() {
+        this.isPaused = !this.isPaused;
+        const textureKey = !this.isPaused ? 'pause-button' : 'play-button';
+        this.activeButton.setTexture(textureKey);
+
+        if (this.isPaused) {
             this.scene.pauseGame();
+            this.addOverlayScene();
+
         } else {
             this.scene.resumeGame();
+            this.scene.scene.stop('OverlayScene');
         }
-        this.isPlaying = !this.isPlaying;
     }
+
+    isGamePlaying() {
+        return this.isPlaying;
+    }
+
 
     getButtons() {
         return this.buttons;

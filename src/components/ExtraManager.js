@@ -1,14 +1,31 @@
-import { EXTRA_SCALE, EXTRA_TYPES, AVAILABLE_EXTRAS, EXTRA_SPAWN_TIME, EXTRA_TYPE_CHANGE_INTERVAL_TIME } from "../config/gameConfig";
+import RandomShape from "../objects/RandomShape";
+import { EXTRA_SCALE, EXTRA_TYPES, AVAILABLE_EXTRAS, EXTRA_SPAWN_TIME, EXTRA_TYPE_CHANGE_INTERVAL_TIME, EXTRA_POINTS, STATES_DETAIL, MAP_CONFIG } from "../config/gameConfig";
+
 
 export default class ExtraManager {
-    constructor(scene, gameStateManager) {
+    constructor(scene, gameStateManager, scoreManager, mapManager) {
         this.scene = scene;
         // Set a consistent physics time step
         this.scene.physics.world.setFPS(60);
-
+        this.mapManager = mapManager;
         this.gameStateManager = gameStateManager;
+        this.scoreManager = scoreManager;
         this.extras = this.scene.physics.add.group();
         this.createExtrasAnimations();
+
+        this.totalExtras = {
+            chad: 0,
+            barry: 0
+        }
+        this.totalStateExtras = {
+            chad: 0,
+            barry: 0
+        }
+
+        this.MAX_ALLOWED_EXTRAS_POiNTS = 200;
+
+        this.stateIndex = 0;  // Track current state index
+        this.wonStates = [];  // Array to store won states
 
         // Initial fall speed and speed increase settings
         this.FALL_SPEED = 200;
@@ -19,6 +36,7 @@ export default class ExtraManager {
         this.SPAWN_DELAY = 1000;
         this.MIN_SPAWN_DELAY = 300;
         this.SPAWN_DELAY_DECREASE = 100;
+        this.spawnTimer = null;
 
         // Game time tracking
         this.gameStartTime = Date.now();
@@ -35,7 +53,7 @@ export default class ExtraManager {
     }
 
     setupSpeedIncreaseTimer() {
-        this.scene.time.addEvent({
+        this.spawnTimer = this.scene.time.addEvent({
             delay: this.SPEED_INTERVAL,
             callback: () => {
                 if (!this.gameStateManager.isGamePaused()) {
@@ -73,7 +91,7 @@ export default class ExtraManager {
 
     setupSpawnTimer() {
         this.spawnTimer = this.scene.time.addEvent({
-            delay: this.SPAWN_DELAY,
+            delay: this.SPAWN_DELAY,  // This should be 1000 for 1 second
             callback: () => {
                 if (!this.gameStateManager.isGamePaused()) {
                     this.spawnExtra();
@@ -82,6 +100,13 @@ export default class ExtraManager {
             callbackScope: this,
             loop: true
         });
+    }
+
+    stopSpawnTimer() {
+        if (this.spawnTimer) {
+            this.spawnTimer.destroy();
+            this.spawnTimer = null;
+        }
     }
 
     createExtrasAnimations() {
@@ -146,38 +171,191 @@ export default class ExtraManager {
         });
     }
 
+
     spawnExtra() {
+        if (this.stateDetailIndex >= STATES_DETAIL.length) {
+            this.endGame();
+            return;
+        }
+    
         const { chad, barry } = this.scene.characterManager.getCharacters();
-        const x = Phaser.Math.RND.pick([chad.x, barry.x]);
         const randomType = Phaser.Math.RND.pick(EXTRA_TYPES);
-
-        // Create the extra sprite
-        const extra = this.scene.physics.add.sprite(x, -50, 'extras', 'frame_0');
-
-        extra.setData('type', randomType);
-        extra.setData('originalType', randomType);
+    
+        // Spawn for Chad
+        const chadExtra = this.scene.physics.add.sprite(chad.x, Phaser.Math.RND.pick([-100, 20]), 'extras', 'frame_0');
+        this.setupExtra(chadExtra, randomType, 'chad');
+    
+        // Spawn for Barry
+        const barryExtra = this.scene.physics.add.sprite(barry.x, Phaser.Math.RND.pick([-100, 20]), 'extras', 'frame_0');
+        this.setupExtra(barryExtra, randomType, 'barry');
+    
+        return { chadExtra, barryExtra };
+    }
+    
+    // Helper method to setup individual extras
+    setupExtra(extra, type, characterSide) {
+        extra.setData('type', type);
+        extra.setData('originalType', type);
         extra.setData('typeChangeTimer', 0);
         extra.setData('typeChangeInterval', Phaser.Math.Between(EXTRA_TYPE_CHANGE_INTERVAL_TIME[0], EXTRA_TYPE_CHANGE_INTERVAL_TIME[1]));
-        extra.setData('spawnTime', Date.now()); // Store spawn time
+        extra.setData('spawnTime', Date.now());
         extra.setScale(EXTRA_SCALE);
-
+        extra.setDepth(6);
+    
         // Physics settings for smooth movement
         extra.body.setSize(extra.width * EXTRA_SCALE, extra.height * EXTRA_SCALE);
         extra.body.setAllowGravity(false);
         extra.body.setVelocityY(this.FALL_SPEED);
-        extra.body.setDragY(0); // No drag
-        extra.body.setBounce(0); // No bounce
-        extra.body.setAngularVelocity(0); // No rotation
-
+        extra.body.setDragY(0);
+        extra.body.setBounce(0);
+        extra.body.setAngularVelocity(0);
+    
         // Play the appropriate animation based on type
-        extra.play(randomType);
-
+        extra.play(type);
+    
         // Add to group and setup collisions
         this.extras.add(extra);
-        this.scene.collisionManager.setupCollisions(extra, this.scene.characterManager.getCharacters());
 
+        this.scene.collisionManager.setupCollisions(extra, this.scene.characterManager.getCharacters());
+    
         return extra;
     }
+
+    // Add this method to handle collisions
+    handleCollisionForState(character, extra) {
+        const extraType = extra.getData('type');
+        if (extraType !== 'onion') {
+            const { chad, barry } = this.scene.characterManager.getCharacters();
+        
+            const characterType = character === chad ? 'chad' : 'barry';
+    
+            // Update state-specific points
+            this.totalStateExtras[characterType] += EXTRA_POINTS[extraType];
+
+            // Check if current state is won after collision
+            this.checkStateWin();
+        }
+    }
+
+    checkStateWin() {
+        const currentState = STATES_DETAIL[this.stateIndex];
+        const requiredSeats = currentState === "DC" ? 3 : currentState.seats;
+
+        // Check Chad's points
+        if (this.totalStateExtras.chad >= requiredSeats) {
+            // Push win data
+            this.wonStates.push({
+                character: 'chad',
+                state: currentState.name,
+                seats: requiredSeats
+            });
+
+            // this.scoreManager.updateScore('chad', requiredSeats);
+
+            // DC is not the state but it does participate in presidential elections and has its own voting.
+            if(STATES_DETAIL[this.stateIndex].name !== "DC"){ 
+                this.mapManager.highlightState(STATES_DETAIL[this.stateIndex].name, STATES_DETAIL[this.stateIndex].abbr, MAP_CONFIG.CHAD_COLOR);
+            }
+            this.moveToNextState();
+        }
+        // Check Barry's points
+        else if (this.totalStateExtras.barry >= requiredSeats) {
+            // Push win data
+            this.wonStates.push({
+                character: 'barry',
+                state: currentState.name,
+                seats: requiredSeats
+            });
+
+            console.log("Barry won ", currentState.name, " "+requiredSeats)
+
+            // this.scoreManager.updateScore('barry', requiredSeats);
+
+            if(STATES_DETAIL[this.stateIndex].name !== "DC"){ 
+                this.mapManager.highlightState(STATES_DETAIL[this.stateIndex].name, STATES_DETAIL[this.stateIndex].abbr, MAP_CONFIG.BARRY_COLOR);
+            }
+            this.moveToNextState();
+        }
+    }
+
+    moveToNextState() {
+        // Reset state points before moving to next state
+        this.totalStateExtras = {
+            chad: 0,
+            barry: 0
+        };
+
+        this.stateIndex++;
+
+        // Check if we've gone through all states
+        if (this.stateIndex >= STATES_DETAIL.length) {
+            this.endGame();
+        } else {
+            this.updateStateDisplay();
+        }
+    }
+
+    updateStateDisplay() {
+        const currentState = STATES_DETAIL[this.stateIndex];
+        
+        // Emit event for state change
+        this.scene.events.emit('stateChanged', {
+            stateName: currentState.name,
+            seatsRequired: currentState.seats,
+            stateIndex: this.stateIndex,
+            chadPoints: this.totalStateExtras.chad,
+            barryPoints: this.totalStateExtras.barry
+        });
+    }
+
+    getWonStates(){
+        return this.wonStates;
+    }
+
+    getCurrentState(){
+        return STATES_DETAIL[this.stateIndex];
+    }
+
+    getTotalStateExtras() {
+        return this.totalStateExtras;
+    }
+
+
+
+    getTotalExtras() {
+        return { totalExtras: this.totalExtras, maxAllowedPoints: this.MAX_ALLOWED_EXTRAS_POiNTS }
+    }
+
+    checkGameEnd() {
+        const { chad, barry } = this.scene.scoreManager.leftOverPointsDetail;
+
+        if (chad >= this.MAX_ALLOWED_EXTRAS_POiNTS && barry >= this.MAX_ALLOWED_EXTRAS_POiNTS) {
+            this.endGame();
+        }
+    }
+
+    endGame() {
+        this.stopSpawnTimer();
+        this.extras.clear(true, true);
+
+        const chadSc = this.scene.scoreManager.scores.chad;
+
+        const finalScores = {
+            chad: this.scene.scoreManager.scores.chad.score,
+            barry: this.scene.scoreManager.scores.barry.score,
+            winner: this.scene.scoreManager.scores.chad.score > this.scene.scoreManager.scores.barry.score ? "chad" : "barry",
+            wonStates:this.wonStates
+        };
+        console.log(finalScores)
+        // Stop the current scene and launch score scene
+        this.scene.scene.pause();
+        this.scene.scene.start('FinishScene', finalScores);
+
+        console.log("Game end");
+
+    }
+
+
 
     switchExtraType(extra) {
         const currentType = extra.getData('type');
@@ -250,6 +428,16 @@ export default class ExtraManager {
     }
 
     resetGame() {
+
+        this.stopSpawnTimer();
+        this.totalSpawnedPoints = 0;
+        this.totalExtras = {
+            chad: 0,
+            barry: 0
+        };
+        this.SPAWN_DELAY = 1000;
+        // this.startSpawnTimer();
+
         // Reset all game parameters
         this.FALL_SPEED = 200;
         this.SPAWN_DELAY = 1000;
@@ -258,10 +446,13 @@ export default class ExtraManager {
         this.isChangingTypes = false;
 
         // Update spawn timer with reset delay
-        this.updateSpawnTimer();
+        // this.updateSpawnTimer();
 
-        // Destroy all existing extras
-        this.extras.clear(true, true);
+
+        // Clear existing extras if you have an extras group
+        if (this.extras) {
+            this.extras.clear(true, true);
+        }
     }
 
 
