@@ -1,29 +1,36 @@
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
 import PreloadScene from '../scenes/PreloadScene';
+import IntroScene from '../scenes/IntroScene';
 import GameScene from '../scenes/GameScene';
 import StartScene from '../scenes/StartScene';
-import InputScene from '../scenes/InputScene';
 import OverlayScene from '../scenes/OverlayScene';
 import FinishScene from '../scenes/FinishScene';
 import GameInfoScene from '../scenes/GameInfoScene';
+import LeaderboardScene from '../scenes/LeaderboardScene'
 import DebugAtlasScene from '../scenes/DebugAtlasScene';
 
-export const AVAILABLE_EXTRAS = ['dragon_fly', 'bird_fly', 'gold_box', 'five_coin', 'fruit', 'onion'];
-export const EXTRA_TYPES = ['onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion'];
-
 export const EXTRA_SCALE = 0.4;
-export const RESET_TO_IDLE_TIME = 2000; // adds delay when onion is eaten
+export const RESET_TO_IDLE_TIME = 3500; // adds delay when onion is eaten
 export const EXTRA_SPAWN_TIME = 1000;
 export const EXTRA_TYPE_CHANGE_INTERVAL_TIME = [300, 800];
 export const PRIMARY_TEXT_COLOR = "#74b40a";
+export const SEC_TEXT_COLOR = "#358bc0";
+export const FONT_FAMILY = "Lagome";// "Arcade";// "Impact";
 
-export const EXTRA_POINTS = {
-    onion: 0,
-    fruit: 3,
-    bird_fly: 5,
-    dragon_fly: 8,
-    five_coin: 10,
-    gold_box: 20
-}
+export const GAME_FRAME_RATE = 60;
+
+export const AWS_API_GATEWAY_ENDPOINT = "https://api.goondrook.com/hackathon"
+
+
+export const AVAILABLE_EXTRAS = ['dragon_fly', 'bird_fly', 'gold_box', 'five_coin', 'fruit', 'onion', 'star_emoji'];
+
+export const EXTRA_TYPES = ['onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion'];
+
 
 export const MAP_CONFIG = {
     idle: {
@@ -32,8 +39,8 @@ export const MAP_CONFIG = {
         fillStyle: 0xb8e7f8,
         fillAlpha: 1
     },
-    CHAD_COLOR: 0xf44336,
-    BARRY_COLOR: 0x6d6bff
+    CHAD_COLOR: 0xaf0808,
+    BARRY_COLOR: 0x0878af
 }
 
 
@@ -89,6 +96,18 @@ export const STATES_SEATS = [
     { "WI": 8 },
     { "WY": 1 }
 ]
+
+
+// Define emoji types with weights for spawn probability
+export const EMOJI_TYPES = [
+    { emoji: '🍔', points: 20, type: 'Burger', weight: 1 },
+    { emoji: '🍕', points: 10, type: 'Pizza', weight: 2 },
+    { emoji: '🌭', points: 8, type: 'Hot Dog', weight: 2 },
+    { emoji: '🍟', points: 5, type: 'Fries', weight: 2 },
+    { emoji: '🍪', points: 3, type: 'Cookie', weight: 3 },
+    { emoji: '🧅', points: 0, type: 'Onion', weight: 5 }  // Increased weight for onions
+];
+
 
 
 export const ALL_STATES = [
@@ -176,10 +195,92 @@ function convertNumber(num) {
 }
 
 
+export const DUMMY_SCORE = {
+    playerName: "player A",
+    selectedCharacter: "chad",
+    score: {
+        "chad": 122,
+        "barry": 270
+    },
+    statesWon: 10,
+    timestamp: new Date().toISOString(),
+    gameId: Date.now().toString()
+}
+
+
+export const DEFAULT_INITIAL_SCORE = {
+    chad: 120,
+    barry: 250
+}
+
+
+export const _DEFAULT_INITIAL_SCORE = {
+    chad: { score: 220, winner: "" },
+    barry: { score: 220, winner: "" },
+    chadState: { score: 0, winner: "" },
+    barryState: { score: 0, winner: "" },
+    selectedCharacter: ""
+}
+
+
+export const DEFAULT_DIFFICULTY_SETTINGS = {
+    beginner: {
+        missRate: 0.7,     // 50% chance to miss
+        reactionDelay: 500, // slower reaction time
+        resetToIdleTimeForOpponent: 3500
+
+    },
+    intermediate: {
+        missRate: 0.2,     // 20% chance to miss
+        reactionDelay: 200,
+        resetToIdleTimeForOpponent: 2500
+    },
+    expert: {
+        missRate: 0.05,    // 5% chance to miss
+        reactionDelay: 100, // faster reaction time
+        resetToIdleTimeForOpponent: 1500
+    }
+}
+
+export const DUMMY_LEADERBOARD_SCORE = [
+    {
+        playerName: "player A",
+        selectedCharacter: "chad",
+        score: {
+            "chad": 122,
+            "barry": 270
+        },
+        statesWon: 10,
+        timestamp: new Date().toISOString(),
+        gameId: Date.now().toString()
+    },
+    {
+        playerName: "player B",
+        selectedCharacter: "barry",
+        score: {
+            "chad": 270,
+            "barry": 154
+        },
+        statesWon: 15,
+        timestamp: new Date().toISOString(),
+        gameId: Date.now().toString()
+    },
+    {
+        playerName: "player C",
+        selectedCharacter: "chad",
+        score: {
+            "chad": 230,
+            "barry": 270
+        },
+        statesWon: 25,
+        timestamp: new Date().toISOString(),
+        gameId: Date.now().toString()
+    },
+]
 
 
 export const gameConfig = {
-    type: Phaser.AUTO,
+    type: Phaser.WEBGL,
     powerPreference: 'high-performance',
     scale: {
         mode: Phaser.Scale.RESIZE,
@@ -191,16 +292,26 @@ export const gameConfig = {
     physics: {
         default: 'arcade',
         arcade: {
-            fps: 30,
+            fps: GAME_FRAME_RATE,
+            stepRate: GAME_FRAME_RATE,
             timeScale: 1,
             gravity: { y: 0 },
             debug: false,
             fixedStep: true,
-            updateIterations: 2
+            updateIterations: 2,
+            skipQuadTree: false,
+            overlapBias: 4
         }
     },
+    dom: {
+        createContainer: true  // This is crucial!
+    },
     backgroundColor: '#ffffff',
-    scene: [PreloadScene, StartScene, GameScene, OverlayScene, GameInfoScene, FinishScene, DebugAtlasScene],
+    scene: [PreloadScene, IntroScene, StartScene, GameScene, OverlayScene, GameInfoScene, FinishScene, LeaderboardScene, DebugAtlasScene],
+    fps: {
+        target: GAME_FRAME_RATE,
+        forceSetTimeOut: false
+    },
     render: {
         antialias: true,
         pixelArt: false,

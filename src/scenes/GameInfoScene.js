@@ -1,4 +1,13 @@
-// GameInfoScene.js
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+import { addBackground, createCloseButton, capitalizeWords } from "../utils/helpers";
+import StandardButton from "../objects/StandardButton";
+import { FONT_FAMILY, EMOJI_TYPES, ALL_STATES } from "../config/gameConfig";
+
 export default class GameInfoScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameInfoScene' });
@@ -6,15 +15,14 @@ export default class GameInfoScene extends Phaser.Scene {
         this.lastY = 0;
     }
 
-
     init(data) {
-        console.log("++++++")
-        console.log(data)
         // Store the scene stack if provided
         this.sceneStack = data.sceneStack || [];
         if (data.previousScene && !this.sceneStack.includes(data.previousScene)) {
             this.sceneStack.push(data.previousScene);
+            this.previousScene = data.previousScene;
         }
+        this.parentScene = data.parentScene || null
     }
 
 
@@ -23,26 +31,19 @@ export default class GameInfoScene extends Phaser.Scene {
         const height = this.cameras.main.height;
 
         // Add semi-transparent background that covers the entire scene
-        const overlay = this.add.rectangle(
-            0, 0, width, height,
-            0x000000, 0.8
-        ).setOrigin(0);
+        // const overlay = this.add.rectangle(
+        //     0, 0, width, height,
+        //     0x000000, 0.8
+        // ).setOrigin(0);
+
+        addBackground(this, width, height);
 
         // Create a container for all content
         this.contentContainer = this.add.container(0, 0);
 
-
-        // Create the main score box
-        const titleBg = this.add.rectangle(
-            0,           // x position (left aligned)
-            0,           // y position (top aligned)
-            width,   // width matches game width
-            80,   // height of 60px
-            0x000000,   // black color
-            1         // 70% opacity
-        );
-
-        titleBg.setOrigin(0, 0); // Align to top-left
+        // Define container width (adjust as needed)
+        const containerWidth = width; // 80% of screen width
+        const containerPadding = 20; // Padding from edges
 
 
         // Title (fixed position, outside container)
@@ -51,9 +52,12 @@ export default class GameInfoScene extends Phaser.Scene {
             40,
             'How to Play',
             {
-                fontSize: '48px',
+                fontSize: width <= 700 ? '20px' : '48px',
                 fill: '#ffffff',
-                fontStyle: 'bold'
+                fontStyle: 'bold',
+                stroke: '#000000',
+                    strokeThickness: 3,
+                fontFamily: FONT_FAMILY
             }
         ).setOrigin(0.5);
 
@@ -62,103 +66,78 @@ export default class GameInfoScene extends Phaser.Scene {
 
         // Game instructions
         const instructions = [
-            'Player 1 (Chad):',
-            '- Use A and D keys to move left and right',
-            '- Collect items to score points',
-            '',
-            'Player 2 (Barry):',
-            '- Use LEFT and RIGHT arrow keys to move',
-            '- Collect items to score points',
-            '',
-            'General Rules:',
-            '- First player to collect 200 points wins',
-            '- Press SPACE to pause/resume game',
-            '- Avoid onions - they reduce your score!'
+            { type: 'h', text: "- Pick Your Candidate:" },
+            { type: 'p', text: "Choose between Chad or Barry before the game begins. \n The  unselected character will auto-play as your rival." },
+            { type: 'h', text: "- Catch the Votes: " },
+            { type: 'p', text: "Tap or click to open your character's mouth and collect falling items to score points." },
+            { type: 'h', text: "- Avoid Onions 🧅:" },
+            { type: 'p', text: "Onions are trouble! Eating one will disable your character for 2 seconds." },
+
+            { type: 'h', text: "- Win the States 🗺️" },
+            { type: 'p', text: "Earn enough points to light up U.S. states on the map." },
+            { type: 'p', extraRow: true, text: "The first to reach 270 points wins the game!" },
+
+            { type: 'h', text: "- Leaderboard Rules 🏆" },
+            { type: 'p', text: "Only winners make the leaderboard." },
+            { type: 'p', text: "Rankings are based on the most states won." },
+            { type: 'p', text: "If tied, the opponent's points decide the champion!" },
+
+            { type: 'p', text: "Ready to race, collect, and win? Let the Chad & Barry showdown begin! 🚀" }
         ];
 
-        // Add instructions text to container
-        let yPosition = 150;
+        // Add instructions text to container with proper alignment and word wrap
+        this.yPosition = 120;
         instructions.forEach(instruction => {
             const text = this.add.text(
-                width / 2,
-                yPosition,
-                instruction,
+                containerPadding, // Left padding
+                this.yPosition,
+                instruction.text,
                 {
-                    fontSize: '24px',
+                    fontSize: instruction.type === 'h' ? '30px' : '18px',
                     fill: '#ffffff',
-                    align: 'left'
+                    align: 'left',
+                    stroke: '#000000',
+                    strokeThickness: 3,
+                    fontStyle: instruction.type === 'h' ? 'bold' : 'normal',
+                    wordWrap: {
+                        width: containerWidth - (containerPadding * 2),
+                        useAdvancedWrap: true
+                    }
                 }
-            ).setOrigin(0.5);
+            ).setOrigin(0);
+
             this.contentContainer.add(text);
-            yPosition += 40;
+            const extraRow = instruction.extraRow ? 50 : 0;
+            this.yPosition += text.height + 10 + extraRow; // Dynamic spacing based on text height
         });
 
-        // Points guide
-        const pointsGuide = [
-            { item: '🥕 Carrot: 10 points' },
-            { item: '🥦 Broccoli: 20 points' },
-            { item: '🍎 Apple: 15 points' },
-            { item: '🧅 Onion: -5 points' }
-        ];
+        // add points guide
+        this.yPosition += 30;
+        this.addPointsGuide(containerWidth, containerPadding, '- Points Guide:', EMOJI_TYPES)
 
-        // Add points guide header
-        yPosition += 20;
-        const pointsHeader = this.add.text(
-            width / 2,
-            yPosition,
-            'Points Guide:',
-            {
-                fontSize: '32px',
-                fill: '#ffffff',
-                fontStyle: 'bold'
+
+
+        this.yPosition -= 30;
+        const statesPoint = ALL_STATES.map(state => ({
+            item: `${state.name}`,
+            points: state.seats.toString()
+        }));
+        this.addPointsGuide(containerWidth, containerPadding, '- Votes required to win state:', statesPoint)
+
+
+        createCloseButton(this, this.parentScene)
+
+
+        // Leaderboard button
+        const leaderboardButton = new StandardButton(this, 110, 40, 'Leaderboard', {
+            backgroundColor: 0x3498db,
+            onClick: () => {
+                this.scene.start('LeaderboardScene', {
+                    parentScene: this.scene.key
+                });
             }
-        ).setOrigin(0.5);
-        this.contentContainer.add(pointsHeader);
-
-        // Add points guide items
-        yPosition += 50;
-        pointsGuide.forEach(item => {
-            const text = this.add.text(
-                width / 2,
-                yPosition,
-                item.item,
-                {
-                    fontSize: '24px',
-                    fill: '#ffffff'
-                }
-            ).setOrigin(0.5);
-            this.contentContainer.add(text);
-            yPosition += 40;
         });
 
-        // Back button (fixed position, outside container)
-        const backButton = this.add.text(
-            70,
-            40,
-            'Back',
-            {
-                fontSize: '32px',
-                fill: '#ffffff',
-                backgroundColor: '#444444',
-                padding: { x: 20, y: 10 }
-            }
-        )
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true })
-        .setScrollFactor(0);
-
-        // Button interactions
-        backButton
-            .on('pointerover', () => {
-                backButton.setStyle({ fill: '#ff0' });
-            })
-            .on('pointerout', () => {
-                backButton.setStyle({ fill: '#ffffff' });
-            })
-            .on('pointerdown', () => {
-                this.handleBack();
-                
-            });
 
         // Set up scrolling interaction
         this.input.on('pointerdown', (pointer) => {
@@ -170,12 +149,12 @@ export default class GameInfoScene extends Phaser.Scene {
             if (this.scrolling) {
                 const deltaY = pointer.y - this.lastY;
                 this.contentContainer.y += deltaY;
-                
+
                 // Clamp the container position
-                const minY = height - yPosition - 100; // Bottom boundary
+                const minY = height - this.yPosition - 100; // Bottom boundary
                 const maxY = 0; // Top boundary
                 this.contentContainer.y = Phaser.Math.Clamp(this.contentContainer.y, minY, maxY);
-                
+
                 this.lastY = pointer.y;
             }
         });
@@ -187,9 +166,9 @@ export default class GameInfoScene extends Phaser.Scene {
         // Add mouse wheel support
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
             this.contentContainer.y -= deltaY;
-            
+
             // Clamp the container position
-            const minY = height - yPosition - 100; // Bottom boundary
+            const minY = height - this.yPosition - 100; // Bottom boundary
             const maxY = 0; // Top boundary
             this.contentContainer.y = Phaser.Math.Clamp(this.contentContainer.y, minY, maxY);
         });
@@ -200,7 +179,7 @@ export default class GameInfoScene extends Phaser.Scene {
         });
 
         // Add scroll indicators if content is taller than screen
-        if (yPosition > height) {
+        if (this.yPosition > height) {
             const scrollIndicator = this.add.text(
                 width - 20,
                 height / 2,
@@ -210,9 +189,9 @@ export default class GameInfoScene extends Phaser.Scene {
                     fill: '#ffffff'
                 }
             )
-            .setOrigin(0.5)
-            .setScrollFactor(0)
-            .setAlpha(0.6);
+                .setOrigin(0.5)
+                .setScrollFactor(0)
+                .setAlpha(0.6);
 
             // Make indicator pulse
             this.tweens.add({
@@ -224,6 +203,123 @@ export default class GameInfoScene extends Phaser.Scene {
             });
         }
     }
+
+
+
+    addPointsGuide(containerWidth, containerPadding, title, list) {
+
+        // Calculate column widths and positions
+        const columnWidth = (containerWidth - (containerPadding * 2)) / 3;
+        const columns = [[], [], []];
+
+        // Distribute items into columns
+        list.forEach((item, index) => {
+            columns[index % 3].push(item);
+        });
+
+        // Add points guide header
+        this.yPosition += 20;
+        const pointsHeader = this.add.text(
+            containerPadding,
+            this.yPosition,
+            title,
+            {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontStyle: 'bold',
+                stroke: '#000000', // Black outline
+                strokeThickness: 3, // Thickness of the outline
+            }
+        ).setOrigin(0);
+        this.contentContainer.add(pointsHeader);
+
+        // Add columns
+       this.yPosition += 50;
+        const startY = this.yPosition;
+
+        columns.forEach((column, columnIndex) => {
+            let columnY = startY;
+            const columnX = containerPadding + (columnWidth * columnIndex);
+
+            column.forEach(item => {
+                const itemTxt = title.includes('Points Guide') ? `${capitalizeWords(item.type)} ${item.emoji} ${item.points}` : `${item.item} ${item.points}`;  
+                const itemText = this.add.text(
+                    columnX,
+                    columnY,
+                    itemTxt,  // Combined item and points on same line
+                    {
+                        fontSize: '18px',
+                        fill: '#ffffff',
+                        stroke: '#000000', // Black outline
+                        strokeThickness: 3, // Thickness of the outline
+                        align: 'left',
+                        wordWrap: {
+                            width: columnWidth - 20,
+                            useAdvancedWrap: true
+                        },
+                        lineSpacing: -8
+                    }
+                ).setOrigin(0);
+
+                this.contentContainer.add(itemText);
+                columnY += itemText.height + 10;
+            });
+        });
+
+        // Update yPosition to the bottom of the longest column
+        const maxColumnHeight = Math.max(...columns.map(column =>
+            column.reduce((height, item) => height + 60, 0)
+        ));
+        this.yPosition += maxColumnHeight;
+    }
+
+
+    createTextButton(x, y, message, backgroundColor = 0x000000, textColor = '#ffffff') {
+        // Create container for background and text
+        const container = this.add.container(x, y);
+
+        // Add text first to get its width for the background
+        const text = this.add.text(0, 0, message, {
+            fontFamily: 'Arcade',
+            fontSize: '24px',
+            color: textColor
+        }).setOrigin(0.5);
+
+        // Create background with padding
+        const padding = 16;
+        const borderRadius = 16;
+        const width = text.width + (padding * 2);
+        const height = text.height + (padding * 2);
+
+        // Create rounded rectangle background
+        const background = this.add.graphics();
+        background.fillStyle(backgroundColor, 0.7);
+        background.fillRoundedRect(
+            -(width / 2),
+            -(height / 2),
+            width,
+            height,
+            borderRadius
+        );
+
+        // Add both to container (order matters - background first, then text)
+        container.add(background);
+        container.add(text);
+
+        // Make it interactive if needed
+        container.setInteractive(
+            new Phaser.Geom.Rectangle(
+                -(width / 2),
+                -(height / 2),
+                width,
+                height
+            ),
+            Phaser.Geom.Rectangle.Contains
+        );
+
+        return container;
+    }
+
 
 
     handleBack() {

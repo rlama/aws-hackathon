@@ -1,3 +1,9 @@
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
 export default class CursorManager {
     constructor(scene, config = {}) {
         this.scene = scene;

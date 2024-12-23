@@ -1,24 +1,31 @@
-import { EXTRA_POINTS, STATES_DETAIL } from "../config/gameConfig";
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+
+import { EMOJI_TYPES, STATES_DETAIL, FONT_FAMILY, MAP_CONFIG, AWS_API_GATEWAY_ENDPOINT } from "../config/gameConfig";
+import GameStateManager from "./GameStateManager";
+import { cssColor } from "../utils/helpers";
 import FlyingText from "./FlyingText";
+
+const SCORE_FONT = "Impact"
 
 export default class ScoreManager {
     constructor(scene) {
+         this.gameStateManager = GameStateManager.getInstance();
         this.scene = scene;
-        this.scores = {
-            chad: { score: 0, winner: "" },
-            barry: { score: 0, winner: "" },
-            chadState: { score: 0, winner: "" },
-            barryState: { score: 0, winner: "" }
-        };
+
         this.leftOverPointsDetail = { chat: 0, barry: 0, maxAllowedPoints: 0 }
         this.maxAllowedPoints = 20;
 
         this.toWin = STATES_DETAIL.reduce((sum, state) => sum + state.seats, 0); //total from state seats
         this.toWin += 100// (Senate) this includes DC (+3) from the STATES_DETAIL array
 
-        this.toWin = this.toWin / 2 + 1 ; // Majority to win
-
+        this.toWin = this.toWin / 2 + 1; // Majority to win
         this.createScoreDisplay();
+
     }
 
 
@@ -26,56 +33,56 @@ export default class ScoreManager {
         const gameWidth = this.scene.cameras.main.width;
         const boxHeight = 60;
 
-        // Create the main score box
-        this.scoreBox = this.scene.add.rectangle(
-            0,           // x position (left aligned)
-            0,           // y position (top aligned)
-            gameWidth,   // width matches game width
-            boxHeight,   // height of 60px
-            0x000000,   // black color
-            1         // 70% opacity
-        );
-        this.scoreBox.setOrigin(0, 0); // Align to top-left
-        this.scoreBox.setDepth(10);     // Ensure it's above game elements
-
         // Style for score text
         const textStyle = {
             fontSize: '25px',
             fill: '#ffffff',
-            fontFamily: 'Arial'
+            fontFamily: SCORE_FONT,
+            stroke: '#000000',
+            strokeThickness: 1
         };
 
-         // Style for score text
-         const textStyleState = {
+        // Style for score text
+        const textStyleState = {
             fontSize: '15px',
-            fill: '#ff0000',
-            fontFamily: 'Arial'
+            fill: '#ffffff',
+            fontFamily: SCORE_FONT,
+            stroke: '#000000',
+            strokeThickness: 2
         };
 
         // Create score texts
-        const boxHalf =  boxHeight / 2.5;
+        const boxHalf = boxHeight / 2.1;
         this.scoreText = {
             chad: this.scene.add.text(
                 20,                 // Left padding
                 boxHalf,      // Vertical center of box
-                'Chad: 0 / '+this.toWin+ ' to win',
-                textStyle
+                'Chad: '+this.gameStateManager.getScore("chad")+' / ' + this.toWin + ' to win',
+                {
+                    ...textStyle,
+                    fill: cssColor(MAP_CONFIG.CHAD_COLOR),
+                    stroke: cssColor(MAP_CONFIG.CHAD_COLOR)
+                }
             ),
             barry: this.scene.add.text(
                 gameWidth - 20,     // Right padding
                 boxHalf,      // Vertical center of box
-                'Barry: 0 / '+this.toWin+ ' to win',
-                textStyle
+                'Barry: '+this.gameStateManager.getScore("barry")+' / ' + this.toWin + ' to win',
+                {
+                    ...textStyle,
+                    fill: cssColor(MAP_CONFIG.BARRY_COLOR),
+                    stroke: cssColor(MAP_CONFIG.BARRY_COLOR)
+                }
             ),
             chadState: this.scene.add.text(
                 20,                 // Left padding
-                boxHalf + 20,      // Vertical center of box
+                boxHalf + 30,      // Vertical center of box
                 'CA 2 / 4',
                 textStyleState
             ),
             barryState: this.scene.add.text(
                 gameWidth - 20,     // Right padding
-                boxHalf + 20,      // Vertical center of box
+                boxHalf + 30,      // Vertical center of box
                 'CA 2 / 4',
                 textStyleState
             )
@@ -86,42 +93,31 @@ export default class ScoreManager {
         this.scoreText.barry.setOrigin(1, 0.5);   // Align right, vertically centered
         this.scoreText.chad.setDepth(11);         // Above the score box
         this.scoreText.barry.setDepth(11);        // Above the score box
+        this.scoreText.chad.setLetterSpacing(2);
+        this.scoreText.barry.setLetterSpacing(2);
 
         this.scoreText.chadState.setOrigin(0, 0.5);    // Align left, vertically centered
         this.scoreText.barryState.setOrigin(1, 0.5);   // Align right, vertically centered
         this.scoreText.chadState.setDepth(11);         // Above the score box
         this.scoreText.barryState.setDepth(11);        // Above the score box
-
+        this.scoreText.chadState.setLetterSpacing(2);
+        this.scoreText.barryState.setLetterSpacing(2);
 
     }
 
+    // Point values for different extra types
     calculatePoints(extraType) {
-        // Point values for different extra types
-        return EXTRA_POINTS[extraType] || 0;
-        // switch(extraType) {
-        //     case 'onion':
-        //         return -2;
-        //     case 'fruit':
-        //         return 1;
-        //     case 'bird_fly':
-        //         return 2;
-        //     case 'dragon_fly':
-        //         return 3;
-        //     case 'five_coin':
-        //         return 3;
-        //     case 'gold_box':
-        //         return 5;
-        //     default:
-        //         console.warn('Unknown extra type:', extraType);
-        //         return 0;
-        // }
+        const pt = EMOJI_TYPES.filter(d => d.type === extraType)[0]
+        return pt ? pt.points : 0;
     }
 
 
     writeToScoreBoard(characterKey, currentState) {
+
+        const playerScore = this.gameStateManager.getScore(characterKey);
         // Check for game end
         this.scoreText[characterKey].setText(
-            `${characterKey.charAt(0).toUpperCase() + characterKey.slice(1)}: ${this.scores[characterKey].score}  /  ${this.toWin} to win`
+            `${characterKey.charAt(0).toUpperCase() + characterKey.slice(1)}: ${playerScore}  /  ${this.toWin} to win`
         );
 
         const ct = this.scene.extraManager.getTotalStateExtras()
@@ -133,35 +129,7 @@ export default class ScoreManager {
         this.scoreText['barryState'].setText(
             `For ${currentState.name} : ${ct[characterKey]} / ${currentState.seats}`
         );
-    }   
-
-    // Need to update the state score properly
-
-
-    _updateScore(characterKey, points) {
-
-        this.scores[characterKey].score += points;
-         // Animate score change
-         this.scene.tweens.add({
-            targets: this.scoreText[characterKey],
-            scale: { from: 1.2, to: 1 },
-            duration: 200,
-            ease: 'Power2'
-        });
-        this.writeToScoreBoard(characterKey);
-
-        /// addd and detect game end  //this.toWin
-
-        if (this.scores[characterKey].score >= this.toWin) {
-
-            this.scores[characterKey].score = this.toWin;
-            this.scores[characterKey].winner =  characterKey;
-
-            this.scene.extraManager.endGame();
-        }
-
     }
-
 
 
     updateScore(character, extraType, currentState) {
@@ -169,58 +137,47 @@ export default class ScoreManager {
         const characterKey = character === this.scene.characterManager.getCharacters().chad ? 'chad' : 'barry';
 
         if (extraType) {
-                const points = this.calculatePoints(extraType);
+            const points = +this.calculatePoints(extraType);
 
-                this.scores[characterKey].score += points;
+            this.gameStateManager.incrementScore(characterKey, points)
 
-                // Animate score change
-                this.scene.tweens.add({
-                    targets: this.scoreText[characterKey],
-                    scale: { from: 1.2, to: 1 },
-                    duration: 200,
-                    ease: 'Power2'
-                });
+            // Animate score change
+            this.scene.tweens.add({
+                targets: this.scoreText[characterKey],
+                scale: { from: 1.2, to: 1 },
+                duration: 200,
+                ease: 'Power2'
+            });
+            const dTxt = ['oops...', 'Damn onions!', 'why now...', 'Oh nooooo!'];
+            const flyingWord = Phaser.Math.RND.pick(dTxt);
+
+            const isOnion = extraType === 'Onion';
+            const pointTxt = isOnion ? flyingWord : `+${points}`;
+            const fontSize = isOnion ? '22px' : '32px';
 
 
-                const pointTxt = extraType === 'onion' ? `${points} Disabled` : `+${points}`;
+            this.flyingText = new FlyingText(this.scene);
+            this.flyingText.create(character.x, 450, pointTxt, {
+                color: isOnion ? '#ff0000' : '#00ff00',
+                fontSize: fontSize,
+                duration: 1500,
+                distance: 50,
+                holdDuration: isOnion ? 2000 : 400,
+                strokeThickness: isOnion ? 1 : 2
+            });
 
-                this.flyingText = new FlyingText(this.scene);
-                this.flyingText.create(character.x, 450, pointTxt, {
-                    color: extraType === 'onion' ? '#ff0000'  : '#00ff00',
-                    fontSize: '32px',
-                    duration: 1500,
-                    distance: 50,
-                    holdDuration: extraType === 'onion' ? 2000 : 400
-                });
-        
-                this.writeToScoreBoard(characterKey, currentState);
-        
+            this.writeToScoreBoard(characterKey, currentState);
         }
 
-        /// addd and detect game end  //this.toWin
+        /// add and detect game end
+        if (this.gameStateManager.getScore(characterKey) >= this.toWin) {
 
-        if (this.scores[characterKey].score >= this.toWin) {
-
-            this.scores[characterKey].score = this.toWin;
-            this.scores[characterKey].winner =  characterKey;
-
+            this.gameStateManager.winner = characterKey;
             this.scene.extraManager.endGame();
         }
 
     }
 
-
-    // handleResize(gameSize) {
-    //     const { width, height } = gameSize;
-    //     const boxHeight = 60;
-
-    //     // Resize and reposition score box
-    //     this.scoreBox.width = width;
-
-    //     // Reposition score texts
-    //     this.scoreText.chad.setPosition(20, boxHeight / 2);
-    //     this.scoreText.barry.setPosition(width - 20, boxHeight / 2);
-    // }
 
     reset() {
         this.scores = { chad: { score: 0, spawned: 0 }, barry: { score: 0, spawned: 0 } };
@@ -231,6 +188,7 @@ export default class ScoreManager {
             this.scoreText[key].setScale(1);
         });
     }
+
 
     getScores() {
         return this.scores;

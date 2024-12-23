@@ -1,11 +1,21 @@
-// src/components/ButtonManager.js
-export default class ButtonManager {
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+import GameStateManager from "../components/GameStateManager";
+
+export default class PlayPauseButton {
     constructor(scene) {
+        this.gameStateManager = GameStateManager.getInstance();
         this.scene = scene;
         this.buttons = {};
         // this.buttonScale = 0.15;
         this.isPlaying = true;
+
+        this.ypos = 40;
     }
+
 
 
     createButtons() {
@@ -14,7 +24,7 @@ export default class ButtonManager {
         // Create button with explicit texture reference
         this.activeButton = this.scene.add.sprite(
             gameWidth / 2,
-            30,
+            this.ypos,
             'pause-button'
         );
 
@@ -41,9 +51,10 @@ export default class ButtonManager {
         // Create circular background
         const circle = this.scene.add.circle(
             gameWidth / 2,
-            30,
+            this.ypos,
             circleRadius,
-            0x333333
+            0xffffff,
+            0.3
         );
 
         // Make interactive
@@ -72,7 +83,7 @@ export default class ButtonManager {
 
         this.scene.scene.launch('OverlayScene', {
             parentScene: this.scene,
-            buttonManager: this
+            playPauseButton: this
         });
     }
 
@@ -87,6 +98,7 @@ export default class ButtonManager {
             this.addOverlayScene();
 
         } else {
+            this.gameStateManager.resumeAllSounds()
             this.scene.resumeGame();
             this.scene.scene.stop('OverlayScene');
         }

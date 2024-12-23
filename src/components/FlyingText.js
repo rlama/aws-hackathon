@@ -1,3 +1,9 @@
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
 export default class FlyingText {
     constructor(scene, config = {}) {
         this.scene = scene;
@@ -5,17 +11,22 @@ export default class FlyingText {
         this.counter = 0;
     }
 
+    
     create(x, y, text, config = {}) {
         const defaultConfig = {
             fontSize: '24px',
             color: '#ffffff',
             stroke: '#000000',
+            fillColor: '#ffffff00',
+            backgroundColor: '#ff000000',
             strokeThickness: 2,
-            duration: 1000,
-            distance: 50,
+            duration: Phaser.Math.Between(700, 1200),
+            distance: Phaser.Math.Between(10, 70),
             fadeInDuration: 300,
-            holdDuration: 400,
+            holdDuration: Phaser.Math.Between(200, 500),
             fadeOutDuration: 300,
+            padding: { x: 10, y: 5 },
+            ...config
         };
 
         const finalConfig = { ...defaultConfig, ...config };
@@ -26,12 +37,15 @@ export default class FlyingText {
             fontSize: finalConfig.fontSize,
             color: finalConfig.color,
             stroke: finalConfig.stroke,
-            strokeThickness: finalConfig.strokeThickness
+            strokeThickness: finalConfig.strokeThickness,
+            fillColor: finalConfig.fillColor,
+            backgroundColor: finalConfig.backgroundColor,
+            padding: finalConfig.padding
         }).setOrigin(0.5);
 
         // Initial setup
         textObject.setAlpha(0);
-        
+
         // Create fade in tween
         this.scene.tweens.add({
             targets: textObject,

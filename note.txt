@@ -1,0 +1,47 @@
+
+// TO DO 
+
+
+clean up extramanager variables.
+
+update how to play with emojis
+
+auto pause and let player see where they are at
+
+
+//https://pixabay.com/music/search/retro%20game/
+
+Error occured see chrome
+
+// in lambda filter out oppent with 270 
+
+// check and clean lambda to save and get scores
+
+
+// Clean up amd move changing values to gameStateManager
+
+// add exciting phrases in the finish scene
+
+// add exciting words like 'yes you got Alabama "
+
+
+// add my signature to all files 
+
+
+
+
+
+------------------------
+Notes for blog for Amazon Q
+
+
+More onion to fall png.  Gave me a different insight of using weights
+
+swtiching extras was complicated but AQ solved that in a couple of seconds. Asking it to correct my extra manager file
+
+creating and extrating spritsheet 
+
+//the falling of sprites is still jumpy
+Struggle with smoothing , Q suggested pooling and other tweaks
+
+memory management

@@ -1,4 +1,12 @@
-// DebugAtlasScene.js
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+
+import { addBackground, createCloseButton } from "../utils/helpers";
+
 export default class DebugAtlasScene extends Phaser.Scene {
     constructor() {
         super({ key: 'DebugAtlasScene' });
@@ -15,32 +23,16 @@ export default class DebugAtlasScene extends Phaser.Scene {
     }
 
     create() {
-        this.createBackground();
-        this.createCloseButton();
+        const width = this.scale.width;
+        const height = this.scale.height;
+        addBackground(this, width, height);
+
+        createCloseButton(this);
+
         this.createContent();
-        this.setupKeyboardControls();
+        // this.setupKeyboardControls();
     }
 
-    createBackground() {
-
-    }
-
-    createCloseButton() {
-        const closeButton = this.add.text(
-            this.cameras.main.width - 40, 10,
-            'X',
-            {
-                fontSize: '24px',
-                padding: { x: 10, y: 5 },
-                backgroundColor: '#ff0000',
-                color: '#ffffff'
-            }
-        )
-        .setInteractive({ useHandCursor: true })
-        .on('pointerover', () => closeButton.setStyle({ backgroundColor: '#aa0000' }))
-        .on('pointerout', () => closeButton.setStyle({ backgroundColor: '#ff0000' }))
-        .on('pointerdown', () => this.closeDebugger());
-    }
 
     createContent() {
         this.contentContainer = this.add.container(0, 0);
@@ -153,16 +145,4 @@ export default class DebugAtlasScene extends Phaser.Scene {
         });
     }
 
-    setupKeyboardControls() {
-        this.input.keyboard.on('keydown-ESC', () => {
-            this.closeDebugger();
-        });
-    }
-
-    closeDebugger() {
-        if (this.parentScene) {
-            this.scene.resume(this.parentScene);
-        }
-        this.scene.sleep();
-    }
 }

@@ -1,27 +1,34 @@
-// src/components/CharacterManager.js
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+import GameStateManager from "./GameStateManager";
+import { DEFAULT_DIFFICULTY_SETTINGS } from "../config/gameConfig";
+
 export default class CharacterManager {
-    constructor(scene, selectedCharacter, gameStateManager) {
+    constructor(scene, selectedCharacter) {
+        this.gameStateManager = GameStateManager.getInstance();
         this.scene = scene;
         this.characters = {};
         this.characterScale = 0.7;
         this.chadGotStuck = false;
         this.barryGotStuck = false;
-        this.selectedCharacter = selectedCharacter; // Store selected character
-        this.gameStateManager = gameStateManager;
+        this.selectedCharacter = this.gameStateManager.selectedCharacter || "";
         this.isStartScene = this.scene.scene.key === 'StartScene';
-
+        this.lastUpdateTime = 0;
     }
 
+
     createCharacters() {
-        // const width = this.scene.scale.width;
-        // const height = this.scene.scale.height;
 
         const width = this.scene.cameras.main.width;
         const height = this.scene.cameras.main.height;
 
         const isMobile = width <= 768;
 
-        // Create animations first
+        // Create all animations
         this.createCharacterAnimations();
 
         const characterConfigs = {
@@ -104,8 +111,8 @@ export default class CharacterManager {
         const height = this.scene.scale.height;
 
         ['chad', 'barry'].forEach(charKey => {
-            const xPos = charKey === 'chad' ? 
-                width * (isMobile ? 0.25 : 0.40) : 
+            const xPos = charKey === 'chad' ?
+                width * (isMobile ? 0.25 : 0.40) :
                 width * (isMobile ? 0.75 : 0.60);
 
             this.scene.add.text(
@@ -187,10 +194,10 @@ export default class CharacterManager {
             onComplete: () => {
                 // Flash effect
                 this.scene.cameras.main.flash(500, 255, 255, 255);
-
+                this.gameStateManager.selectedCharacter = character;
                 // Transition to game scene
                 this.scene.time.delayedCall(500, () => {
-                    this.scene.scene.start('GameScene', { selectedCharacter: character, autoPlayingCharacter: this.autoPlayingCharacter });
+                    this.scene.scene.start('GameScene');
                 });
             }
         });
@@ -228,34 +235,34 @@ export default class CharacterManager {
 
         // Keyboard controls
         this.scene.input.keyboard.on('keydown-M', () => {
-            if (!this.gameStateManager.isGamePaused()) {
+            if (!this.gameStateManager.isGamePaused) {
                 this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName);
             }
         });
 
         // Add tap/touch control
         this.scene.input.on('pointerdown', (pointer) => {
-            if (!this.gameStateManager.isGamePaused()) {
+            if (!this.gameStateManager.isGamePaused) {
                 this.handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName);
             }
         });
+    }
 
+    getSelectedCharacter() {
+        return this.selectedCharacter;
     }
 
     // Separate the action logic into its own method to avoid code duplication
     handleCharacterAction(activeCharacter, otherCharacter, otherCharacterName) {
-        
-        const charGotStuck = this.selectedCharacter === "chad" ? this.chadGotStuck : this.barryGotStuck;
-        
-        if (!charGotStuck) {
-            console.log("this.chadGotStuck : ", this.chadGotStuck )
-            console.log("this.barryGotStuck : ", this.barryGotStuck )
 
-            
+        const charGotStuck = this.selectedCharacter === "chad" ? this.chadGotStuck : this.barryGotStuck;
+
+        if (!charGotStuck) {
             activeCharacter.play(this.selectedCharacter + '_mouth_open');
             if (otherCharacter.anims.currentAnim.key !== otherCharacterName + "_not_happy") {
                 otherCharacter.play(otherCharacterName + '_idle');
             }
+            //  activeCharacter.play(this.selectedCharacter + '_mouth_open');
         }
     }
 
@@ -424,8 +431,7 @@ export default class CharacterManager {
     }
 
 
-
-    // Update method to handle eating effects for robot (autoplaying character)
+    // Auto playing logic for Robot
     updateAutoPlaying() {
         // Get all extras from the extras group
         const extras = this.scene.extraManager.extras.getChildren();
@@ -435,6 +441,13 @@ export default class CharacterManager {
         const activeCharacter = this.characters[autoPlayingCharacterName];
 
         if (!activeCharacter) return;
+
+        const currentTime = this.scene.time.now;
+        const difficulty = DEFAULT_DIFFICULTY_SETTINGS[this.gameStateManager.difficultyLevel];
+
+        // Check if enough time has passed since last update
+        if (currentTime - this.lastUpdateTime < difficulty.reactionDelay) return;
+        this.lastUpdateTime = currentTime;
 
         // Find the closest extra to the active character
         let closestExtra = null;
@@ -454,27 +467,42 @@ export default class CharacterManager {
             }
         });
 
-        // Update eat based on closest extra
+        // Determine if the robot should intentionally miss based on difficulty
+        const shouldMiss = Math.random() < difficulty.missRate;
 
-        if (closestExtra && closestDistance <= 130) {
-            const extraType = closestExtra.getData('type');
+        if (shouldMiss) {
+            // Sometimes move away from the extra or do nothing
+            if (closestExtra && closestDistance <= 130) {
 
-            // Open/close mouth logic with random ness
-            
-            const condition = Phaser.Math.RND.pick(['open', 'close']);
+                if (!this.isCharacterStuck(autoPlayingCharacterName)) {
+                    if (Math.random() < 0.5) {
+                        // Move in opposite direction
+                        if (closestExtra.y > activeCharacter.y) {
+                            activeCharacter.play(`${autoPlayingCharacterName}_idle`);
+                        } else {
 
-            if (extraType !== 'onion' && !activeCharacter.mouthOpen) {
-                this.openMouth(activeCharacter, autoPlayingCharacterName);
-            } else if (extraType === 'onion' && activeCharacter.mouthOpen) {
-                this.closeMouth(activeCharacter, autoPlayingCharacterName);
+                            activeCharacter.play(`${autoPlayingCharacterName}_mouth_open`);
+                        }
+                    } else {
+                        // Do nothing
+                        // activeCharacter.play(`${autoPlayingCharacterName}_idle`);
+                    }
+                }
+
             }
         } else {
+            // Original logic for optimal play
+            if (closestExtra && closestDistance <= 130) {
+                const extraType = closestExtra.getData('type');
+                // const condition = Phaser.Math.RND.pick(this.smartIndexArray);
 
-            if (activeCharacter.mouthOpen) {
-                this.closeMouth(activeCharacter, autoPlayingCharacterName);
+                if (extraType !== 'Onion') {
+                    this.openMouth(activeCharacter, autoPlayingCharacterName);
+                }
             }
         }
     }
+
 
 
     openMouth(activeCharacter, autoPlayingCharacterName) {
@@ -519,6 +547,17 @@ export default class CharacterManager {
         if (!this.barryGotStuck) {
             this.characters.barry.play('barry_idle', true);
         }
+    }
+
+    resetCharacters() {
+        this.scene = scene;
+        this.characters = {};
+        this.characterScale = 0.7;
+        this.chadGotStuck = false;
+        this.barryGotStuck = false;
+        this.gameStateManager.selectedCharacter = ""; // Store selected character
+        this.isStartScene = this.scene.scene.key === 'StartScene';
+        this.lastUpdateTime = 0;
     }
 
     // Clean up when scene changes

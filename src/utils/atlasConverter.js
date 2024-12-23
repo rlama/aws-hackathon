@@ -1,3 +1,10 @@
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+
 // utils/atlasConverter.js
 export function convertAtlas(originalAtlas) {
     const frames = [];

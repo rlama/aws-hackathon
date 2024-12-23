@@ -1,44 +1,156 @@
-import { EXTRA_TYPES } from "../config/gameConfig";
-
+/*
+ * Purpose:         Manages all the states and and its values
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE } from "../config/gameConfig";
+import AudioManager from "./AudioManager";
 
 export default class GameStateManager {
-    constructor(scene) {
-        this.scene = scene;
-        this.isPaused = false;
-        this.gameTime = 0;
-        this.scores = {
-            chad: 0,
-            barry: 0
-        };
-        this.scoreText = {};
+    constructor() {
+
+        if (GameStateManager.instance) {
+            return GameStateManager.instance;
+        }
+        GameStateManager.instance = this;
+
+        this._scene = undefined;
+        this._isGamePaused = false;
+        this._gameTime = 0;
 
         // Velocity-related properties
-        this.baseVelocity = 100;
-        this.extraVelocity = this.baseVelocity;
-        this.maxVelocity = 500;
-        this.velocityIncrement = 20;
-
+        this._baseVelocity = 100;
+        this._extraVelocity = this._baseVelocity;
+        this._maxVelocity = 500;
+        this._velocityIncrement = 20;
+        this._selectedCharacter = '';
+        this._playerName = '';
+        this._difficultyLevel = 'beginner'
+        this._scores = DEFAULT_INITIAL_SCORE
+        this._winner = "";
+        this._wonStates = [];
         this.setupInitialState();
+        this._audioManager = null;
+        this._mute = true;
+
+    }
+
+    // Static method to get instance
+    static getInstance() {
+        if (!GameStateManager.instance) {
+            GameStateManager.instance = new GameStateManager();
+        }
+        return GameStateManager.instance;
+    }
+
+
+    initializeAudio(scene) {
+        // Initialize AudioManager if not already initialized
+        if (!this.audioManager) {
+            this.audioManager = new AudioManager(scene);
+            // Preload and create sounds
+            this.audioManager.create();
+        }
+        return this.audioManager;
+    }
+
+    getFinalScore() {
+
+        const chadSc = this.getScore('chad');
+        const selectedCharacter = this._selectedCharacter;
+
+        const opponent = this.getScore([selectedCharacter]) === "chad" ? "barry" : "chad";
+
+        const wonStates = this._wonStates.filter(item => item.character === selectedCharacter).length;
+
+        const finalScores = {
+            score: {
+                chad: this._scores.chad,
+                barry: this._scores.barry,
+            },
+            opponent: this._scores[opponent],
+            statesWon: this._wonStates.length,
+            playerName: this._playerName,
+            selectedCharacter: selectedCharacter,
+            level: this._difficultyLevel
+        };
+        return finalScores;
+    }
+
+
+    // Getters and setters
+    get scores() { return this._scores; }
+    // Increment score
+    incrementScore(character, amount = 1) {
+        if (character in this._scores) {
+            this._scores[character] += amount;
+            if (this._scores[character] > 270) this._scores[character] = 270;
+            // console.log(`Score incremented for ${character}: ${this._scores[character]}`);
+            return this._scores[character];
+        }
+        // console.warn(`Cannot increment score: Player ${character} not found`);
+        return false;
+    }
+    // Get individual score
+    getScore(character) {
+        if (character in this._scores) {
+            return this._scores[character];
+        }
+        // console.warn(`Player ${character} not found in scores`);
+        return 0;
+    }
+
+
+    get wonStates() { return this._wonStates; }
+    // Set individual score
+    setWonStates(value) {
+        this._wonStates.push(value);
+    }
+
+    set audioManager(value) { this._audioManager = value; }
+    get audioManager() { return this._audioManager; }
+
+    set isGamePaused(value) { this._isGamePaused = value; }
+    get isGamePaused() { return this._isGamePaused; }
+
+
+    set winner(value) { this._winner = value; }
+    get winner() { return this._winner; }
+
+    set mute(value) { this._mute = value; }
+    get mute() { return this._mute; }
+
+
+    set playerName(value) { this._playerName = value; }
+    get playerName() { return this._playerName; }
+
+    set selectedCharacter(value) { this._selectedCharacter = value; }
+    get selectedCharacter() { return this._selectedCharacter; }
+
+    set difficultyLevel(value) { this._difficultyLevel = value; }
+    get difficultyLevel() { return this._difficultyLevel; }
+
+    set scene(value) {
+        this._scene = value;
     }
 
     // Add this method to get the current game time
-    getGameTime() {
-        return this.gameTime;
-    }
+    get gameTime() { return this._gameTime; }
 
     // Update method to track game time
     update(time, delta) {
-        if (!this.isPaused) {
-            this.gameTime += delta; // Increment game time by delta
+        if (!this._isGamePaused) {
+            this._gameTime += delta; // Increment game time by delta
         }
     }
 
     setupInitialState() {
         // Initial spawn settings
-        this.spawnDelay = 2000;      // Start with 2000ms (2 seconds)
-        this.minDelay = 500;         // Minimum delay (half second)
-        this.delayDecrement = 100;   // Decrease by 100ms each time
-        this.spawnTimer = null;      // Store timer reference
+        this._spawnDelay = 2000;      // Start with 2000ms (2 seconds)
+        this._minDelay = 500;         // Minimum delay (half second)
+        this._delayDecrement = 100;   // Decrease by 100ms each time
+        this._spawnTimer = null;      // Store timer reference
     }
 
     startGame() {
@@ -48,125 +160,155 @@ export default class GameStateManager {
 
     setupVelocityIncrement() {
         // Create a timer to increase velocity
-        this.scene.time.addEvent({
+        this._scene.time.addEvent({
             delay: 10000,  // Increase velocity every 10 seconds
-            callback: this.increaseVelocity,
+            callback: this._increaseVelocity,
             callbackScope: this,
             loop: true
         });
     }
 
     increaseVelocity() {
-        if (this.extraVelocity < this.maxVelocity) {
-            this.extraVelocity += this.velocityIncrement;
-            // console.log('New velocity:', this.extraVelocity);
+        if (this._extraVelocity < this._maxVelocity) {
+            this._extraVelocity += this._velocityIncrement;
+            // console.log('New velocity:', this._extraVelocity);
         }
     }
 
     applyVelocityToExtra(extra) {
-        extra.body.setVelocityY(this.extraVelocity);
-    }
-
-
-    // Define handleResize method before using it
-    handleResize = (gameSize) => {
-        const { width, height } = gameSize;
-        const bottomPadding = 20;
-        
-        if (this.scoreBackground && this.scoreText) {
-            // Update backgrounds
-            this.scoreBackground.barry.setPosition(width, height);
-
-            // Update score texts
-            this.scoreText.chad.setPosition(20, height - bottomPadding);
-            this.scoreText.barry.setPosition(width - 20, height - bottomPadding);
-
-            // Debug log
-            console.log('Resize handled:', { width, height });
-        }
+        extra.body.setVelocityY(this._extraVelocity);
     }
 
 
     pauseGame() {
-        this.isPaused = true;
-        // this.game.isPaused = true;
-        this.scene.game.pause();
-        this.scene.physics.pause();
-        this.scene.anims.pauseAll();
-        if (this.spawnTimer) {
-            this.spawnTimer.paused = true;
+        this._isGamePaused = true;
+        // this._game.isGamePaused = true;
+        this._scene.game.pause();
+        this._scene.physics.pause();
+        this._scene.anims.pauseAll();
+        if (this._spawnTimer) {
+            this._spawnTimer.paused = true;
         }
     }
 
     resumeGame() {
-        this.isPaused = false;
-        // this.game.isPaused = false;
-        this.scene.game.resume();
-        this.scene.physics.resume();
-        this.scene.anims.resumeAll();
-        if (this.spawnTimer) {
-            this.spawnTimer.paused = false;
+        this._isGamePaused = false;
+        // this._game.isGamePaused = false;
+        this._scene.game.resume();
+        this._scene.physics.resume();
+        this._scene.anims.resumeAll();
+        if (this._spawnTimer) {
+            this._spawnTimer.paused = false;
         }
     }
 
     decreaseDelay() {
-        if (this.spawnDelay > this.minDelay) {
-            this.spawnDelay = Math.max(this.spawnDelay - this.delayDecrement, this.minDelay);
+        if (this._spawnDelay > this._minDelay) {
+            this._spawnDelay = Math.max(this._spawnDelay - this._delayDecrement, this._minDelay);
 
             // Destroy existing timer
-            if (this.spawnTimer) {
-                this.spawnTimer.destroy();
+            if (this._spawnTimer) {
+                this._spawnTimer.destroy();
             }
 
             // Create new timer with updated delay
-            this.spawnTimer = this.scene.time.addEvent({
-                delay: this.spawnDelay,
-                callback: this.scene.spawnExtra,
-                callbackScope: this.scene,
+            this._spawnTimer = this._scene.time.addEvent({
+                delay: this._spawnDelay,
+                callback: this._scene.spawnExtra,
+                callbackScope: this._scene,
                 loop: true
             });
 
-            // console.log('New spawn delay:', this.spawnDelay);
+            // console.log('New spawn delay:', this._spawnDelay);
         }
     }
 
     startSpawning() {
         // Initial spawn timer
-        this.spawnTimer = this.scene.time.addEvent({
-            delay: this.spawnDelay,
-            callback: this.scene.spawnExtra,
-            callbackScope: this.scene,
+        this._spawnTimer = this._scene.time.addEvent({
+            delay: this._spawnDelay,
+            callback: this._scene.spawnExtra,
+            callbackScope: this._scene,
             loop: true
         });
 
         // Create a timer to decrease delay
-        this.scene.time.addEvent({
+        this._scene.time.addEvent({
             delay: 5000,           // Adjust delay every 5 seconds
-            callback: this.decreaseDelay,
+            callback: this._decreaseDelay,
             callbackScope: this,
             loop: true
         });
     }
 
 
-    resetGame() {
+    reset() {
+        this._scores = {
+            chad: 0,
+            barry: 0
+        };
+
+        this._winner = "";
+        this._wonStates = [];
+
         // Reset velocity
-        this.extraVelocity = this.baseVelocity;
-        
+        this._extraVelocity = this._baseVelocity;
+
         // Reset spawn delay
-        this.spawnDelay = 2000;
+        this._spawnDelay = 2000;
     }
 
-
-    getScores() {
-        return this.scores;
-    }
-
-    isGamePaused() {
-        return this.isPaused;
-    }
 
     getCurrentVelocity() {
-        return this.extraVelocity;
+        return this._extraVelocity;
+    }
+
+
+
+    /// Sounds
+
+    playSound(key, config = {}) {
+        if (this.audioManager) {
+            if (!this._isGamePaused) {
+                this.audioManager.play(key, config);
+            }
+        } else {
+            console.warn('AudioManager not initialized');
+        }
+    }
+
+    pauseAllSounds() {
+        if (this.audioManager) {
+            console.log("---pauseAll---")
+            this.audioManager.pauseAll();
+        }
+    }
+
+    resumeAllSounds() {
+        if (this.audioManager) {
+            this.audioManager.resumeAll();
+        }
+    }
+
+    pauseSound(key) {
+        if (this.audioManager) {
+            this.audioManager.pause(key);
+        }
+    }
+
+    resumeSound(key) {
+        if (this.audioManager) {
+            this.audioManager.resume(key);
+        }
+    }
+
+    pauseGameWithAudio() {
+        this.isGamePaused = true;
+        this.audioManager?.pauseWithFade();
+    }
+
+    resumeGameWithAudio() {
+        this.isGamePaused = false;
+        this.audioManager?.resumeWithFade();
     }
 }

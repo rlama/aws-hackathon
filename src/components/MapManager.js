@@ -1,7 +1,15 @@
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+
 import { MAP_CONFIG } from "../config/gameConfig";
 
 export default class MapManager {
     constructor(scene, scaleOffset = 1, yOffset = 0, idleColor) {
+
         this.scene = scene;
         this.states = [];
         this.stateData = null;
@@ -24,13 +32,10 @@ export default class MapManager {
 
         this.statePolygons = new Map(); // Initialize the Map
         this.stateLabels = new Map();   // Initialize the Map for labels
-
-
     }
 
 
     createStateMap() {
-        console.log('Loading map data...');
         this.stateData = this.scene.cache.json.get('mapData');
 
         if (!this.stateData || !this.stateData.features) {
@@ -81,7 +86,7 @@ export default class MapManager {
         const mapWidth = (this.maxLong - this.minLong) * latitudeCorrection;
         const mapHeight = this.maxLat - this.minLat;
 
-        const padding = 50;
+        const padding = 80;
         const scaleX = ((this.gameWidth - padding * 2) / mapWidth) / this.scaleOffset;
         const scaleY = ((this.gameHeight - padding * 2) / mapHeight) / this.scaleOffset;
         this.scale = Math.min(scaleX, scaleY);
@@ -146,14 +151,14 @@ export default class MapManager {
         });
     }
 
-    highlightState(stateId, abbre, highlightColor = 0xff0000) {
+    highlightState(stateId, abbre, highlightColor = 0xff0000, opacity=0.3) {
 
         const state = this.states.find(state => state.id === stateId);
         if (state) {
             const graphics = state.graphics;
             graphics.clear();
             graphics.lineStyle(1, highlightColor, 1);
-            graphics.fillStyle(highlightColor, 0.3);
+            graphics.fillStyle(highlightColor, opacity);
 
             const feature = this.stateData.features.find(f => f.properties.name === stateId);
             if (!feature) {

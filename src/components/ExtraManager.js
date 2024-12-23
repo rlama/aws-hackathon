@@ -1,66 +1,270 @@
-import RandomShape from "../objects/RandomShape";
-import { EXTRA_SCALE, EXTRA_TYPES, AVAILABLE_EXTRAS, EXTRA_SPAWN_TIME, EXTRA_TYPE_CHANGE_INTERVAL_TIME, EXTRA_POINTS, STATES_DETAIL, MAP_CONFIG } from "../config/gameConfig";
+/*
+ * Author:          Richard Lama
+ * Last Updated:    December 22, 2024
+ * Version:         1.0.0
+ */
+
+import GameStateManager from "./GameStateManager";
+import {EXTRA_TYPE_CHANGE_INTERVAL_TIME, STATES_DETAIL, MAP_CONFIG, EMOJI_TYPES } from "../config/gameConfig";
+import { cssColor } from "../utils/helpers";
+import FlyingText from "./FlyingText";
+import { saveToLeaderboard } from "../api/api";
 
 
-export default class ExtraManager {
-    constructor(scene, gameStateManager, scoreManager, mapManager) {
+class ExtraManager {
+    constructor(scene, mapManager) {
         this.scene = scene;
-        // Set a consistent physics time step
-        this.scene.physics.world.setFPS(60);
+        this.gameStateManager = GameStateManager.getInstance();
         this.mapManager = mapManager;
-        this.gameStateManager = gameStateManager;
-        this.scoreManager = scoreManager;
-        this.extras = this.scene.physics.add.group();
-        this.createExtrasAnimations();
-
-        this.totalExtras = {
-            chad: 0,
-            barry: 0
-        }
+        this.extras = this.scene.add.group();
+        this.activeExtras = [];
+        this.pool = [];
         this.totalStateExtras = {
             chad: 0,
             barry: 0
         }
 
-        this.MAX_ALLOWED_EXTRAS_POiNTS = 200;
+        // Text configuration for emojis
+        this.EMOJI_CONFIG = {
+            fontSize: '42px',
+            fontFamily: 'Arial, "Segoe UI Emoji", sans-serif',
+            resolution: 2
+        };
 
-        this.stateIndex = 0;  // Track current state index
-        this.wonStates = [];  // Array to store won states
+        this.stateIndex = 0;
 
-        // Initial fall speed and speed increase settings
+        // Keep your existing speed and spawn settings
         this.FALL_SPEED = 200;
-        this.SPEED_INCREMENT = 50;
+        this.SPEED_INCREMENT = 20;
         this.SPEED_INTERVAL = 5000;
-
-        // Spawn delay settings
         this.SPAWN_DELAY = 1000;
-        this.MIN_SPAWN_DELAY = 300;
-        this.SPAWN_DELAY_DECREASE = 100;
+        this.MIN_SPAWN_DELAY = 280;
+        this.SPAWN_DELAY_DECREASE = 80;
         this.spawnTimer = null;
-
-        // Game time tracking
         this.gameStartTime = Date.now();
-        this.TYPE_CHANGE_START_DELAY = 10000; // 10 seconds initial delay
-        this.TYPE_CHANGE_DURATION = 10000;    // 10 seconds of changing
-        this.TYPE_CHANGE_PAUSE = 5000;        // 5 seconds pause
-        this.isChangingTypes = false;         // Track if we're in changing phase
-        this.lastPhaseChange = 0;            // Track when we last changed phases
+        this.EXTRA_SWITCH_DELAY = 15000;
+        this.EXTRA_SWITCH_DURATION = 5000;
+        this.TYPE_CHANGE_PAUSE = 5000;
+        this.isChangingTypes = false;
+        this.lastPhaseChange = 0;
 
         // Setup timers
         this.setupSpeedIncreaseTimer();
         this.setupSpawnTimer();
-
     }
 
+    spawnExtra() {
+        if (this.stateDetailIndex >= STATES_DETAIL.length) {
+            this.endGame();
+            return;
+        }
+
+        const { chad, barry } = this.scene.characterManager.getCharacters();
+        const randomType = this.getWeightedRandomEmoji(); // Use weighted random instead
+        const ypos = -50;
+
+        // Create text objects for emojis
+        const chadExtra = this.createEmojiExtra(chad.x, ypos, randomType);
+        const barryExtra = this.createEmojiExtra(barry.x, ypos, randomType);
+
+        this.setupExtra(chadExtra, randomType.type, 'chad');
+        this.setupExtra(barryExtra, randomType.type, 'barry');
+
+        return { chadExtra, barryExtra };
+    }
+
+    // Add this method to get weighted random emoji
+    getWeightedRandomEmoji() {
+        const totalWeight = EMOJI_TYPES.reduce((sum, item) => sum + item.weight, 0);
+        let random = Phaser.Math.RND.between(1, totalWeight);
+
+        for (const item of EMOJI_TYPES) {
+            random -= item.weight;
+            if (random <= 0) {
+                return item;
+            }
+        }
+        return EMOJI_TYPES[0]; // fallback
+    };
+
+
+    createEmojiExtra(x, y, emojiData) {
+        const extra = this.scene.add.text(x, y, emojiData.emoji, this.EMOJI_CONFIG)
+            .setOrigin(0.5)
+            .setDepth(6);
+
+        // Enable physics
+        this.scene.physics.world.enable(extra);
+
+        // Store emoji data
+        extra.setData('emojiData', emojiData);
+
+        return extra;
+    }
+
+    setupExtra(extra, type, characterSide) {
+        extra.setData('type', type);
+        extra.setData('originalType', type);
+        extra.setData('typeChangeTimer', 0);
+        extra.setData('typeChangeInterval', Phaser.Math.Between(
+            EXTRA_TYPE_CHANGE_INTERVAL_TIME[0],
+            EXTRA_TYPE_CHANGE_INTERVAL_TIME[1]
+        ));
+        extra.setData('spawnTime', Date.now());
+
+        // Setup physics
+        const body = extra.body;
+        body.setSize(32, 32);
+        body.setAllowGravity(false);
+        body.setVelocityY(this.FALL_SPEED);
+        body.setDragY(0);
+        body.setBounce(0);
+        body.setAngularVelocity(0);
+
+        // Add to group and setup collisions
+        this.extras.add(extra);
+        this.activeExtras.push(extra);
+        this.scene.collisionManager.setupCollisions(extra, this.scene.characterManager.getCharacters());
+
+        return extra;
+    }
+
+    cleanupExtra(extra) {
+        const index = this.activeExtras.indexOf(extra);
+        if (index > -1) {
+            this.activeExtras.splice(index, 1);
+        }
+
+        this.extras.remove(extra);
+
+        if (extra.body) {
+            extra.body.enable = false;
+        }
+
+        extra.destroy();
+    }
+
+
+
+    update(time, delta) {
+
+        const currentTime = Date.now();
+        const gameElapsedTime = currentTime - this.gameStartTime;
+
+        // Only start extra type switching mechanics after initial delay
+        if (gameElapsedTime >= this.EXTRA_SWITCH_DELAY) {
+            const timeSinceLastPhase = currentTime - this.lastPhaseChange;
+
+            // Check if we need to switch phases
+            if (this.isChangingTypes && timeSinceLastPhase >= this.EXTRA_SWITCH_DURATION) {
+                // Switch to pause phase
+                this.isChangingTypes = false;
+                this.lastPhaseChange = currentTime;
+                // console.log('Switching to pause phase');
+            } else if (!this.isChangingTypes && timeSinceLastPhase >= this.TYPE_CHANGE_PAUSE) {
+                // Switch to changing phase
+                this.isChangingTypes = true;
+                this.lastPhaseChange = currentTime;
+                // console.log('Switching to changing phase');
+            }
+
+            // If this is our first time past the initial delay, start in changing phase
+            if (this.lastPhaseChange === 0) {
+                this.isChangingTypes = true;
+                this.lastPhaseChange = currentTime;
+                // console.log('Starting first changing phase');
+            }
+        }
+
+        // Clean up extras that are off screen
+        this.activeExtras = this.activeExtras.filter(extra => {
+            if (extra.y > this.scene.game.config.height + 100) {
+                this.cleanupExtra(extra);
+                return false;
+            }
+            return true;
+        });
+
+        // Handle type changes if needed
+        if (this.isChangingTypes) {
+
+            if (Math.random() < 0.5) {
+                this.switchExtrasRandom()
+            }else{
+                this.switchExtrasToOnion()
+            }
+        }
+    }
+
+
+    switchExtrasRandom() {
+        this.activeExtras.forEach(extra => {
+            const currentTime = Date.now();
+            const typeChangeTimer = extra.getData('typeChangeTimer');
+            const SWITCH_DELAY = 1300; // 500ms delay between switches
+            
+            if (currentTime - typeChangeTimer >= SWITCH_DELAY) {
+                // Get random type excluding current type
+                const currentType = extra.getData('emojiData').type;
+                const availableTypes = EMOJI_TYPES.filter(type => type.type !== currentType);
+                const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                
+                // Switch to new random type
+                extra.setText(randomType.emoji);
+                extra.setData('emojiData', randomType);
+                extra.setData('type', randomType.type);
+                
+                // Update the timer
+                extra.setData('typeChangeTimer', currentTime);
+            }
+        });
+    }
+    
+
+
+    switchExtrasToOnion() {
+        this.activeExtras.forEach(extra => {
+            const currentTime = Date.now();
+            const typeChangeTimer = extra.getData('typeChangeTimer');
+            const SWITCH_DELAY = 1000; // 500ms delay between switches
+            const emojiData = extra.getData('emojiData');
+            
+            if (currentTime - typeChangeTimer >= SWITCH_DELAY) {
+                // Find onion type from EMOJI_TYPES
+                const onionType = EMOJI_TYPES.find(type => type.type === 'Onion');
+                
+                // If current type is onion, switch back to original type
+                if (emojiData.type === 'Onion') {
+                    const originalType = extra.getData('originalType');
+                    const originalEmoji = EMOJI_TYPES.find(type => type.type === originalType);
+                    
+                    extra.setText(originalEmoji.emoji);
+                    extra.setData('emojiData', originalEmoji);
+                    extra.setData('type', originalEmoji.type);
+                } else {
+                    // Switch to onion
+                    extra.setText(onionType.emoji);
+                    extra.setData('emojiData', onionType);
+                    extra.setData('type', onionType.type);
+                }
+                
+                extra.setData('typeChangeTimer', currentTime);
+            }
+        });
+    }
+
+
+
     setupSpeedIncreaseTimer() {
+        const gsm = this.gameStateManager;
         this.spawnTimer = this.scene.time.addEvent({
             delay: this.SPEED_INTERVAL,
             callback: () => {
-                if (!this.gameStateManager.isGamePaused()) {
+                if (!gsm.isGamePaused) {
                     // Increase fall speed
 
-                    if (this.FALL_SPEED >= 420) {
-                        this.FALL_SPEED -= 200;
+                    if (this.FALL_SPEED >= 280) {
+                        this.FALL_SPEED = 200;
                         this.SPAWN_DELAY = 1000;
                     } else {
                         this.FALL_SPEED += this.SPEED_INCREMENT;
@@ -93,7 +297,7 @@ export default class ExtraManager {
         this.spawnTimer = this.scene.time.addEvent({
             delay: this.SPAWN_DELAY,  // This should be 1000 for 1 second
             callback: () => {
-                if (!this.gameStateManager.isGamePaused()) {
+                if (!this.gameStateManager.isGamePaused) {
                     this.spawnExtra();
                 }
             },
@@ -102,180 +306,114 @@ export default class ExtraManager {
         });
     }
 
-    stopSpawnTimer() {
-        if (this.spawnTimer) {
-            this.spawnTimer.destroy();
-            this.spawnTimer = null;
-        }
-    }
-
-    createExtrasAnimations() {
-        // Dragon animations
-        this.scene.anims.create({
-            key: 'dragon_fly',
-            frames: this.scene.anims.generateFrameNames('extras', {
-                prefix: 'frame_',
-                start: 0,
-                end: 4
-            }),
-            frameRate: 30,
-            repeat: -1
-        });
-
-        // Bird animations
-        this.scene.anims.create({
-            key: 'bird_fly',
-            frames: this.scene.anims.generateFrameNames('extras', {
-                prefix: 'frame_',
-                start: 7,
-                end: 14
-            }),
-            frameRate: 30,
-            repeat: -1
-        });
-
-        // Gold box animation
-        this.scene.anims.create({
-            key: 'gold_box',
-            frames: [{ key: 'extras', frame: 'frame_6' }],
-            frameRate: 1,
-            repeat: 0
-        });
-
-        // Five coin animation
-        this.scene.anims.create({
-            key: 'five_coin',
-            frames: [{ key: 'extras', frame: 'frame_77' }],
-            frameRate: 1,
-            repeat: 0
-        });
-
-        // Onion animation
-        this.scene.anims.create({
-            key: 'onion',
-            frames: [{ key: 'extras', frame: 'frame_80' }],
-            frameRate: 1,
-            repeat: 0
-        });
-
-        // Fruit animation
-        this.scene.anims.create({
-            key: 'fruit',
-            frames: [
-                { key: 'extras', frame: 'frame_37' },
-                { key: 'extras', frame: 'frame_71' },
-                { key: 'extras', frame: 'frame_75' }
-            ],
-            frameRate: 15,
-            repeat: -1
-        });
-    }
 
 
-    spawnExtra() {
-        if (this.stateDetailIndex >= STATES_DETAIL.length) {
-            this.endGame();
-            return;
-        }
-    
-        const { chad, barry } = this.scene.characterManager.getCharacters();
-        const randomType = Phaser.Math.RND.pick(EXTRA_TYPES);
-    
-        // Spawn for Chad
-        const chadExtra = this.scene.physics.add.sprite(chad.x, Phaser.Math.RND.pick([-100, 20]), 'extras', 'frame_0');
-        this.setupExtra(chadExtra, randomType, 'chad');
-    
-        // Spawn for Barry
-        const barryExtra = this.scene.physics.add.sprite(barry.x, Phaser.Math.RND.pick([-100, 20]), 'extras', 'frame_0');
-        this.setupExtra(barryExtra, randomType, 'barry');
-    
-        return { chadExtra, barryExtra };
-    }
-    
-    // Helper method to setup individual extras
-    setupExtra(extra, type, characterSide) {
-        extra.setData('type', type);
-        extra.setData('originalType', type);
-        extra.setData('typeChangeTimer', 0);
-        extra.setData('typeChangeInterval', Phaser.Math.Between(EXTRA_TYPE_CHANGE_INTERVAL_TIME[0], EXTRA_TYPE_CHANGE_INTERVAL_TIME[1]));
-        extra.setData('spawnTime', Date.now());
-        extra.setScale(EXTRA_SCALE);
-        extra.setDepth(6);
-    
-        // Physics settings for smooth movement
-        extra.body.setSize(extra.width * EXTRA_SCALE, extra.height * EXTRA_SCALE);
-        extra.body.setAllowGravity(false);
-        extra.body.setVelocityY(this.FALL_SPEED);
-        extra.body.setDragY(0);
-        extra.body.setBounce(0);
-        extra.body.setAngularVelocity(0);
-    
-        // Play the appropriate animation based on type
-        extra.play(type);
-    
-        // Add to group and setup collisions
-        this.extras.add(extra);
-
-        this.scene.collisionManager.setupCollisions(extra, this.scene.characterManager.getCharacters());
-    
-        return extra;
-    }
-
-    // Add this method to handle collisions
     handleCollisionForState(character, extra) {
-        const extraType = extra.getData('type');
-        if (extraType !== 'onion') {
+        const emojiData = extra.getData('emojiData');
+        if (emojiData.type !== 'Onion') {
             const { chad, barry } = this.scene.characterManager.getCharacters();
-        
             const characterType = character === chad ? 'chad' : 'barry';
-    
+
             // Update state-specific points
-            this.totalStateExtras[characterType] += EXTRA_POINTS[extraType];
+            this.totalStateExtras[characterType] += emojiData.points;
 
             // Check if current state is won after collision
-            this.checkStateWin();
+            this.checkStateWin(character);
         }
     }
 
-    checkStateWin() {
+
+
+    /// add wonStates to gameState
+
+    checkStateWin(character) {
         const currentState = STATES_DETAIL[this.stateIndex];
         const requiredSeats = currentState === "DC" ? 3 : currentState.seats;
 
         // Check Chad's points
         if (this.totalStateExtras.chad >= requiredSeats) {
             // Push win data
-            this.wonStates.push({
+
+            this.gameStateManager.setWonStates({
                 character: 'chad',
                 state: currentState.name,
                 seats: requiredSeats
+            })
+            if (this.gameStateManager.selectedCharacter === 'chad') {
+                this.gameStateManager.playSound('statewin')
+            } else {
+                this.gameStateManager.playSound('statewinopp', { volume: 0.2 })
+            }
+
+            const warr = ["conquered", "secured", "captured", "claimed", "won", "acquired"]
+            const flyingWords = Phaser.Math.RND.pick(warr);
+
+            this.flyingText = new FlyingText(this.scene);
+
+            const randomX = Phaser.Math.Between(character.x - 130, character.x - 180);
+            const randomY = Phaser.Math.Between(300, 500);
+            const randomH = Phaser.Math.Between(1800, 2500);
+            const randomD = Phaser.Math.Between(50, 80);
+
+            this.flyingText.create(randomX, randomY, `${currentState.abbr} ${flyingWords}`, {
+                color: cssColor(MAP_CONFIG.CHAD_COLOR),
+                fontSize: '20px',
+                duration: 1500,
+                holdDuration: randomH,
+                distance: randomD,
+                strokeThickness: 1,
+                fillColor: '#efa4a5',
+                backgroundColor: '#efa4a5'
             });
 
-            // this.scoreManager.updateScore('chad', requiredSeats);
-
             // DC is not the state but it does participate in presidential elections and has its own voting.
-            if(STATES_DETAIL[this.stateIndex].name !== "DC"){ 
+            if (STATES_DETAIL[this.stateIndex].name !== "DC") {
                 this.mapManager.highlightState(STATES_DETAIL[this.stateIndex].name, STATES_DETAIL[this.stateIndex].abbr, MAP_CONFIG.CHAD_COLOR);
             }
             this.moveToNextState();
         }
         // Check Barry's points
         else if (this.totalStateExtras.barry >= requiredSeats) {
+
             // Push win data
-            this.wonStates.push({
+            this.gameStateManager.setWonStates({
                 character: 'barry',
                 state: currentState.name,
                 seats: requiredSeats
             });
 
-            console.log("Barry won ", currentState.name, " "+requiredSeats)
+            if (this.gameStateManager.selectedCharacter === 'barry') {
+                this.gameStateManager.playSound('statewin')
+            } else {
+                this.gameStateManager.playSound('statewinopp', { volume: 0.2 })
+            }
 
-            // this.scoreManager.updateScore('barry', requiredSeats);
+            const warr = ["conquered", "secured", "captured", "claimed", "won", "acquired"]
+            const flyingWords = Phaser.Math.RND.pick(warr);
 
-            if(STATES_DETAIL[this.stateIndex].name !== "DC"){ 
+            const randomX = Phaser.Math.Between(character.x + 130, character.x + 180);
+            const randomY = Phaser.Math.Between(300, 500);
+            const randomH = Phaser.Math.Between(1800, 2500);
+            const randomD = Phaser.Math.Between(50, 80);
+
+            this.flyingText = new FlyingText(this.scene);
+            this.flyingText.create(randomX, randomY, `You ${flyingWords} ${currentState.abbr}`, {
+                color: cssColor(MAP_CONFIG.BARRY_COLOR),
+                fontSize: '20px',
+                duration: 1500,
+                distance: randomD,
+                holdDuration: randomH,
+                strokeThickness: 1,
+                fillColor: '#91d4f7',
+                backgroundColor: '#91d4f7'
+            });
+
+            if (STATES_DETAIL[this.stateIndex].name !== "DC") {
                 this.mapManager.highlightState(STATES_DETAIL[this.stateIndex].name, STATES_DETAIL[this.stateIndex].abbr, MAP_CONFIG.BARRY_COLOR);
             }
             this.moveToNextState();
         }
+
     }
 
     moveToNextState() {
@@ -297,7 +435,7 @@ export default class ExtraManager {
 
     updateStateDisplay() {
         const currentState = STATES_DETAIL[this.stateIndex];
-        
+
         // Emit event for state change
         this.scene.events.emit('stateChanged', {
             stateName: currentState.name,
@@ -308,162 +446,56 @@ export default class ExtraManager {
         });
     }
 
-    getWonStates(){
-        return this.wonStates;
-    }
 
-    getCurrentState(){
-        return STATES_DETAIL[this.stateIndex];
+
+    stopSpawnTimer() {
+        if (this.spawnTimer) {
+            this.spawnTimer.destroy();
+            this.spawnTimer = null;
+        }
     }
 
     getTotalStateExtras() {
         return this.totalStateExtras;
     }
-
-
-
-    getTotalExtras() {
-        return { totalExtras: this.totalExtras, maxAllowedPoints: this.MAX_ALLOWED_EXTRAS_POiNTS }
+    getCurrentState() {
+        return STATES_DETAIL[this.stateIndex];
     }
 
-    checkGameEnd() {
-        const { chad, barry } = this.scene.scoreManager.leftOverPointsDetail;
-
-        if (chad >= this.MAX_ALLOWED_EXTRAS_POiNTS && barry >= this.MAX_ALLOWED_EXTRAS_POiNTS) {
-            this.endGame();
-        }
-    }
 
     endGame() {
         this.stopSpawnTimer();
         this.extras.clear(true, true);
 
-        const chadSc = this.scene.scoreManager.scores.chad;
+        const finalScores = this.gameStateManager.getFinalScore()
 
-        const finalScores = {
-            chad: this.scene.scoreManager.scores.chad.score,
-            barry: this.scene.scoreManager.scores.barry.score,
-            winner: this.scene.scoreManager.scores.chad.score > this.scene.scoreManager.scores.barry.score ? "chad" : "barry",
-            wonStates:this.wonStates
-        };
-        console.log(finalScores)
         // Stop the current scene and launch score scene
         this.scene.scene.pause();
-        this.scene.scene.start('FinishScene', finalScores);
+
+        //Save score to leaderboard, only if player score is 270 or if player wins.
+        if (finalScores.score[this.gameStateManager.selectedCharacter] >= 270) {
+            saveToLeaderboard(finalScores)
+        }
+
+        // Play sound
+        const didWon = this.gameStateManager.winner === this.gameStateManager.selectedCharacter;
+        if (didWon) {
+            this.gameStateManager.playSound("win");
+        } else {
+            this.gameStateManager.playSound("loose");
+        }
+
+
+        this.scene.scene.start('FinishScene', {
+            gameEnd: true
+        });
 
         console.log("Game end");
 
     }
 
 
-
-    switchExtraType(extra) {
-        const currentType = extra.getData('type');
-        const originalType = extra.getData('originalType');
-
-        const randomType = Phaser.Math.RND.pick(EXTRA_TYPES);
-
-        const nextType = currentType === 'onion' && originalType === 'onion' ? randomType : 'onion';
-        // Switch between original type and onion
-        const newType = currentType === 'onion' ? originalType : nextType;
-
-        // console.log("Switching extra type from", currentType, "to", newType);
-
-        extra.setData('type', newType);
-        extra.play(newType);
-    }
-
-    update(time, delta) {
-        const currentTime = Date.now();
-        const gameElapsedTime = currentTime - this.gameStartTime;
-
-        // Only start type changing mechanics after initial delay
-        if (gameElapsedTime >= this.TYPE_CHANGE_START_DELAY) {
-            const timeSinceLastPhase = currentTime - this.lastPhaseChange;
-
-            // Check if we need to switch phases
-            if (this.isChangingTypes && timeSinceLastPhase >= this.TYPE_CHANGE_DURATION) {
-                // Switch to pause phase
-                this.isChangingTypes = false;
-                this.lastPhaseChange = currentTime;
-                // console.log('Switching to pause phase');
-            } else if (!this.isChangingTypes && timeSinceLastPhase >= this.TYPE_CHANGE_PAUSE) {
-                // Switch to changing phase
-                this.isChangingTypes = true;
-                this.lastPhaseChange = currentTime;
-                // console.log('Switching to changing phase');
-            }
-
-            // If this is our first time past the initial delay, start in changing phase
-            if (this.lastPhaseChange === 0) {
-                this.isChangingTypes = true;
-                this.lastPhaseChange = currentTime;
-                // console.log('Starting first changing phase');
-            }
-        }
-
-
-        this.extras.getChildren().forEach(extra => {
-            // Update velocity to current FALL_SPEED
-            extra.body.setVelocityY(this.FALL_SPEED);
-
-            // Only process type changes if we're past initial delay and in changing phase
-            if (gameElapsedTime >= this.TYPE_CHANGE_START_DELAY && this.isChangingTypes) {
-                const typeTimer = extra.getData('typeChangeTimer');
-                const typeInterval = extra.getData('typeChangeInterval');
-
-                extra.setData('typeChangeTimer', typeTimer + delta);
-
-                if (typeTimer + delta >= typeInterval) {
-                    this.switchExtraType(extra);
-                    extra.setData('typeChangeTimer', 0);
-                }
-            }
-
-            // Remove if off screen
-            if (extra.y > this.scene.game.config.height + 50) {
-                this.destroyExtra(extra);
-            }
-        });
-    }
-
-    resetGame() {
-
-        this.stopSpawnTimer();
-        this.totalSpawnedPoints = 0;
-        this.totalExtras = {
-            chad: 0,
-            barry: 0
-        };
-        this.SPAWN_DELAY = 1000;
-        // this.startSpawnTimer();
-
-        // Reset all game parameters
-        this.FALL_SPEED = 200;
-        this.SPAWN_DELAY = 1000;
-        this.gameStartTime = Date.now();
-        this.lastPhaseChange = 0;
-        this.isChangingTypes = false;
-
-        // Update spawn timer with reset delay
-        // this.updateSpawnTimer();
-
-
-        // Clear existing extras if you have an extras group
-        if (this.extras) {
-            this.extras.clear(true, true);
-        }
-    }
-
-
-    destroyExtra(extra) {
-        if (extra) {
-            this.scene.tweens.killTweensOf(extra);
-            extra.destroy();
-        }
-    }
-
-    getExtrasGroup() {
-        return this.extras;
-    }
 }
+
+// Export the class
+export default ExtraManager;
