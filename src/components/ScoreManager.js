@@ -156,8 +156,7 @@ export default class ScoreManager {
             const fontSize = isOnion ? '22px' : '32px';
 
 
-            this.flyingText = new FlyingText(this.scene);
-            this.flyingText.create(character.x, 450, pointTxt, {
+            this.gameStateManager.createFlyingText(character.x, 450, pointTxt, {
                 color: isOnion ? '#ff0000' : '#00ff00',
                 fontSize: fontSize,
                 duration: 1500,

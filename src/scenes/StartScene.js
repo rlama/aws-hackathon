@@ -67,15 +67,15 @@ export default class StartScene extends Phaser.Scene {
 
 
          // Add debug button
-        //  const debugButton = new StandardButton(this, 140, 30, 'Open Atlas Debugger', {
-        //     onClick: () => {
-        //         this.scene.start('DebugAtlasScene', {
-        //             atlasKeys: ['characters', 'extras'],
-        //             parentScene: this
-        //         });
-        //         this.scene.pause();
-        //     }
-        // });
+         const debugButton = new StandardButton(this, 140, 30, 'Open Atlas Debugger', {
+            onClick: () => {
+                this.scene.start('DebugAtlasScene', {
+                    atlasKeys: ['characters', 'extras'],
+                    parentScene: this
+                });
+                this.scene.pause();
+            }
+        });
     }
 
 }

@@ -290,7 +290,7 @@ export default class CharacterManager {
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
                 start: 0,
-                end: 15
+                end: 14
             }),
             frameRate: 30,
             repeat: -1
@@ -300,8 +300,8 @@ export default class CharacterManager {
             key: 'chad_dead',
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
-                start: 29,
-                end: 34
+                start: 21,
+                end: 28
             }),
             frameRate: 30,
             repeat: -1
@@ -324,8 +324,8 @@ export default class CharacterManager {
             key: 'chad_eating',
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
-                start: 16,
-                end: 28
+                start: 14,
+                end: 19
             }),
             frameRate: 30,
             repeat: 1
@@ -337,7 +337,7 @@ export default class CharacterManager {
             key: 'chad_not_happy',
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
-                start: 29,
+                start: 26,
                 end: 34
             }),
             frameRate: 30,
@@ -371,8 +371,8 @@ export default class CharacterManager {
             key: 'barry_dead',
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
-                start: 68,
-                end: 74
+                start: 63,
+                end: 69
             }),
             frameRate: 30,
             repeat: -1
@@ -394,7 +394,7 @@ export default class CharacterManager {
             frames: this.scene.anims.generateFrameNames('characters', {
                 prefix: 'frame_',
                 start: 56,
-                end: 67
+                end: 62
             }),
             frameRate: 30,
             repeat: 1

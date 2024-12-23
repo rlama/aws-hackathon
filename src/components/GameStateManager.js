@@ -6,6 +6,7 @@
  */
 import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE } from "../config/gameConfig";
 import AudioManager from "./AudioManager";
+import FlyingText from "./FlyingText";
 
 export default class GameStateManager {
     constructor() {
@@ -33,6 +34,7 @@ export default class GameStateManager {
         this.setupInitialState();
         this._audioManager = null;
         this._mute = true;
+        this._flyingText = null;
 
     }
 
@@ -45,6 +47,15 @@ export default class GameStateManager {
     }
 
 
+    initializeFlyingText(scene) {
+        // Initialize AudioManager if not already initialized
+        if (!this.flyingText) {
+            this.flyingText = new FlyingText(scene);
+        }
+        return this.flyingText;
+    }
+
+
     initializeAudio(scene) {
         // Initialize AudioManager if not already initialized
         if (!this.audioManager) {
@@ -54,6 +65,7 @@ export default class GameStateManager {
         }
         return this.audioManager;
     }
+
 
     getFinalScore() {
 
@@ -264,6 +276,15 @@ export default class GameStateManager {
     }
 
 
+    ///Flying text
+
+    createFlyingText(x, y, text, style) {
+        if (this.flyingText) {
+            this.flyingText.create(x, y, text, style);
+        } else {
+            console.warn('FlyingText not initialized');
+        }
+    }
 
     /// Sounds
 

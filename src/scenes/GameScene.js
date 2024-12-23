@@ -93,6 +93,8 @@ export default class GameScene extends Phaser.Scene {
         this.playPauseButton.createButtons();
         this.characterManager.setCharacterControlsKeyInputs();
 
+        this.gameStateManager.initializeFlyingText(this)
+
         // Start game systems
         this.gameStateManager.startGame();
 

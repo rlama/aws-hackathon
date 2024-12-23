@@ -348,14 +348,13 @@ class ExtraManager {
             const warr = ["conquered", "secured", "captured", "claimed", "won", "acquired"]
             const flyingWords = Phaser.Math.RND.pick(warr);
 
-            this.flyingText = new FlyingText(this.scene);
 
             const randomX = Phaser.Math.Between(character.x - 130, character.x - 180);
             const randomY = Phaser.Math.Between(300, 500);
             const randomH = Phaser.Math.Between(1800, 2500);
             const randomD = Phaser.Math.Between(50, 80);
 
-            this.flyingText.create(randomX, randomY, `${currentState.abbr} ${flyingWords}`, {
+            this.gameStateManager.createFlyingText(randomX, randomY, `${currentState.abbr} ${flyingWords}`, {
                 color: cssColor(MAP_CONFIG.CHAD_COLOR),
                 fontSize: '20px',
                 duration: 1500,
@@ -396,8 +395,8 @@ class ExtraManager {
             const randomH = Phaser.Math.Between(1800, 2500);
             const randomD = Phaser.Math.Between(50, 80);
 
-            this.flyingText = new FlyingText(this.scene);
-            this.flyingText.create(randomX, randomY, `You ${flyingWords} ${currentState.abbr}`, {
+
+            this.gameStateManager.createFlyingText(randomX, randomY, `You ${flyingWords} ${currentState.abbr}`, {
                 color: cssColor(MAP_CONFIG.BARRY_COLOR),
                 fontSize: '20px',
                 duration: 1500,
