@@ -209,8 +209,8 @@ export const DUMMY_SCORE = {
 
 
 export const DEFAULT_INITIAL_SCORE = {
-    chad: 120,
-    barry: 250
+    chad: 0,
+    barry: 0
 }
 
 

@@ -8,6 +8,8 @@ update how to play with emojis
 
 auto pause and let player see where they are at
 
+mobile if possible
+
 
 //https://pixabay.com/music/search/retro%20game/
 
@@ -34,6 +36,7 @@ Error occured see chrome
 ------------------------
 Notes for blog for Amazon Q
 
+//https://pixabay.com/music/search/retro%20game/
 
 More onion to fall png.  Gave me a different insight of using weights
 
