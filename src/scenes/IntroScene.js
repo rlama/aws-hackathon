@@ -7,8 +7,9 @@
 
 import { PRIMARY_TEXT_COLOR, SEC_TEXT_COLOR, FONT_FAMILY } from "../config/gameConfig";
 import StandardButton from "../objects/StandardButton";
-import { addBackground } from "../utils/helpers";
+import { addBackground, getFingerprint } from "../utils/helpers";
 import GameStateManager from '../components/GameStateManager';
+import { checkNameAlreadyExists } from "../api/api";
 
 
 
@@ -17,6 +18,7 @@ export default class IntroScene extends Phaser.Scene {
         super({ key: 'IntroScene' });
         this.gameStateManager = GameStateManager.getInstance();
         this.playerName="";
+        this.labelbtn=null;
     }
 
     create() {
@@ -30,33 +32,62 @@ export default class IntroScene extends Phaser.Scene {
             loop: true,
         })
 
-
           // Add character names
-          this.add.text(width/2, height * 0.25, 'Hungry', {
-            fontSize: '42px',
+          this.add.text(width/2, height * 0.25, 'AWS Game Builder Challenge', {
+            fontSize: '24px',
             fill: PRIMARY_TEXT_COLOR,
-            fontFamily: FONT_FAMILY
+            fontFamily: FONT_FAMILY,
+            stroke: '#ffffff',
+            strokeThickness: 1
         }).setOrigin(0.5);
 
         this.add.text(width/2, height * 0.37, 'CHAD & BARRY', {
             fontSize: '80px',
             fill: PRIMARY_TEXT_COLOR,
-            fontFamily: FONT_FAMILY
+            fontFamily: FONT_FAMILY,
+            stroke: '#000000',
+            strokeThickness: 2
         }).setOrigin(0.5);
 
         // Add info button
         this.goButton = new StandardButton(this, width/2, height * 0.7, 'Start', {
-            onClick: () => {
+            onClick: async () => {
+                try {
+                    // Add uid
+                    const uid = await getFingerprint();
+                    this.gameStateManager.uid = uid;
 
-                // Debug FinishScene
-                // this.scene.start('FinishScene', {});
-                
-                this.scene.start('StartScene', {
-                    parentScene: this,
-                    playerName: this.playerName
-                });
+                    // Update button text
+                    this.goButton.setText('Checking...');
+        
+                    // Check if name exists
+                    const exists = await checkNameAlreadyExists(this.playerName, uid);
+                    
+                    if (exists) {
+                        this.labelbtn.setText('Name already taken. Choose another name.');
+                        this.goButton.setText('Start');
+                        return;
+                    }
+        
+                    // Debug FinishScene
+                    // this.scene.start('FinishScene', {});
+        
+                    // Start game if name is available
+                    this.scene.start('StartScene', {
+                        parentScene: this,
+                        playerName: this.playerName
+                    });
+        
+                } catch (error) {
+                    // If any error occurs, start the game anyway
+                    this.scene.start('StartScene', {
+                        parentScene: this,
+                        playerName: this.playerName
+                    });
+                }
             },
-            visible: false
+            visible: false,
+            width: 200
         });
 
         this.addInputField(width, height)
@@ -136,12 +167,13 @@ export default class IntroScene extends Phaser.Scene {
         });
 
 
-        const labelbtm = this.add.text(width/2 - 75, height * 0.62, 'Max 10 Characters', {
+        this.labelbtn = this.add.text(width/2, height * 0.63, 'Max 10 Characters', {
             fontSize: '14px',
             color: 'orange',
             fontFamily: FONT_FAMILY,
             fontWeight: 'bold'
         });
+        this.labelbtn.setOrigin(0.5);
     }
 
 

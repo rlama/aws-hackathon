@@ -5,6 +5,7 @@
  * Version:         1.0.0
  */
 import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE } from "../config/gameConfig";
+import { capitalizeWords } from "../utils/helpers";
 import AudioManager from "./AudioManager";
 import FlyingText from "./FlyingText";
 
@@ -33,8 +34,10 @@ export default class GameStateManager {
         this._wonStates = [];
         this.setupInitialState();
         this._audioManager = null;
-        this._mute = true;
+        this._musicOn = true;
+        this._soundOn = true;
         this._flyingText = null;
+        this._uid = null;
 
     }
 
@@ -69,23 +72,20 @@ export default class GameStateManager {
 
     getFinalScore() {
 
-        const chadSc = this.getScore('chad');
         const selectedCharacter = this._selectedCharacter;
 
-        const opponent = this.getScore([selectedCharacter]) === "chad" ? "barry" : "chad";
+        const opponent = selectedCharacter === "chad" ? "barry" : "chad";
 
         const wonStates = this._wonStates.filter(item => item.character === selectedCharacter).length;
 
         const finalScores = {
-            score: {
-                chad: this._scores.chad,
-                barry: this._scores.barry,
-            },
+            score:  this._scores[selectedCharacter],
             opponent: this._scores[opponent],
-            statesWon: this._wonStates.length,
-            playerName: this._playerName,
+            statesWon: wonStates,
+            playerName: capitalizeWords(this._playerName),
             selectedCharacter: selectedCharacter,
-            level: this._difficultyLevel
+            level: this._difficultyLevel,
+            uid:this._uid
         };
         return finalScores;
     }
@@ -130,8 +130,14 @@ export default class GameStateManager {
     set winner(value) { this._winner = value; }
     get winner() { return this._winner; }
 
-    set mute(value) { this._mute = value; }
-    get mute() { return this._mute; }
+    set musicOn(value) { this._musicOn = value; }
+    get musicOn() { return this._musicOn; }
+
+    set soundOn(value) { this._soundOn = value; }
+    get soundOn() { return this._soundOn; }
+
+    set uid(value) { this._uid = value; }
+    get uid() { return this._uid; }
 
 
     set playerName(value) { this._playerName = value; }
@@ -291,8 +297,16 @@ export default class GameStateManager {
     playSound(key, config = {}) {
         if (this.audioManager) {
             if (!this._isGamePaused) {
-                this.audioManager.play(key, config);
+                if (key === 'background' && this._musicOn) {
+                    console.log(key, "  ", this._musicOn)
+                    this.audioManager.play(key, config);
+                } else {
+                    if (this._soundOn) {
+                        this.audioManager.play(key, config);
+                    }
+                }
             }
+
         } else {
             console.warn('AudioManager not initialized');
         }
@@ -319,7 +333,14 @@ export default class GameStateManager {
 
     resumeSound(key) {
         if (this.audioManager) {
-            this.audioManager.resume(key);
+            if (key === 'background' && this._musicOn) {
+                this.audioManager.resume(key);
+            } else if (key !== 'background' && this._soundOn) {
+                this.audioManager.resume(key);
+            }
+            else {
+                this.audioManager.pause(key);
+            }
         }
     }
 

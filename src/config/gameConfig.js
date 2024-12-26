@@ -40,8 +40,12 @@ export const MAP_CONFIG = {
         fillAlpha: 1
     },
     CHAD_COLOR: 0xaf0808,
-    BARRY_COLOR: 0x0878af
+    BARRY_COLOR: 0x0878af,
+    CHAD_STROKE_COLOR: 0xffffff,
+    BARRY_STROKE_COLOR: 0xffffff,
 }
+
+export const SHOW_SPRITE_DEBUG = false;
 
 
 export const STATES_SEATS = [
@@ -107,7 +111,6 @@ export const EMOJI_TYPES = [
     { emoji: '🍪', points: 3, type: 'Cookie', weight: 3 },
     { emoji: '🧅', points: 0, type: 'Onion', weight: 5 }  // Increased weight for onions
 ];
-
 
 
 export const ALL_STATES = [

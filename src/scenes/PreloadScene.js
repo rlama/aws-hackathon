@@ -61,24 +61,6 @@ export default class PreloadScene extends Phaser.Scene {
             'assets/sprites/chad_barry_atlas.json'
         );
 
-        // this.load.atlas(
-        //     'extras',
-        //     'assets/sprites/extras_atlas.png',
-        //     'assets/sprites/extras_atlas.json'
-        // );
-
-        // Load buttons
-        this.load.image('pause-button', 'assets/images/pause-btn.png', {
-            pixelArt: false,
-            antialiasing: true,
-            smoothing: true
-        });
-        this.load.image('play-button', 'assets/images/play-btn.png', {
-            pixelArt: false,
-            antialiasing: true,
-            smoothing: true
-        });
-
         // Setup loading events
         this.load.on('loaderror', (fileObj) => {
             console.error('Error loading asset:', fileObj.src);

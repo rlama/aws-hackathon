@@ -15,7 +15,7 @@ export default class CollisionManager {
         this.scoreManager = scoreManager;
     }
 
-    
+
     setupCollisions(extra, characters) {
         this.scene.physics.add.overlap(
             extra,
@@ -28,7 +28,7 @@ export default class CollisionManager {
         // Destroy when out of bounds
         extra.checkWorldBounds = true;
         extra.body.onWorldBounds = true;
-        
+
         this.scene.physics.world.on('worldbounds', (body) => {
             if (body.gameObject === extra) {
                 extra.destroy();
@@ -41,27 +41,28 @@ export default class CollisionManager {
 
             const currentStateTotal = this.scene.extraManager.getTotalStateExtras()
             const currentState = this.scene.extraManager.getCurrentState();
-            const statesCurrentData = {currentStateTotal, currentState}
- 
+            const statesCurrentData = { currentStateTotal, currentState }
+
             const points = this.scoreManager.calculatePoints(extra.type);
             const extraType = extra.getData('type');
 
 
             const { chad, barry } = this.characterManager.getCharacters();
             const characterType = character === chad ? 'chad' : 'barry';
-            if(characterType !== this.gameStateManager.selectedCharacter) {
-                this.gameStateManager.playSound('eatingopp',{volume:0.5});
+
+            if (characterType !== this.gameStateManager.selectedCharacter) {
+                this.gameStateManager.playSound('eatingopp', { volume: 0.5 });
             }
 
-            if(extraType !== 'Onion' && characterType === this.gameStateManager.selectedCharacter) {
-                this.gameStateManager.playSound('eating',{volume:0.3});
+            if (extraType !== 'Onion' && characterType === this.gameStateManager.selectedCharacter) {
+                this.gameStateManager.playSound('eating', { volume: 0.3 });
                 // this.gameStateManager.playSound('pluspoints');
             }
 
             this.handleCharacterAnimationOnCollision(character, extraType);
 
             // Handle collision for state
-            this.scene.extraManager.handleCollisionForState(character, extra, );
+            this.scene.extraManager.handleCollisionForState(character, extra,);
 
             this.scoreManager.updateScore(character, extraType, currentState);
 
@@ -110,7 +111,7 @@ export default class CollisionManager {
 
         // Set stuck state using CharacterManager
         this.characterManager.setStuckState(isChad ? 'chad' : 'barry', true);
-        
+
         // Remove only animation complete listeners
         characterObj.removeListener('animationcomplete');
 
@@ -118,11 +119,13 @@ export default class CollisionManager {
         characterObj.play(notHappyAnim);
 
         const characterType = character === chad ? 'chad' : 'barry';
-        if(characterType !== this.gameStateManager.selectedCharacter) {
-            this.gameStateManager.playSound('onionopp',{volume:1});
-        }else{
-            this.gameStateManager.playSound('Onion')
+
+        if (characterType !== this.gameStateManager.selectedCharacter) {
+            this.gameStateManager.playSound('onionopp', { volume: 1 });
+        } else {
+            this.gameStateManager.playSound('onion')
         }
+
 
 
 
@@ -130,12 +133,12 @@ export default class CollisionManager {
 
         const reseTimeForOpponent = DEFAULT_DIFFICULTY_SETTINGS[this.gameStateManager.difficultyLevel].resetToIdleTimeForOpponent;
 
-        const resetTime = this.gameStateManager.selectedCharacter === characterType ? RESET_TO_IDLE_TIME : reseTimeForOpponent; 
+        const resetTime = this.gameStateManager.selectedCharacter === characterType ? RESET_TO_IDLE_TIME : reseTimeForOpponent;
 
         this.scene.time.delayedCall(resetTime, () => {
             this.characterManager.setStuckState(isChad ? 'chad' : 'barry', false);
-            if(characterObj) characterObj.play(idleAnim);
+            if (characterObj) characterObj.play(idleAnim);
         }, null, this);
-        
+
     }
 }

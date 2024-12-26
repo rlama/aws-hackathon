@@ -1,5 +1,6 @@
 import { AWS_API_GATEWAY_ENDPOINT } from "../config/gameConfig";
 
+// Fetches the current Leaderboard 
 export const fetchLeaderboard = async (level) => {
     try {
         const options = {
@@ -17,10 +18,42 @@ export const fetchLeaderboard = async (level) => {
             },
             body: JSON.stringify(options)
         })
-        const res = await response.json();
-        const scores = res.data;
 
-        return scores;
+        if(response.status !== 200) {
+            throw new Error("@ server, getting leaderboard. Check back in few minutes.");
+        }
+        const res = await response.json();
+        return res.data;
+
+    } catch (error) {
+        console.error('Error fetching scores:', error);
+        throw new Error("@ server, getting leaderboard. Check back in few minutes.");
+
+    }
+}
+
+
+// Checks if name already exists
+export const checkNameAlreadyExists = async (name, uid) => {
+    try {
+        const options = {
+            data: {
+                name,
+                uid
+            },
+            type: 'check'
+        }
+
+        // Call Lambda function through API Gateway
+        const response = await fetch(AWS_API_GATEWAY_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(options)
+        })
+        const res = await response.json();
+        return res.data;
 
     } catch (error) {
         console.error('Error fetching scores:', error);
@@ -30,7 +63,7 @@ export const fetchLeaderboard = async (level) => {
 }
 
 
-
+// Save the player's score to Leaderboard
 export const saveToLeaderboard = async(_score) => {
 
     try {

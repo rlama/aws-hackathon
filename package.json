@@ -13,6 +13,7 @@
     "vite-plugin-static-copy": "^2.1.0"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.5.1",
     "phaser": "^3.87.0"
   }
 }

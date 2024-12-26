@@ -18,6 +18,8 @@ export default class CharacterManager {
         this.selectedCharacter = this.gameStateManager.selectedCharacter || "";
         this.isStartScene = this.scene.scene.key === 'StartScene';
         this.lastUpdateTime = 0;
+
+        this.startSceneScale = 0.8
     }
 
 
@@ -36,12 +38,12 @@ export default class CharacterManager {
                 chad: {
                     x: width * (isMobile ? 0.25 : 0.3),
                     y: height * (isMobile ? 0.77 : 0.5),
-                    scale: 0.8
+                    scale: this.startSceneScale
                 },
                 barry: {
                     x: width * (isMobile ? 0.75 : 0.7),
                     y: height * (isMobile ? 0.77 : 0.5),
-                    scale: 0.8
+                    scale: this.startSceneScale
                 }
             },
             gameScene: {
@@ -154,7 +156,7 @@ export default class CharacterManager {
         circle
             .on('pointerover', () => {
                 this.scene.tweens.add({
-                    targets: [circle, this.characters[charKey]],
+                    targets: [this.characters[charKey]],
                     scaleX: 1.1,
                     scaleY: 1.1,
                     duration: 200,
@@ -163,9 +165,9 @@ export default class CharacterManager {
             })
             .on('pointerout', () => {
                 this.scene.tweens.add({
-                    targets: [circle, this.characters[charKey]],
-                    scaleX: 1,
-                    scaleY: 1,
+                    targets: [this.characters[charKey]],
+                    scaleX: this.startSceneScale,
+                    scaleY: this.startSceneScale,
                     duration: 200,
                     ease: 'Power2'
                 });
@@ -304,7 +306,7 @@ export default class CharacterManager {
                 end: 34
             }),
             frameRate: 30,
-            repeat: -1
+            repeat: 12
         });
 
 
@@ -341,7 +343,7 @@ export default class CharacterManager {
                 end: 34
             }),
             frameRate: 30,
-            repeat: 4
+            repeat: 12
         });
 
 
@@ -375,7 +377,7 @@ export default class CharacterManager {
                 end: 74
             }),
             frameRate: 30,
-            repeat: -1
+            repeat: 6
         });
 
         this.scene.anims.create({
@@ -409,7 +411,7 @@ export default class CharacterManager {
                 end: 74
             }),
             frameRate: 30,
-            repeat: 4
+            repeat: 12
         });
 
         // this.characters.chad.play("chad_idle")

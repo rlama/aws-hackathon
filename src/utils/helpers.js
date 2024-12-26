@@ -4,6 +4,17 @@
  * Version:         1.0.0
  */
 
+import FingerprintJS from '@fingerprintjs/fingerprintjs'; 
+
+// Unique ID based on device fingerprint
+export const getFingerprint = async () => {
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    const base64Fingerprint = btoa(result.visitorId ).slice(0, 12);
+    return base64Fingerprint ; 
+}
+
+
 
 export function createCloseButton(scene, parentScene) {
     const closeButton = scene.add.text(

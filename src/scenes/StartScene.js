@@ -5,7 +5,7 @@
  */
 
 
-import { PRIMARY_TEXT_COLOR, FONT_FAMILY } from "../config/gameConfig";
+import { PRIMARY_TEXT_COLOR, FONT_FAMILY, SHOW_SPRITE_DEBUG} from "../config/gameConfig";
 import CharacterManager from "../components/CharacterManager";
 import StandardButton from "../objects/StandardButton";
 import DifficultyLevelCheckbox from "../objects/DifficultyLevelCheckbox";
@@ -30,7 +30,9 @@ export default class StartScene extends Phaser.Scene {
         this.add.text(width / 2, height * 0.24, 'Select Your Candidate', {
             fontSize: '38px',
             fill: PRIMARY_TEXT_COLOR,
-            fontFamily: FONT_FAMILY
+            fontFamily: FONT_FAMILY,
+            // stroke: '#ffffff',
+            // strokeThickness: 3
         }).setOrigin(0.5);
 
         // Create character containers with correct frames
@@ -62,20 +64,28 @@ export default class StartScene extends Phaser.Scene {
         });
 
         // Create difficulty checkbox
-        this.difficultyCheckbox = new DifficultyLevelCheckbox();
+        const difficulties = [
+            { key: 'beginner', text: 'Beginner', x: width * 0.16 },
+            { key: 'intermediate', text: 'Intermediate', x: width * 0.4 },
+            { key: 'expert', text: 'Expert', x: width * 0.7 }
+        ];
+
+        this.difficultyCheckbox = new DifficultyLevelCheckbox(difficulties);
         this.difficultyCheckbox.create(width, height, this);
 
 
          // Add debug button
-         const debugButton = new StandardButton(this, 140, 30, 'Open Atlas Debugger', {
-            onClick: () => {
-                this.scene.start('DebugAtlasScene', {
-                    atlasKeys: ['characters', 'extras'],
-                    parentScene: this
-                });
-                this.scene.pause();
-            }
-        });
+         if(SHOW_SPRITE_DEBUG){
+            const debugButton = new StandardButton(this, 140, 30, 'Open Atlas Debugger', {
+                onClick: () => {
+                    this.scene.start('DebugAtlasScene', {
+                        atlasKeys: ['characters', 'extras'],
+                        parentScene: this
+                    });
+                    this.scene.pause();
+                }
+            });
+        }
     }
 
 }

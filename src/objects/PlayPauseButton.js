@@ -13,67 +13,49 @@ export default class PlayPauseButton {
         // this.buttonScale = 0.15;
         this.isPlaying = true;
 
-        this.ypos = 40;
+        this.ypos = 20;
     }
 
-
-
-    createButtons() {
+    createButtons(){
         const gameWidth = this.scene.cameras.main.width;
 
-        // Create button with explicit texture reference
-        this.activeButton = this.scene.add.sprite(
-            gameWidth / 2,
-            this.ypos,
-            'pause-button'
-        );
-
-        // Store actual texture objects
-        this.textureKeys = {
-            play: this.scene.textures.get('play-button'),
-            pause: this.scene.textures.get('pause-button')
+        const config = {
+            fontSize: '50px',
+            fontFamily: 'Arial, "Segoe UI Emoji", sans-serif',
+            resolution: 2,
+            fill: '#2693d6',
+            stroke: '#000000',
+            strokeThickness: 2
         };
+        this.activeButton = this.scene.add.text(gameWidth / 2, this.ypos, '⚙', config)
+        .setInteractive({ useHandCursor: true })
+        .setOrigin(0.5)
+        .setDepth(20);
 
-        this.activeButton.setScale(40 / 256);
-        this.activeButton.setDepth(27);
-
-        const overlay = this.addBtnOverlay();
-
-        return { active: this.activeButton };
-    }
-
-
-
-    addBtnOverlay() {
-        const gameWidth = this.scene.cameras.main.width;
-        const circleRadius = 30;
-
-        // Create circular background
-        const circle = this.scene.add.circle(
-            gameWidth / 2,
-            this.ypos,
-            circleRadius,
-            0xffffff,
-            0.3
-        );
-
-        // Make interactive
-        circle.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Circle(circleRadius, circleRadius, circleRadius),
-            hitAreaCallback: Phaser.Geom.Circle.Contains
-        });
-
-        // Click handler for toggling play/pause
-        circle.on('pointerdown', (pointer, localX, localY, event) => {
+         // Click handler for toggling play/pause
+        this.activeButton.on('pointerdown', (pointer, localX, localY, event) => {
             event.stopPropagation();
             this.togglePlayPauseState();
         });
 
-        circle.setDepth(25);
-        return circle;
-    }
+        this.activeButton.on('pointerover', () => {
+            this.activeButton.setScale(1.1);
+        });
+        this.activeButton.on('pointerout', () => {
+            this.activeButton.setScale(1);
+        });
+     
 
+        // action for spacebar
+        this.spaceBar = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.spaceBar.on('down', () => {
+            this.togglePlayPauseState();
+        });
+
+        
+
+        return { active: this.activeButton };
+    }
 
     addOverlayScene() {
         // Create a new scene for the overlay that stays active
@@ -90,15 +72,16 @@ export default class PlayPauseButton {
 
     togglePlayPauseState() {
         this.isPaused = !this.isPaused;
-        const textureKey = !this.isPaused ? 'pause-button' : 'play-button';
-        this.activeButton.setTexture(textureKey);
+        const textureKey = !this.isPaused ? '⚙' : '⚙';
+        this.activeButton.setText(textureKey);
+        // this.activeButton.setTexture(textureKey);
 
         if (this.isPaused) {
             this.scene.pauseGame();
             this.addOverlayScene();
 
         } else {
-            this.gameStateManager.resumeAllSounds()
+            // this.gameStateManager.resumeSound("background")
             this.scene.resumeGame();
             this.scene.scene.stop('OverlayScene');
         }

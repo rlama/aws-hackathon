@@ -7,6 +7,7 @@
 
 import { FONT_FAMILY } from "../config/gameConfig";
 import StandardButton from "../objects/StandardButton";
+import MusicButton from "../objects/MusicButton";
 // Create a separate scene for handling inputs
 export default class OverlayScene extends Phaser.Scene {
     constructor() {
@@ -20,6 +21,8 @@ export default class OverlayScene extends Phaser.Scene {
     create() {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
+
+        const btnWidth =  300;
 
         // Create semi-transparent background
         const overlay = this.add.rectangle(
@@ -35,17 +38,40 @@ export default class OverlayScene extends Phaser.Scene {
 
         // Create resume button
 
-        let ypos = this.cameras.main.centerY - 50
-        const xpos = this.cameras.main.centerX
-        const resumeButton = new StandardButton(this, xpos, ypos, 'Resume', {
+        let ypos = this.cameras.main.centerY - 100
+        let xpos = this.cameras.main.centerX;
+        const resumeButton = new StandardButton( this, xpos, ypos, 'Resume', {
             backgroundColor: 0x444444,
             onClick: () => {
                 this.playPauseButton.togglePlayPauseState();
             },
-            zIndex: 10
+            zIndex: 10,
+            width:btnWidth
         });
 
-        ypos += 50
+        ypos += 50;
+        // Create music button
+        this.musicButton = new MusicButton(this, xpos, ypos, {
+            fontSize: '40px',
+            backgroundColor: '#444444',
+            padding: { x: 15, y: 15 },
+            zIndex: 10,
+            buttonTxtPrefix: 'Music',
+            width:btnWidth
+        });
+
+        // Create music button
+        ypos += 50;
+        this.soundButton = new MusicButton(this, xpos, ypos, {
+            fontSize: '40px',
+            backgroundColor: '#444444',
+            padding: { x: 15, y: 15 },
+            zIndex: 10,
+            buttonTxtPrefix: 'Sound FX',
+            width:btnWidth
+        });
+        
+        ypos += 50;
         const gameInfoButton = new StandardButton(this, xpos, ypos, 'Game info & rules', {
             backgroundColor: 0x444444,
             onClick: () => {
@@ -56,7 +82,8 @@ export default class OverlayScene extends Phaser.Scene {
                 });
                 this.scene.stop();
             },
-            zIndex: 10
+            zIndex: 10,
+            width:btnWidth
             
         });
 

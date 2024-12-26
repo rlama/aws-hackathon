@@ -6,7 +6,7 @@
 
 
 import { addBackground, createCloseButton, capitalizeWords } from "../utils/helpers";
-import { FONT_FAMILY, DUMMY_LEADERBOARD_SCORE, AWS_API_GATEWAY_ENDPOINT } from "../config/gameConfig";
+import { FONT_FAMILY } from "../config/gameConfig";
 import { fetchLeaderboard } from "../api/api";
 import GameStateManager from "../components/GameStateManager";
 
@@ -73,17 +73,25 @@ export default class LeaderboardScene extends Phaser.Scene {
         try {
             const scores = await fetchLeaderboard(this.gameStateManager.difficultyLevel);
 
+            console.log(scores)
+
             // Display scores
             scores.forEach((score, index) => {
                 this.createScoreRow(score, index);
             });
 
             createCloseButton(this, this.parentScene);
+
         } catch (error) {
-            this.add.text(width / 2 - 200, 200, 'Error loading leaderboard score', {
-                fontSize: '20px',
-                color: '#ff0000'
-            });
+
+            this.add.text(width / 2, 200, error, {
+                fontSize: '15px',
+                color: '#ff8735'
+            }).setOrigin(0.5, 0.5);
+
+            this.loadingText.setVisible(false)
+            createCloseButton(this, this.parentScene);
+
         }
 
     }

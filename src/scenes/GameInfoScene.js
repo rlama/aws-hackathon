@@ -69,10 +69,11 @@ export default class GameInfoScene extends Phaser.Scene {
             { type: 'h', text: "- Pick Your Candidate:" },
             { type: 'p', text: "Choose between Chad or Barry before the game begins. \n The  unselected character will auto-play as your rival." },
             { type: 'h', text: "- Catch the Votes: " },
-            { type: 'p', text: "Tap or click to open your character's mouth and collect falling items to score points." },
+            { type: 'p', text: "Click mouse or press 'm' key to open your character's mouth and collect falling items to score points. Press 'Spacebar' key or the 'Gear ⚙' icon to pause game and see the game settings." },
             { type: 'h', text: "- Avoid Onions 🧅:" },
-            { type: 'p', text: "Onions are trouble! Eating one will disable your character for 2 seconds." },
-
+            { type: 'p', text: "Onions are trouble! Eating one will disable your character for 3.5 seconds." },
+            { type: 'h', text: "- Difficulty Levels" },
+            { type: 'p', text: "There are 3 difficulty levels, Beginner, Intermeidate and Expert. In intermeidate and expert levels the opponent or robot gets smarter and takes less time to wake up after the onion trap." },
             { type: 'h', text: "- Win the States 🗺️" },
             { type: 'p', text: "Earn enough points to light up U.S. states on the map." },
             { type: 'p', extraRow: true, text: "The first to reach 270 points wins the game!" },
@@ -93,7 +94,7 @@ export default class GameInfoScene extends Phaser.Scene {
                 this.yPosition,
                 instruction.text,
                 {
-                    fontSize: instruction.type === 'h' ? '30px' : '18px',
+                    fontSize: instruction.type === 'h' ? '30px' : '20px',
                     fill: '#ffffff',
                     align: 'left',
                     stroke: '#000000',

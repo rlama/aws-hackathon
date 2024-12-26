@@ -2,20 +2,26 @@
 // TO DO 
 
 
+check name and unique computer id already exists (so that the same player can try again and update the score)
+
+Add states count while playing
+
+Fix the overlapping scores and state names
+
+
+
 clean up extramanager variables.
 
-update how to play with emojis
+clean up leaderboaard json (make it 10 ) before live
 
 auto pause and let player see where they are at
+
+turn off sound
 
 mobile if possible
 
 
 //https://pixabay.com/music/search/retro%20game/
-
-Error occured see chrome
-
-// in lambda filter out oppent with 270 
 
 // check and clean lambda to save and get scores
 
@@ -48,3 +54,6 @@ creating and extrating spritsheet
 Struggle with smoothing , Q suggested pooling and other tweaks
 
 memory management
+
+
+add s3 lambda , cloudfront, api gateway

@@ -7,6 +7,7 @@
 
 import { FONT_FAMILY } from "../config/gameConfig";
 
+
 export default class StandardButton extends Phaser.GameObjects.Container {
     constructor(scene, x, y, text, config = {}) {
         super(scene, x, y);
@@ -39,6 +40,10 @@ export default class StandardButton extends Phaser.GameObjects.Container {
 
     }
 
+    setText(msg){
+        this.text.setText(msg)
+    }
+
     createButton(message) {
         // Create text
         this.text = this.scene.add.text(0, 0, message, {
@@ -49,7 +54,7 @@ export default class StandardButton extends Phaser.GameObjects.Container {
         }).setOrigin(0.5);
 
         // Calculate dimensions
-        const width = this.text.width + (this.config.padding * 2) ;
+        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
         const height = this.text.height + (this.config.padding * 2);
 
         // Create background
@@ -122,14 +127,14 @@ export default class StandardButton extends Phaser.GameObjects.Container {
     }
 
     onPointerOver() {
-        const width = this.text.width + (this.config.padding * 2);
+        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
         const height = this.text.height + (this.config.padding * 2);
         this.drawBackground(width, height, true);
         this.scene.game.canvas.style.cursor = 'pointer';
     }
 
     onPointerOut() {
-        const width = this.text.width + (this.config.padding * 2);
+        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
         const height = this.text.height + (this.config.padding * 2);
         this.drawBackground(width, height, false);
         this.scene.game.canvas.style.cursor = 'default';

@@ -5,7 +5,7 @@
  */
 
 import GameStateManager from "./GameStateManager";
-import {EXTRA_TYPE_CHANGE_INTERVAL_TIME, STATES_DETAIL, MAP_CONFIG, EMOJI_TYPES } from "../config/gameConfig";
+import { EXTRA_TYPE_CHANGE_INTERVAL_TIME, STATES_DETAIL, MAP_CONFIG, EMOJI_TYPES } from "../config/gameConfig";
 import { cssColor } from "../utils/helpers";
 import FlyingText from "./FlyingText";
 import { saveToLeaderboard } from "../api/api";
@@ -190,7 +190,7 @@ class ExtraManager {
 
             if (Math.random() < 0.5) {
                 this.switchExtrasRandom()
-            }else{
+            } else {
                 this.switchExtrasToOnion()
             }
         }
@@ -202,24 +202,24 @@ class ExtraManager {
             const currentTime = Date.now();
             const typeChangeTimer = extra.getData('typeChangeTimer');
             const SWITCH_DELAY = 1300; // 500ms delay between switches
-            
+
             if (currentTime - typeChangeTimer >= SWITCH_DELAY) {
                 // Get random type excluding current type
                 const currentType = extra.getData('emojiData').type;
                 const availableTypes = EMOJI_TYPES.filter(type => type.type !== currentType);
                 const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-                
+
                 // Switch to new random type
                 extra.setText(randomType.emoji);
                 extra.setData('emojiData', randomType);
                 extra.setData('type', randomType.type);
-                
+
                 // Update the timer
                 extra.setData('typeChangeTimer', currentTime);
             }
         });
     }
-    
+
 
 
     switchExtrasToOnion() {
@@ -228,16 +228,16 @@ class ExtraManager {
             const typeChangeTimer = extra.getData('typeChangeTimer');
             const SWITCH_DELAY = 1000; // 500ms delay between switches
             const emojiData = extra.getData('emojiData');
-            
+
             if (currentTime - typeChangeTimer >= SWITCH_DELAY) {
                 // Find onion type from EMOJI_TYPES
                 const onionType = EMOJI_TYPES.find(type => type.type === 'Onion');
-                
+
                 // If current type is onion, switch back to original type
                 if (emojiData.type === 'Onion') {
                     const originalType = extra.getData('originalType');
                     const originalEmoji = EMOJI_TYPES.find(type => type.type === originalType);
-                    
+
                     extra.setText(originalEmoji.emoji);
                     extra.setData('emojiData', originalEmoji);
                     extra.setData('type', originalEmoji.type);
@@ -247,7 +247,7 @@ class ExtraManager {
                     extra.setData('emojiData', onionType);
                     extra.setData('type', onionType.type);
                 }
-                
+
                 extra.setData('typeChangeTimer', currentTime);
             }
         });
@@ -339,11 +339,15 @@ class ExtraManager {
                 state: currentState.name,
                 seats: requiredSeats
             })
-            if (this.gameStateManager.selectedCharacter === 'chad') {
+            const isPlayer = this.gameStateManager.selectedCharacter === 'chad';
+
+
+            if (isPlayer) {
                 this.gameStateManager.playSound('statewin')
             } else {
                 this.gameStateManager.playSound('statewinopp', { volume: 0.2 })
             }
+
 
             const warr = ["conquered", "secured", "captured", "claimed", "won", "acquired"]
             const flyingWords = Phaser.Math.RND.pick(warr);
@@ -354,7 +358,11 @@ class ExtraManager {
             const randomH = Phaser.Math.Between(1800, 2500);
             const randomD = Phaser.Math.Between(50, 80);
 
-            this.gameStateManager.createFlyingText(randomX, randomY, `${currentState.abbr} ${flyingWords}`, {
+            const playerText = currentState === 'DC' ? `Awesome its DC, You got extra points. ` : `You ${flyingWords} ${currentState.abbr}`;
+
+            const customTxt = isPlayer ? playerText : `${currentState.abbr} ${flyingWords}`;
+
+            this.gameStateManager.createFlyingText(randomX, randomY, customTxt, {
                 color: cssColor(MAP_CONFIG.CHAD_COLOR),
                 fontSize: '20px',
                 duration: 1500,
@@ -381,6 +389,8 @@ class ExtraManager {
                 seats: requiredSeats
             });
 
+            const isPlayer = this.gameStateManager.selectedCharacter === 'barry';
+
             if (this.gameStateManager.selectedCharacter === 'barry') {
                 this.gameStateManager.playSound('statewin')
             } else {
@@ -395,8 +405,12 @@ class ExtraManager {
             const randomH = Phaser.Math.Between(1800, 2500);
             const randomD = Phaser.Math.Between(50, 80);
 
+            const playerText = currentState === 'DC' ? `Awesome its DC, You got extra points. ` : `You ${flyingWords} ${currentState.abbr}`;
 
-            this.gameStateManager.createFlyingText(randomX, randomY, `You ${flyingWords} ${currentState.abbr}`, {
+            const customTxt = isPlayer ? playerText : `${currentState.abbr} ${flyingWords}`;
+
+
+            this.gameStateManager.createFlyingText(randomX, randomY, customTxt, {
                 color: cssColor(MAP_CONFIG.BARRY_COLOR),
                 fontSize: '20px',
                 duration: 1500,
@@ -472,7 +486,7 @@ class ExtraManager {
         this.scene.scene.pause();
 
         //Save score to leaderboard, only if player score is 270 or if player wins.
-        if (finalScores.score[this.gameStateManager.selectedCharacter] >= 270) {
+        if (finalScores.score >= 270) {
             saveToLeaderboard(finalScores)
         }
 

@@ -38,6 +38,8 @@ export default class GameScene extends Phaser.Scene {
 
 
     create() {
+        this.input.setDefaultCursor('crosshair');
+
 
         // Initialize memory monitor
         // this.memoryMonitor = new MemoryMonitor(this.game);
@@ -115,6 +117,7 @@ export default class GameScene extends Phaser.Scene {
 
     resumeGame() {
         this.scene.resume();
+        this.gameStateManager.resumeSound('background');
     }
 
     update(time, delta) {
