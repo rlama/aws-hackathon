@@ -1,0 +1,59 @@
+
+// TO DO 
+
+
+check name and unique computer id already exists (so that the same player can try again and update the score)
+
+Add states count while playing
+
+Fix the overlapping scores and state names
+
+
+
+clean up extramanager variables.
+
+clean up leaderboaard json (make it 10 ) before live
+
+auto pause and let player see where they are at
+
+turn off sound
+
+mobile if possible
+
+
+//https://pixabay.com/music/search/retro%20game/
+
+// check and clean lambda to save and get scores
+
+
+// Clean up amd move changing values to gameStateManager
+
+// add exciting phrases in the finish scene
+
+// add exciting words like 'yes you got Alabama "
+
+
+// add my signature to all files 
+
+
+
+
+
+------------------------
+Notes for blog for Amazon Q
+
+//https://pixabay.com/music/search/retro%20game/
+
+More onion to fall png.  Gave me a different insight of using weights
+
+swtiching extras was complicated but AQ solved that in a couple of seconds. Asking it to correct my extra manager file
+
+creating and extrating spritsheet 
+
+//the falling of sprites is still jumpy
+Struggle with smoothing , Q suggested pooling and other tweaks
+
+memory management
+
+
+add s3 lambda , cloudfront, api gateway

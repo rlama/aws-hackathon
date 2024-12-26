@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+		<meta name="googlebot" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aws Game Challenge Chad & Barry</title>
+    <style>
+      @font-face {
+          font-family: 'BarcadeBold';
+          src: url('assets/fonts/barcade/BarcadeNoBarBold-gzXq.otf') format('opentype');
+      }
+
+      /* @font-face {
+          font-family: 'Arcade';
+          src: url('assets/fonts/arcade/Arcade-e9qg.ttf') format('truetype');
+      } */
+
+      @font-face {
+          font-family: 'Lagome';
+          src: url('assets/fonts/lagom-vp/LagomvpFreeDemo-7OpVD.otf') format('opentype');
+      }
+
+      
+  
+      body::before {
+          content: '';
+          font-family: 'BarcadeBold';
+          opacity: 0;
+          pointer-events: none;
+          position: absolute;
+      }
+
+
+       body::after {
+          content: '';
+          font-family: 'Lagome';
+          opacity: 0;
+          pointer-events: none;
+          position: absolute;
+      } 
+  </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
