@@ -4,8 +4,9 @@
  * Last Updated:    December 22, 2024
  * Version:         1.0.0
  */
-import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE } from "../config/gameConfig";
+import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE, MUSIC_ON, SOUND_ON } from "../config/gameConfig";
 import { capitalizeWords } from "../utils/helpers";
+import StorageManager from "./StorageManager";
 import AudioManager from "./AudioManager";
 import FlyingText from "./FlyingText";
 
@@ -34,10 +35,18 @@ export default class GameStateManager {
         this._wonStates = [];
         this.setupInitialState();
         this._audioManager = null;
-        this._musicOn = true;
-        this._soundOn = true;
         this._flyingText = null;
         this._uid = null;
+
+        this._soundInitialized = false;
+
+        this._musicOn = MUSIC_ON;
+        this._soundOn = SOUND_ON;
+
+        this.loadAudioLsSettings();
+
+        // Store the instance
+        GameStateManager.instance = this;
 
     }
 
@@ -47,6 +56,14 @@ export default class GameStateManager {
             GameStateManager.instance = new GameStateManager();
         }
         return GameStateManager.instance;
+    }
+
+
+    loadAudioLsSettings() {
+        const musicOn = StorageManager.getProperty('musicon', true);
+        const soundOn = StorageManager.getProperty('soundon', true);
+        this._musicOn = musicOn;
+        this._soundOn = soundOn;
     }
 
 
@@ -71,21 +88,18 @@ export default class GameStateManager {
 
 
     getFinalScore() {
-
         const selectedCharacter = this._selectedCharacter;
-
         const opponent = selectedCharacter === "chad" ? "barry" : "chad";
-
         const wonStates = this._wonStates.filter(item => item.character === selectedCharacter).length;
 
         const finalScores = {
-            score:  this._scores[selectedCharacter],
+            score: this._scores[selectedCharacter],
             opponent: this._scores[opponent],
             statesWon: wonStates,
             playerName: capitalizeWords(this._playerName),
             selectedCharacter: selectedCharacter,
             level: this._difficultyLevel,
-            uid:this._uid
+            uid: this._uid
         };
         return finalScores;
     }
@@ -97,11 +111,8 @@ export default class GameStateManager {
     incrementScore(character, amount = 1) {
         if (character in this._scores) {
             this._scores[character] += amount;
-            if (this._scores[character] > 270) this._scores[character] = 270;
-            // console.log(`Score incremented for ${character}: ${this._scores[character]}`);
-            return this._scores[character];
+            if (this._scores[character] > 270) this._scores[character] = 270;            return this._scores[character];
         }
-        // console.warn(`Cannot increment score: Player ${character} not found`);
         return false;
     }
     // Get individual score
@@ -109,23 +120,24 @@ export default class GameStateManager {
         if (character in this._scores) {
             return this._scores[character];
         }
-        // console.warn(`Player ${character} not found in scores`);
         return 0;
     }
 
 
     get wonStates() { return this._wonStates; }
-    // Set individual score
     setWonStates(value) {
         this._wonStates.push(value);
     }
+
+    // This is to reverse sound radio buttons on start 
+    set soundInitialized(value) { this._soundInitialized = value; }
+    get soundInitialized() { return this._soundInitialized; }
 
     set audioManager(value) { this._audioManager = value; }
     get audioManager() { return this._audioManager; }
 
     set isGamePaused(value) { this._isGamePaused = value; }
     get isGamePaused() { return this._isGamePaused; }
-
 
     set winner(value) { this._winner = value; }
     get winner() { return this._winner; }
@@ -138,7 +150,6 @@ export default class GameStateManager {
 
     set uid(value) { this._uid = value; }
     get uid() { return this._uid; }
-
 
     set playerName(value) { this._playerName = value; }
     get playerName() { return this._playerName; }
@@ -189,7 +200,6 @@ export default class GameStateManager {
     increaseVelocity() {
         if (this._extraVelocity < this._maxVelocity) {
             this._extraVelocity += this._velocityIncrement;
-            // console.log('New velocity:', this._extraVelocity);
         }
     }
 
@@ -200,7 +210,6 @@ export default class GameStateManager {
 
     pauseGame() {
         this._isGamePaused = true;
-        // this._game.isGamePaused = true;
         this._scene.game.pause();
         this._scene.physics.pause();
         this._scene.anims.pauseAll();
@@ -211,7 +220,6 @@ export default class GameStateManager {
 
     resumeGame() {
         this._isGamePaused = false;
-        // this._game.isGamePaused = false;
         this._scene.game.resume();
         this._scene.physics.resume();
         this._scene.anims.resumeAll();
@@ -236,8 +244,6 @@ export default class GameStateManager {
                 callbackScope: this._scene,
                 loop: true
             });
-
-            // console.log('New spawn delay:', this._spawnDelay);
         }
     }
 
@@ -282,7 +288,7 @@ export default class GameStateManager {
     }
 
 
-    ///Flying text
+    ///  Flying text
 
     createFlyingText(x, y, text, style) {
         if (this.flyingText) {
@@ -292,7 +298,8 @@ export default class GameStateManager {
         }
     }
 
-    /// Sounds
+
+    /// Sound and Music
 
     playSound(key, config = {}) {
         if (this.audioManager) {
@@ -301,12 +308,11 @@ export default class GameStateManager {
                     console.log(key, "  ", this._musicOn)
                     this.audioManager.play(key, config);
                 } else {
-                    if (this._soundOn) {
+                    if (key !== 'background' && this._soundOn) {
                         this.audioManager.play(key, config);
                     }
                 }
             }
-
         } else {
             console.warn('AudioManager not initialized');
         }
@@ -334,15 +340,23 @@ export default class GameStateManager {
     resumeSound(key) {
         if (this.audioManager) {
             if (key === 'background' && this._musicOn) {
-                this.audioManager.resume(key);
+                // Check if background music is playing
+                if (!this.audioManager.isPlaying(key)) {
+                    this.audioManager.play(key, {
+                        volume: 0.1,
+                        loop: true,
+                    })
+                } else {
+                    this.audioManager.resume(key);
+                }
             } else if (key !== 'background' && this._soundOn) {
                 this.audioManager.resume(key);
-            }
-            else {
+            } else {
                 this.audioManager.pause(key);
             }
         }
     }
+
 
     pauseGameWithAudio() {
         this.isGamePaused = true;

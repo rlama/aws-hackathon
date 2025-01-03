@@ -5,9 +5,9 @@
  */
 
 
-import { EMOJI_TYPES, STATES_DETAIL, FONT_FAMILY, MAP_CONFIG, AWS_API_GATEWAY_ENDPOINT } from "../config/gameConfig";
+import { EMOJI_TYPES, STATES_DETAIL, FONT_FAMILY, MAP_CONFIG, AWS_API_GATEWAY_ENDPOINT, MAX_MOBILE_WIDTH } from "../config/gameConfig";
 import GameStateManager from "./GameStateManager";
-import { cssColor } from "../utils/helpers";
+import { cssColor, isIphone, checkIfMobile } from "../utils/helpers";
 import FlyingText from "./FlyingText";
 
 const SCORE_FONT = "Impact"
@@ -24,20 +24,58 @@ export default class ScoreManager {
         this.toWin += 100// (Senate) this includes DC (+3) from the STATES_DETAIL array
 
         this.toWin = this.toWin / 2 + 1; // Majority to win
-        this.createScoreDisplay();
-
+    
         this.updateCount = 0;
 
+        this.boxHeight = 60;
+
+        this.gameWidth = this.scene.cameras.main.width;
+        this.height = this.scene.cameras.main.width;
+
+        this.initialize()
+    }
+
+    initialize() {     
+        this.createScoreDisplay();
+        // Add resize listener
+        this.scene.game.events.on('widthchange', this.handleResize, this);
+        this.handleResize()
+    }
+
+    handleResize(obj){
+        this.gameWidth = obj ? obj.width : this.scene.cameras.main.width;
+        // this.gameHeight = obj ? obj.width : this.scene.cameras.main.width;
+
+        if(this.gameWidth < MAX_MOBILE_WIDTH){
+
+            const ypos = isIphone() ?  this.boxHeight / 0.55 :   this.boxHeight / 1.1;
+
+            this.scoreText.chad.setY(ypos)
+            this.scoreText.barry.setY(ypos)
+
+
+            this.scoreText.chadStateCount.setY(ypos+25)
+            this.scoreText.barryStateCount.setY(ypos+25)
+
+            this.scoreText.chadState.setY(ypos+50)
+            this.scoreText.barryState.setY(ypos+50)
+
+
+            this.scoreText.playingStateA.setY(ypos+40)
+            this.scoreText.playingStateB.setY(ypos+60)
+
+            this.scoreText.playingStateB.setStyle({fontSize:'15px'})
+        }
     }
 
 
     createScoreDisplay() {
-        const gameWidth = this.scene.cameras.main.width;
-        const boxHeight = 60;
+        this.gameWidth = this.scene.cameras.main.width;
 
         // Style for score text
         const textStyle = {
             fontSize: '22px',
+            // fontWeight: 'bold',
             fill: '#ffffff',
             fontFamily: SCORE_FONT,
             stroke: '#ffffff',
@@ -77,31 +115,36 @@ export default class ScoreManager {
         };
 
         // Create score texts
-        const boxHalf = boxHeight / 2.1;
+        const boxHalf = this.boxHeight / 2.1;
+        const toWinText =  this.gameWidth < MAX_MOBILE_WIDTH ? '' : `/  ${this.toWin}` ;
+
+        const chadStrokeColor =  checkIfMobile() ?  MAP_CONFIG.CHAD_COLOR : MAP_CONFIG.CHAD_STROKE_COLOR;
+        const barryStrokeColor =  checkIfMobile() ?  MAP_CONFIG.BARRY_COLOR : MAP_CONFIG.BARRY_STROKE_COLOR;
+
         this.scoreText = {
             chad: this.scene.add.text(
                 20,                 // Left padding
                 boxHalf,      // Vertical center of box
-                'Chad: '+this.gameStateManager.getScore("chad")+' / ' + this.toWin + ' to win',
+                'Chad: '+this.gameStateManager.getScore("chad") + toWinText,
                 {
                     ...textStyle,
                     fill: cssColor(MAP_CONFIG.CHAD_COLOR),
-                    stroke: cssColor(MAP_CONFIG.CHAD_STROKE_COLOR)
+                    stroke: cssColor(chadStrokeColor)
                 }
             ),
             barry: this.scene.add.text(
-                gameWidth - 20,     // Right padding
+                this.gameWidth - 20,     // Right padding
                 boxHalf,      // Vertical center of box
-                'Barry: '+this.gameStateManager.getScore("barry")+' / ' + this.toWin + ' to win',
+                'Barry: '+this.gameStateManager.getScore("barry")+ toWinText,
                 {
                     ...textStyle,
                     fill: cssColor(MAP_CONFIG.BARRY_COLOR),
-                    stroke: cssColor(MAP_CONFIG.BARRY_STROKE_COLOR)
+                    stroke: cssColor(barryStrokeColor)
                 }
             ),
 
             playingStateA: this.scene.add.text(
-                gameWidth/2,                 // Left padding
+                this.gameWidth/2,                 // Left padding
                 boxHalf + 28,      // Vertical center of box
                 'playing for ',
                 textStyleStateAA
@@ -109,7 +152,7 @@ export default class ScoreManager {
 
 
             playingStateB: this.scene.add.text(
-                gameWidth/2,                 // Left padding
+                this.gameWidth/2,                 // Left padding
                 boxHalf + 50,      // Vertical center of box
                 'Alabama: 1',
                 textStyleStateBB
@@ -118,16 +161,16 @@ export default class ScoreManager {
             chadStateCount: this.scene.add.text(
                 20,                 // Left padding
                 boxHalf + 25,      // Vertical center of box
-                'STATES WON: 0',
+                'STATES: 0',
                 {
                     ...textStyleStateWon,
                     fill: cssColor(MAP_CONFIG.CHAD_COLOR),
                 }
             ),
             barryStateCount: this.scene.add.text(
-                gameWidth - 20,     // Right padding
+                this.gameWidth - 20,     // Right padding
                 boxHalf + 25,      // Vertical center of box
-                'STATES WON: 0',
+                'STATES: 0',
                 {
                     ...textStyleStateWon,
                     fill: cssColor(MAP_CONFIG.BARRY_COLOR),
@@ -142,7 +185,7 @@ export default class ScoreManager {
             ),
 
             barryState: this.scene.add.text(
-                gameWidth - 20,     // Right padding
+                this.gameWidth - 20,     // Right padding
                 boxHalf + 45,      // Vertical center of box
                 '',
                 textStyleState
@@ -151,35 +194,38 @@ export default class ScoreManager {
 
         // Center both texts together
         // Set text properties
-        this.scoreText.playingStateA.setOrigin(0.5);    // Align left, vertically centered
+        this.scoreText.playingStateA.setOrigin(0.5);  
         this.scoreText.playingStateA.setDepth(11);  
         this.scoreText.playingStateA.setLetterSpacing(2);
 
-        this.scoreText.playingStateB.setOrigin(0.5);    // Align left, vertically centered
+        this.scoreText.playingStateB.setOrigin(0.5);  
         this.scoreText.playingStateB.setDepth(11);  
         this.scoreText.playingStateB.setLetterSpacing(2);
 
 
-        this.scoreText.chadStateCount.setOrigin(0, 0.5);    // Align left, vertically centered
+        this.scoreText.chadStateCount.setOrigin(0, 0.5);  
         this.scoreText.chadStateCount.setDepth(11);  
         this.scoreText.chadStateCount.setLetterSpacing(2);
-        this.scoreText.barryStateCount.setOrigin(1, 0.5);    // Align left, vertically centered
+
+        this.scoreText.barryStateCount.setOrigin(1, 0.5);  
         this.scoreText.barryStateCount.setDepth(11);  
         this.scoreText.barryStateCount.setLetterSpacing(2);
 
 
-        this.scoreText.chad.setOrigin(0, 0.5);    // Align left, vertically centered
-        this.scoreText.barry.setOrigin(1, 0.5);   // Align right, vertically centered
-        this.scoreText.chad.setDepth(11);         // Above the score box
-        this.scoreText.barry.setDepth(11);        // Above the score box
+        this.scoreText.chad.setOrigin(0, 0.5);  
+        this.scoreText.chad.setDepth(11);      
         this.scoreText.chad.setLetterSpacing(2);
+
+        this.scoreText.barry.setOrigin(1, 0.5);   
+        this.scoreText.barry.setDepth(11);        
         this.scoreText.barry.setLetterSpacing(2);
 
-        this.scoreText.chadState.setOrigin(0, 0.5);    // Align left, vertically centered
-        this.scoreText.barryState.setOrigin(1, 0.5);   // Align right, vertically centered
-        this.scoreText.chadState.setDepth(11);         // Above the score box
-        this.scoreText.barryState.setDepth(11);        // Above the score box
+        this.scoreText.chadState.setOrigin(0, 0.5);  
+        this.scoreText.chadState.setDepth(11);         
         this.scoreText.chadState.setLetterSpacing(2);
+        
+        this.scoreText.barryState.setOrigin(1, 0.5);   
+        this.scoreText.barryState.setDepth(11);        
         this.scoreText.barryState.setLetterSpacing(2);
 
     }
@@ -192,11 +238,13 @@ export default class ScoreManager {
 
 
     writeToScoreBoard(characterKey, currentState) {
-        const gameWidth = this.scene.cameras.main.width;
         const playerScore = this.gameStateManager.getScore(characterKey);
         // Check for game end
+
+        const toWinText =  this.gameWidth < MAX_MOBILE_WIDTH ? '' : `/  ${this.toWin}` ;
+
         this.scoreText[characterKey].setText(
-            `${characterKey.charAt(0).toUpperCase() + characterKey.slice(1)}: ${playerScore}  /  ${this.toWin} to win`
+            `${characterKey.charAt(0).toUpperCase() + characterKey.slice(1)}: ${playerScore}  ${toWinText}`
         );
 
         const ct = this.scene.extraManager.getTotalStateExtras()
@@ -207,11 +255,11 @@ export default class ScoreManager {
         const barryWonStates = this.gameStateManager.wonStates.filter(d => d.character === 'barry').length;
 
         this.scoreText['chadStateCount'].setText(
-            `STATES WON : ${chadWonStates}`
+            `STATES: ${chadWonStates}`
         );
 
         this.scoreText['barryStateCount'].setText(
-            `STATES WON : ${barryWonStates}`
+            `STATES: ${barryWonStates}`
         );
 
         this.scoreText['chadState'].setText(
@@ -267,9 +315,7 @@ export default class ScoreManager {
             this.gameStateManager.winner = characterKey;
             this.scene.extraManager.endGame();
         }
-
         this.updateCount ++;
-
     }
 
 

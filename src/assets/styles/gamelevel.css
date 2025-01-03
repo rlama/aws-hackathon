@@ -1,0 +1,110 @@
+.select-wrapper {
+  position: relative;
+  width: 230px;
+  left: 50px;
+  font-family: 'Arial', sans-serif;
+}
+
+.custom-select {
+  position: relative;
+  padding: 15px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #5db7ef;
+}
+
+.select-trigger {
+  font-family: 'Lagome', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #5db7ef;
+  font-size: 19px;
+}
+
+.arrow {
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #5db7ef;
+  transition: transform 0.3s ease;
+}
+
+.options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: #3d494c;
+  border: 1px solid #5db7ef;
+  border-radius: 12px;
+  padding: 10px 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.option {
+  padding: 12px 20px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.option:hover {
+  background: #5db7ef;
+  color: #fff;
+}
+
+.option .icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beginner .icon::before {
+  content: "🌱";
+}
+
+.intermediate .icon::before {
+  content: "⚡";
+}
+
+.expert .icon::before {
+  content: "👑";
+}
+
+.active .options {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.active .arrow {
+  transform: rotate(180deg);
+}
+
+/* Ripple effect */
+.option::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.option:active::after {
+  width: 100px;
+  height: 100px;
+}

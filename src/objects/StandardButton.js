@@ -6,6 +6,7 @@
 
 
 import { FONT_FAMILY } from "../config/gameConfig";
+import { checkIfMobile } from "../utils/helpers";
 
 
 export default class StandardButton extends Phaser.GameObjects.Container {
@@ -15,10 +16,10 @@ export default class StandardButton extends Phaser.GameObjects.Container {
         // Default configuration
         this.config = {
             fontFamily:FONT_FAMILY,
-            backgroundColor: 0x3498db,
-            textColor: '#ffffff',
-            borderColor: 0xffffff,
-            hoverColor: 0x2980b9,
+            backgroundColor: '#3488bf',
+            color: '#ffffff',
+            borderColor: '#3488bf',
+            hoverColor: '#3488bf',
             fontSize: '18px',
             padding: 10,
             borderRadius: 6,
@@ -42,16 +43,24 @@ export default class StandardButton extends Phaser.GameObjects.Container {
 
     setText(msg){
         this.text.setText(msg)
+        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
+        const height = this.text.height + (this.config.padding * 2);
+        // this.drawBackground(width, height, true);
+    }
+
+    setYPosition(pos){
+        this.setY(pos)
+    }
+
+    setStyle(st){
+        console.log(st)
+        this.text.setStyle(st)
     }
 
     createButton(message) {
         // Create text
-        this.text = this.scene.add.text(0, 0, message, {
-            fontFamily: this.config.fontFamily,
-            fontSize: this.config.fontSize,
-            color: this.config.textColor,
-            visible: this.config.visible
-        }).setOrigin(0.5);
+        this.text = this.scene.add.text(0, 0, message, {...this.config})
+        .setOrigin(0.5);
 
         // Calculate dimensions
         const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
@@ -59,23 +68,38 @@ export default class StandardButton extends Phaser.GameObjects.Container {
 
         // Create background
         this.background = this.scene.add.graphics();
+
         
         // Draw initial state
-        this.drawBackground(width, height);
+        // this.drawBackground(width, height);
 
         // Add elements to container
         this.add([this.background, this.text]);
 
         // Make interactive
-        this.setInteractive(
-            new Phaser.Geom.Rectangle(
-                -(width/2), 
-                -(height/2), 
+        this.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(
+                -(width/2) - 10, 
+                -(height/2) - 10, 
                 width, 
                 height
-            ), 
-            Phaser.Geom.Rectangle.Contains
-        );  
+            ),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+            useHandCursor: true,
+            draggable: false,
+            pixelPerfect: false,
+            alphaTolerance: 1
+        });
+
+        this.on('pointerover', () => {
+            this.setAlpha(0.8);
+        });
+
+        this.on('pointerout', () => {
+            this.setAlpha(1);
+        });
+
+
 
         this.setVisibility(this.config.visible)
 
@@ -119,38 +143,52 @@ export default class StandardButton extends Phaser.GameObjects.Container {
         );
     }
 
+
     setupEventListeners() {
-        this.on('pointerover', this.onPointerOver, this);
-        this.on('pointerout', this.onPointerOut, this);
-        this.on('pointerdown', this.onPointerDown, this);
-        this.on('pointerup', this.onPointerUp, this);
+        if(!checkIfMobile()){
+            this.on('pointerover', this.onPointerOver, this);
+            this.on('pointerout', this.onPointerOut, this);
+            this.on('pointerdown', this.onPointerDown, this);
+            this.on('pointerup', this.onPointerUp, this);
+        } else {
+            // Mobile-specific handling
+            this.on('pointerdown', (pointer, localX, localY, event) => {
+                event.stopPropagation();  // Prevent event bubbling
+                this.onPointerDown();
+            }, this);
+            
+            this.on('pointerup', (pointer, localX, localY, event) => {
+                event.stopPropagation();  // Prevent event bubbling
+                this.onPointerUp();
+                // Execute onClick immediately for mobile
+
+            }, this);
+        }
     }
 
     onPointerOver() {
-        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
-        const height = this.text.height + (this.config.padding * 2);
-        this.drawBackground(width, height, true);
         this.scene.game.canvas.style.cursor = 'pointer';
     }
 
     onPointerOut() {
-        const width = this.config.width ? this.config.width : this.text.width + (this.config.padding * 2) ;
-        const height = this.text.height + (this.config.padding * 2);
-        this.drawBackground(width, height, false);
         this.scene.game.canvas.style.cursor = 'default';
     }
 
     onPointerDown() {
+
         this.y += 2;
         this.text.y += 2;
-        // Execute onClick callback if provided
-        if (this.config.onClick) {
-            this.config.onClick();
-        }
+     
+
     }
 
     onPointerUp() {
         this.y -= 2;
         this.text.y -= 2;
+
+        if (this.config.onClick) {
+            this.config.onClick();
+        }
+
     }
 }

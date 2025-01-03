@@ -11,7 +11,7 @@ import FlyingText from "./FlyingText";
 import { saveToLeaderboard } from "../api/api";
 
 
-class ExtraManager {
+export default class ExtraManager {
     constructor(scene, mapManager) {
         this.scene = scene;
         this.gameStateManager = GameStateManager.getInstance();
@@ -480,7 +480,9 @@ class ExtraManager {
         this.stopSpawnTimer();
         this.extras.clear(true, true);
 
-        const finalScores = this.gameStateManager.getFinalScore()
+        const finalScores = this.gameStateManager.getFinalScore();
+
+        finalScores = {...finalScores, uid: this.gameStateManager.uid}
 
         // Stop the current scene and launch score scene
         this.scene.scene.pause();
@@ -498,17 +500,11 @@ class ExtraManager {
             this.gameStateManager.playSound("loose");
         }
 
-
         this.scene.scene.start('FinishScene', {
             gameEnd: true
         });
 
         console.log("Game end");
-
     }
-
-
 }
 
-// Export the class
-export default ExtraManager;

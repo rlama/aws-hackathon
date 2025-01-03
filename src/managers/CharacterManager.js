@@ -5,12 +5,17 @@
  */
 
 import GameStateManager from "./GameStateManager";
-import { DEFAULT_DIFFICULTY_SETTINGS } from "../config/gameConfig";
+import { DEFAULT_DIFFICULTY_SETTINGS, MAX_MOBILE_WIDTH } from "../config/gameConfig";
+import { isIphone } from "../utils/helpers";
+
+
+const charArr = ['chad', 'barry']
 
 export default class CharacterManager {
     constructor(scene, selectedCharacter) {
         this.gameStateManager = GameStateManager.getInstance();
         this.scene = scene;
+        this.game = scene.game;
         this.characters = {};
         this.characterScale = 0.7;
         this.chadGotStuck = false;
@@ -18,20 +23,31 @@ export default class CharacterManager {
         this.selectedCharacter = this.gameStateManager.selectedCharacter || "";
         this.isStartScene = this.scene.scene.key === 'StartScene';
         this.lastUpdateTime = 0;
-
+        this.overlayCircles = [];
         this.startSceneScale = 0.8
     }
+
+
+    initialize() {
+        this.createCharacters()
+        // Add resize listener
+        this.game.events.on('widthchange', this.handleResize, this);
+        this.handleResize()
+    }
+
 
 
     createCharacters() {
 
         const width = this.scene.cameras.main.width;
         const height = this.scene.cameras.main.height;
-
-        const isMobile = width <= 768;
+        const isMobile = width <= MAX_MOBILE_WIDTH;
 
         // Create all animations
         this.createCharacterAnimations();
+
+        let gameSceneYpos = 0.83;
+        gameSceneYpos = isIphone() ? 0.85 : 0.8;
 
         const characterConfigs = {
             startScene: {
@@ -49,12 +65,12 @@ export default class CharacterManager {
             gameScene: {
                 chad: {
                     x: width * (isMobile ? 0.25 : 0.40),
-                    y: height * (isMobile ? 0.77 : 0.83),
+                    y: height * gameSceneYpos,
                     scale: 0.7
                 },
                 barry: {
                     x: width * (isMobile ? 0.75 : 0.60),
-                    y: height * (isMobile ? 0.77 : 0.83),
+                    y: height * gameSceneYpos,
                     scale: 0.7
                 }
             }
@@ -65,7 +81,7 @@ export default class CharacterManager {
             characterConfigs.gameScene;
 
         // Create characters
-        ['chad', 'barry'].forEach(charKey => {
+        charArr.forEach(charKey => {
             const charConfig = sceneConfig[charKey];
             const frame = this.scene.textures.getFrame('characters', `${charKey}_idle`);
 
@@ -108,11 +124,33 @@ export default class CharacterManager {
     }
 
 
+
+
+    handleResize(newWidth) {
+
+        const width = newWidth || this.scene.cameras.main.width;
+        const height = this.scene.cameras.main.height;
+
+        if (width < MAX_MOBILE_WIDTH) {
+
+            Object.keys(this.characters).forEach(key => {
+                this.characters[key].setY(height * 0.4)
+                this.characters[key].setScale(0.7)
+            });
+
+            this.overlayCircles.forEach(circle => {
+                circle.setY(height * 0.4)
+                circle.setScale(0.7)
+            })
+        }
+    }
+
+
     addCharacterLabels(isMobile) {
         const width = this.scene.scale.width;
         const height = this.scene.scale.height;
 
-        ['chad', 'barry'].forEach(charKey => {
+        charArr.forEach(charKey => {
             const xPos = charKey === 'chad' ?
                 width * (isMobile ? 0.25 : 0.40) :
                 width * (isMobile ? 0.75 : 0.60);
@@ -130,17 +168,23 @@ export default class CharacterManager {
         });
     }
 
+
     addStartSceneInteractivity(sceneConfig) {
         const circleRadius = 110;
 
-        ['chad', 'barry'].forEach(charKey => {
+        charArr.forEach(charKey => {
             const circle = this.scene.add.circle(
                 sceneConfig[charKey].x,
                 sceneConfig[charKey].y,
                 circleRadius,
-                0x333333,
-                0.3
+                0x41850a,
+                0.2
             );
+
+            // Add interactive elements for start scene
+            this.characters[charKey].setInteractive({ useHandCursor: true });
+            this.scene.game.canvas.style.cursor = 'pointer';
+
 
             circle.setInteractive({
                 useHandCursor: true,
@@ -148,12 +192,15 @@ export default class CharacterManager {
                 hitAreaCallback: Phaser.Geom.Circle.Contains
             });
 
+            this.overlayCircles.push(circle)
+
             this.setupCircleInteractivity(circle, charKey);
         });
     }
 
     setupCircleInteractivity(circle, charKey) {
-        circle
+
+        this.characters[charKey]
             .on('pointerover', () => {
                 this.scene.tweens.add({
                     targets: [this.characters[charKey]],
@@ -171,6 +218,8 @@ export default class CharacterManager {
                     duration: 200,
                     ease: 'Power2'
                 });
+
+
             })
             .on('pointerdown', () => {
                 this.handleCharacterSelect(charKey, [circle, this.characters[charKey]]);
@@ -182,8 +231,7 @@ export default class CharacterManager {
 
     handleCharacterSelect(character, elements) {
         if (this.selectedCharacter) return; // Prevent multiple selections
-        this.selectedCharacter = character;//=== "chad" ? "barry" : "chad";
-        // this.autoPlayingCharacter = character === "chad" ? "barry" : "chad";
+        this.selectedCharacter = character;
 
         // Play selection animation
         this.scene.tweens.add({
@@ -204,10 +252,8 @@ export default class CharacterManager {
             }
         });
 
-        // // Disable other character's interactivity
+        //  Disable other character's interactivity
         const otherCharacter = character === 'chad' ? 'barry' : 'chad';
-        // this[`${otherCharacter}Circle`].disableInteractive();
-
         // Fade out other character
         this.scene.tweens.add({
             targets: this[`${otherCharacter}Container`],
@@ -230,6 +276,8 @@ export default class CharacterManager {
 
     }
 
+
+    // Touch and Key input handler for chararcters
     setCharacterControlsKeyInputs() {
         const otherCharacterName = this.selectedCharacter === "chad" ? "barry" : "chad";
         const activeCharacter = this.characters[this.selectedCharacter];
@@ -264,18 +312,12 @@ export default class CharacterManager {
             if (otherCharacter.anims.currentAnim.key !== otherCharacterName + "_not_happy") {
                 otherCharacter.play(otherCharacterName + '_idle');
             }
-            //  activeCharacter.play(this.selectedCharacter + '_mouth_open');
         }
-    }
-
-    // Optional: Add method to remove input listeners when needed
-    removeInputListeners() {
-        this.scene.input.keyboard.off('keydown-M');
-        this.scene.input.off('pointerdown');
     }
 
 
     createCharacterAnimations() {
+
         // Chad animations
 
         // Five coin animation
@@ -414,9 +456,6 @@ export default class CharacterManager {
             repeat: 12
         });
 
-        // this.characters.chad.play("chad_idle")
-        // this.characters.barry.play("barry_idle")
-
     }
 
 
@@ -485,9 +524,6 @@ export default class CharacterManager {
 
                             activeCharacter.play(`${autoPlayingCharacterName}_mouth_open`);
                         }
-                    } else {
-                        // Do nothing
-                        // activeCharacter.play(`${autoPlayingCharacterName}_idle`);
                     }
                 }
 
@@ -496,8 +532,6 @@ export default class CharacterManager {
             // Original logic for optimal play
             if (closestExtra && closestDistance <= 130) {
                 const extraType = closestExtra.getData('type');
-                // const condition = Phaser.Math.RND.pick(this.smartIndexArray);
-
                 if (extraType !== 'Onion') {
                     this.openMouth(activeCharacter, autoPlayingCharacterName);
                 }
@@ -518,7 +552,7 @@ export default class CharacterManager {
     }
 
 
-    // Add this method to check mouth state
+    // Function to check mouth state
     isMouthOpen() {
         return this.characters.chad.mouthOpen;
     }
@@ -562,8 +596,4 @@ export default class CharacterManager {
         this.lastUpdateTime = 0;
     }
 
-    // Clean up when scene changes
-    destroy() {
-
-    }
 }

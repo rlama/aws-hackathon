@@ -5,10 +5,12 @@
  */
 
 import { addBackground, cssColor } from "../utils/helpers";
-import MapManager from "../components/MapManager";
-import { MAP_CONFIG, FONT_FAMILY } from "../config/gameConfig";
+import MapManager from "../managers/MapManager";
+import { MAP_CONFIG, FONT_FAMILY, GAMEOVER_TEXT_WON, GAMEOVER_TEXT_LOST } from "../config/gameConfig";
 import StandardButton from "../objects/StandardButton";
-import GameStateManager from "../components/GameStateManager";
+import GameStateManager from "../managers/GameStateManager";
+import { BackgroundManager } from "../managers/BackgroundManager";
+
 
 
 export default class FinishScene extends Phaser.Scene {
@@ -22,19 +24,21 @@ export default class FinishScene extends Phaser.Scene {
         this.gameEnd = data.gameEnd;
     }
 
-
     create() {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
-        // Add background
-        addBackground(this, width, height, true, "gamescene", "finishScene");
+        // Add background with options
+        this.backgroundManager = new BackgroundManager(this);
+        this.backgroundManager.addBackground({
+            isGameScene: false,
+            addOverlay: false,
+            type: 'default'
+        });
 
         const idleColors = {
             idle: {
                 ...MAP_CONFIG.idle,
-                // lineColor: 0x5c3a3a,
-                // lineStyle: 1,
                 fillStyle: 0xcff3ff
             }
         }
@@ -48,100 +52,73 @@ export default class FinishScene extends Phaser.Scene {
             this.mapManager.highlightState(item.state, "", color);
         })
 
-        let ypos = 43;
+        // Get the loaded content
+        this.htmlContent = this.cache.text.get('finishHTML');
 
-        // Game Over text
-        this.add.text(this.scale.width / 2, ypos, 'GAME OVER', {
-            fontSize: '50px',
-            fill: '#ffffff',
-            fontFamily: FONT_FAMILY,
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setOrigin(0.5)
-            .setDepth(1);
+        this.element = document.createElement('div');
+
+        this.element.innerHTML = this.htmlContent;
+        this.element.style.width = '100%';
+        this.element.style.height = '100%';
 
 
-        // Game Over text
-        ypos += 80
+        const gameOverWonTxt = GAMEOVER_TEXT_WON[Phaser.Math.Between(0, GAMEOVER_TEXT_WON.length - 1)];
+        const gameOverLostTxt = GAMEOVER_TEXT_LOST[Phaser.Math.Between(0, GAMEOVER_TEXT_LOST.length - 1)];
+
+        const didWon = this.gameStateManager.winner === this.gameStateManager.selectedCharacter;
+
+        const gameOverTxt = didWon ? gameOverWonTxt : gameOverLostTxt
+        this.element.querySelector('.header-title').innerHTML = gameOverTxt;
 
         const player = 'Hey ' + this.gameStateManager.playerName + "!";
-        const didWon = this.gameStateManager.winner === this.gameStateManager.selectedCharacter;
         const winLostText = didWon ? player + ' You Won !!!' : player + ' You Lost !';
+        // const winLostText = 'Hey Matt, you won'
 
+        let title = this.element.querySelector('#f-title');
+        if (title) {
+            title.innerHTML = winLostText
+        }
 
-        this.add.text(this.scale.width / 2, ypos, winLostText, {
-            fontSize: '28px',
-            fill: '#bda006',
-            fontFamily: FONT_FAMILY,
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setOrigin(0.5);
-
-        // Final Scores
-        ypos += 50
-
-        this.add.text(this.scale.width / 2 - 130, ypos, `Chad: ${this.gameStateManager.getScore("chad")}`, {
-            fontSize: '32px',
-            fill: cssColor(MAP_CONFIG.CHAD_COLOR),
-            stroke: cssColor(MAP_CONFIG.CHAD_COLOR),
-            strokeThickness: 2
-        }).setOrigin(0.5);
-
-        this.add.text(this.scale.width / 2 + 100, ypos, `Barry: ${this.gameStateManager.getScore("barry")}`, {
-            fontSize: '32px',
-            fill: cssColor(MAP_CONFIG.BARRY_COLOR),
-            stroke: cssColor(MAP_CONFIG.BARRY_COLOR),
-            strokeThickness: 2
-            // fontFamily:FONT_FAMILY
-        }).setOrigin(0.5);
-
-        /// ---------------  add state won number --------------
-        ypos += 40
+        let chadScore = this.element.querySelector('#chad-score');
+        if (chadScore) {
+            chadScore.innerHTML = `Chad: ${this.gameStateManager.getScore("chad")}`;
+        }
 
         const chadStateCount = this.gameStateManager.wonStates.filter(item => item.character === 'chad').length;
+        let chadState = this.element.querySelector('#chad-states');
+        if (chadState) {
+            chadState.innerHTML = `States: ${chadStateCount}`;
+            // chadState.innerHTML = `States: 13`;
+        }
 
-        this.add.text(this.scale.width / 2 - 130, ypos, `States: ${chadStateCount}`, {
-            fontSize: '22px',
-            fill: cssColor(MAP_CONFIG.CHAD_COLOR),
-            stroke: cssColor(MAP_CONFIG.CHAD_COLOR),
-            strokeThickness: 2
-        }).setOrigin(0.5);
-
+        let barryScore = this.element.querySelector('#barry-score');
+        if (barryScore) {
+            barryScore.innerHTML = `Barry: ${this.gameStateManager.getScore("barry")}`;
+        }
 
         const barryStateCount = this.gameStateManager.wonStates.filter(item => item.character === 'barry').length;
-
-        this.add.text(this.scale.width / 2 + 100, ypos, `States: ${barryStateCount}`, {
-            fontSize: '22px',
-            fill: cssColor(MAP_CONFIG.BARRY_COLOR),
-            stroke: cssColor(MAP_CONFIG.BARRY_COLOR),
-            strokeThickness: 2
-            // fontFamily:FONT_FAMILY
-        }).setOrigin(0.5);
+        let barryState = this.element.querySelector('#barry-states');
+        if (barryState) {
+            barryState.innerHTML = `States: ${barryStateCount}`;
+            // barryState.innerHTML = `States: 25`;
+        }
 
 
-        // Leaderboard button
-        ypos += 60
-        const leaderboardButton = new StandardButton(this, this.scale.width * 0.5, ypos, 'Leaderboard', {
-            backgroundColor: 0x3498db,
-            onClick: () => {
-                this.scene.start('LeaderboardScene', {
-                    parentScene: this.scene.key
-                });
-            }
-        });
 
-        // Play Again button
-        ypos += 40
-        const playAgainButton = new StandardButton(this, this.scale.width * 0.5, ypos, 'Play Again', {
-            onClick: () => {
+        const replayButton = this.element.querySelector('#replay');
+        if (replayButton) {
+            replayButton.addEventListener('click', (e) => {
                 this.restartGame();
-            }
-        });
+            })
+        }
+
+        // Add to scene
+        this.add.dom(width / 2, height / 2, this.element)
+            .setOrigin(0.5);
+
     }
 
     restartGame() {
-        // this.scene.scene.extraManager.resetExtras();
-        // this.scene.scene.characterManager.resetCharacters();
         this.gameStateManager.reset();
         this.scene.stop('ScoreScene');
         this.scene.start('GameScene');

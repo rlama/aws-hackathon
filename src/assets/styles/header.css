@@ -1,0 +1,88 @@
+
+/* Header bar styles */
+.header-bar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    min-height: 70px; /* Fixed height for header */
+}
+
+
+.header-title{
+    font-family: 'Lagome', sans-serif;
+    font-size: 43px;
+    color: #73b942;
+    text-shadow: 2px 1px #545454;
+    margin: 0;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.close-button {
+    position: absolute;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    transform: scale(1.1);
+    color: #ff3333;
+}
+
+/* Mobile styles */
+@media screen and (max-width: 768px) {
+    .header-bar {
+        min-height: 70px; /* Slightly smaller header for mobile */
+    }
+
+    .close-button {
+        width: 32px;
+        height: 32px;
+        font-size: 36px;
+        right: 10px;
+    }
+
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+    .header-title{
+        font-size: 28px;
+    }
+
+    .close-button {
+        width: 28px;
+        height: 28px;
+        font-size: 32px;
+    }
+
+}
+
+/* Handle iOS safe areas */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .header-bar {
+        padding: 15px 5px;
+        padding-top: calc(env(safe-area-inset-top) + 15px);
+    }
+
+    @media screen and (max-width: 768px) {
+        .header-bar {
+            padding-top: calc(env(safe-area-inset-top) + 40px);
+        }
+    }
+}

@@ -8,17 +8,16 @@ export default class CursorManager {
     constructor(scene, config = {}) {
         this.scene = scene;
         this.config = {
-            atlas: 'game-atlas',           // Your atlas key
-            onionFrame: 'onion',           // Frame name for onion cursor
-            scale: 0.4,                    // Scale of the sprite cursor
-            depth: 1000,                   // Render depth
-            defaultCursor: 'pointer',      // Default CSS cursor
+            atlas: 'game-atlas',  
+            onionFrame: 'onion', 
+            scale: 0.4, 
+            depth: 1000, 
+            defaultCursor: 'pointer',
             ...config
         };
 
         this.sprite = null;
         this.isOnionMode = false;
-
 
         this.init();
     }

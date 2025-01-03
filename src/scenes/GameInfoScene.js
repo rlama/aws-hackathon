@@ -4,15 +4,44 @@
  * Version:         1.0.0
  */
 
-import { addBackground, createCloseButton, capitalizeWords } from "../utils/helpers";
+import { createCloseButton, capitalizeWords } from "../utils/helpers";
 import StandardButton from "../objects/StandardButton";
-import { FONT_FAMILY, EMOJI_TYPES, ALL_STATES } from "../config/gameConfig";
+import { BackgroundManager } from "../managers/BackgroundManager";
+import { FONT_FAMILY, EMOJI_TYPES, ALL_STATES, MAX_MOBILE_WIDTH } from "../config/gameConfig";
+
+
+
+// Game instructions
+const instructions = [
+    { type: 'h', text: "- Pick Your Candidate:" },
+    { type: 'p', text: "Choose between Chad or Barry before the game begins. \n The  unselected character will auto-play as your rival." },
+    { type: 'h', text: "- Catch the Votes: " },
+    { type: 'p', text: "Click mouse or press 'm' key to open your character's mouth and collect falling items to score points. Press 'Spacebar' key or the 'Gear ⚙' icon to pause game and see the game settings." },
+    { type: 'h', text: "- Avoid Onions 🧅:" },
+    { type: 'p', text: "Onions are trouble! Eating one will disable your character for 3.5 seconds." },
+    { type: 'h', text: "- Difficulty Levels" },
+    { type: 'p', text: "There are 3 difficulty levels, Beginner, Intermeidate and Expert. In intermeidate and expert levels the opponent or robot gets smarter and takes less time to wake up after the onion trap." },
+    { type: 'h', text: "- Win the States 🗺️" },
+    { type: 'p', text: "Earn enough points to light up U.S. states on the map." },
+    { type: 'p', extraRow: true, text: "The first to reach 270 points wins the game!" },
+
+    { type: 'h', text: "- Leaderboard Rules 🏆" },
+    { type: 'p', text: "Only winners make the leaderboard." },
+    { type: 'p', text: "Rankings are based on the most states won." },
+    { type: 'p', text: "If tied, the opponent's points decide the champion!" },
+
+    { type: 'p', text: "Ready to race, collect, and win? Let the Chad & Barry showdown begin! 🚀" }
+];
+
 
 export default class GameInfoScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameInfoScene' });
         this.scrolling = false;
         this.lastY = 0;
+        this.allTexts = []
+        this.pointsHeaders = []
+        this.allTableItems = []
     }
 
     init(data) {
@@ -27,16 +56,70 @@ export default class GameInfoScene extends Phaser.Scene {
 
 
     create() {
+        // const { width, height } = this.scale;
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
-        // Add semi-transparent background that covers the entire scene
-        // const overlay = this.add.rectangle(
-        //     0, 0, width, height,
-        //     0x000000, 0.8
-        // ).setOrigin(0);
 
-        addBackground(this, width, height);
+        // Add background with options
+        this.backgroundManager = new BackgroundManager(this);
+        this.backgroundManager.addBackground({
+            isGameScene: false,
+            addOverlay: true,
+            type: 'default',
+            header: false
+        });     
+
+        // Get the loaded content
+        const htmlContent = this.cache.text.get('gameInfoHTML');
+
+        // Create and add the DOM element with HTML content
+        const element = document.createElement('div');
+        element.innerHTML = htmlContent;
+        element.style.width = '100%';
+        element.style.height = '100%';
+
+
+        // Add click handler for close button
+        const closeButton = element.querySelector('.close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                // Close the scene or return to previous scene
+                this.closeScene(this, this.parentScene)
+            });
+        }
+
+        // Add to scene
+        this.add.dom(width / 2, height / 2, element)
+            .setOrigin(0.5);
+
+        // Clean up when scene is shut down
+        this.events.on('shutdown', () => {
+           
+        });
+    }
+
+    closeScene(scene, parentScene) {
+        if (parentScene) {
+            scene.scene.start(parentScene);
+        }
+        scene.scene.sleep();
+    }
+
+
+    _create() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+
+        // Add background with options
+        this.backgroundManager = new BackgroundManager(this);
+        this.backgroundManager.addBackground({
+            isGameScene: false,
+            addOverlay: true,
+            type: 'default',
+            header: true
+        });
+
 
         // Create a container for all content
         this.contentContainer = this.add.container(0, 0);
@@ -46,49 +129,9 @@ export default class GameInfoScene extends Phaser.Scene {
         const containerPadding = 20; // Padding from edges
 
 
-        // Title (fixed position, outside container)
-        const title = this.add.text(
-            width / 2,
-            40,
-            'How to Play',
-            {
-                fontSize: width <= 700 ? '20px' : '48px',
-                fill: '#ffffff',
-                fontStyle: 'bold',
-                stroke: '#000000',
-                    strokeThickness: 3,
-                fontFamily: FONT_FAMILY
-            }
-        ).setOrigin(0.5);
-
-        title.setDepth(1);     // Ensure it's above game elements
-
-
-        // Game instructions
-        const instructions = [
-            { type: 'h', text: "- Pick Your Candidate:" },
-            { type: 'p', text: "Choose between Chad or Barry before the game begins. \n The  unselected character will auto-play as your rival." },
-            { type: 'h', text: "- Catch the Votes: " },
-            { type: 'p', text: "Click mouse or press 'm' key to open your character's mouth and collect falling items to score points. Press 'Spacebar' key or the 'Gear ⚙' icon to pause game and see the game settings." },
-            { type: 'h', text: "- Avoid Onions 🧅:" },
-            { type: 'p', text: "Onions are trouble! Eating one will disable your character for 3.5 seconds." },
-            { type: 'h', text: "- Difficulty Levels" },
-            { type: 'p', text: "There are 3 difficulty levels, Beginner, Intermeidate and Expert. In intermeidate and expert levels the opponent or robot gets smarter and takes less time to wake up after the onion trap." },
-            { type: 'h', text: "- Win the States 🗺️" },
-            { type: 'p', text: "Earn enough points to light up U.S. states on the map." },
-            { type: 'p', extraRow: true, text: "The first to reach 270 points wins the game!" },
-
-            { type: 'h', text: "- Leaderboard Rules 🏆" },
-            { type: 'p', text: "Only winners make the leaderboard." },
-            { type: 'p', text: "Rankings are based on the most states won." },
-            { type: 'p', text: "If tied, the opponent's points decide the champion!" },
-
-            { type: 'p', text: "Ready to race, collect, and win? Let the Chad & Barry showdown begin! 🚀" }
-        ];
-
         // Add instructions text to container with proper alignment and word wrap
-        this.yPosition = 120;
-        instructions.forEach(instruction => {
+        this.yPosition = 160;
+        instructions.forEach((instruction, index) => {
             const text = this.add.text(
                 containerPadding, // Left padding
                 this.yPosition,
@@ -107,9 +150,13 @@ export default class GameInfoScene extends Phaser.Scene {
                 }
             ).setOrigin(0);
 
+            this.allTexts.push(text);
+
             this.contentContainer.add(text);
             const extraRow = instruction.extraRow ? 50 : 0;
-            this.yPosition += text.height + 10 + extraRow; // Dynamic spacing based on text height
+
+            const textHeight = instruction.type === 'h' ? 20 : text.height;
+            this.yPosition += textHeight + 10 + extraRow; // Dynamic spacing based on text height
         });
 
         // add points guide
@@ -123,7 +170,7 @@ export default class GameInfoScene extends Phaser.Scene {
             item: `${state.name}`,
             points: state.seats.toString()
         }));
-        this.addPointsGuide(containerWidth, containerPadding, '- Votes required to win state:', statesPoint)
+        this.addPointsGuide(containerWidth, containerPadding, '- Votes to win state:', statesPoint)
 
 
         createCloseButton(this, this.parentScene)
@@ -203,6 +250,8 @@ export default class GameInfoScene extends Phaser.Scene {
                 repeat: -1
             });
         }
+
+        this.eventListeners()
     }
 
 
@@ -215,7 +264,7 @@ export default class GameInfoScene extends Phaser.Scene {
 
         // Distribute items into columns
         list.forEach((item, index) => {
-            columns[index % 3].push(item);
+            columns[index % 2].push(item);
         });
 
         // Add points guide header
@@ -234,8 +283,10 @@ export default class GameInfoScene extends Phaser.Scene {
         ).setOrigin(0);
         this.contentContainer.add(pointsHeader);
 
+        this.pointsHeaders.push(pointsHeader);
+
         // Add columns
-       this.yPosition += 50;
+        this.yPosition += 50;
         const startY = this.yPosition;
 
         columns.forEach((column, columnIndex) => {
@@ -243,7 +294,7 @@ export default class GameInfoScene extends Phaser.Scene {
             const columnX = containerPadding + (columnWidth * columnIndex);
 
             column.forEach(item => {
-                const itemTxt = title.includes('Points Guide') ? `${capitalizeWords(item.type)} ${item.emoji} ${item.points}` : `${item.item} ${item.points}`;  
+                const itemTxt = title.includes('Points Guide') ? `${capitalizeWords(item.type)} ${item.emoji} ${item.points}` : `${item.item} ${item.points}`;
                 const itemText = this.add.text(
                     columnX,
                     columnY,
@@ -261,6 +312,8 @@ export default class GameInfoScene extends Phaser.Scene {
                         lineSpacing: -8
                     }
                 ).setOrigin(0);
+
+                this.allTableItems.push(itemText)
 
                 this.contentContainer.add(itemText);
                 columnY += itemText.height + 10;
@@ -322,23 +375,48 @@ export default class GameInfoScene extends Phaser.Scene {
     }
 
 
+    eventListeners() {
+        this.game.events.on('widthchange', this.handleResize, this);
+        this.handleResize();
+    }
 
-    handleBack() {
-        if (this.sceneStack.length > 0) {
-            const previousScene = this.sceneStack.pop();
-            console.log("$$$$$$$$$$$$$")
-            console.log(previousScene)
-            this.scene.stop();
-            this.scene.start(previousScene);
+    handleResize(obj) {
+        const newWidth = obj ? obj.width : this.cameras.main.width;
+        const newHeight = obj ? obj.height : this.cameras.main.height;
 
-            // this.scene.stop('GameInfoScene');
-            // this.scene.resume(previousScene);
-            // this.scene.bringToTop(previousScene);
-        } else {
-            // Default fallback if no previous scene
-            this.scene.start('StartScene');
+        console.log(newWidth)
+
+        if (newWidth < MAX_MOBILE_WIDTH) {
+            // Update background
+            if (this.backgroundManager) {
+                this.backgroundManager.resize(newWidth, newHeight);
+            }
+
+            this.title.setStyle({ fontSize: '30px' })
+
+            instructions.forEach((instruction, index) => {
+                if (instruction.type === 'h') {
+                    this.allTexts[index].setStyle({ fontSize: '23px' })
+                }
+                if (instruction.type === 'p') {
+                    this.allTexts[index].setStyle({ fontSize: '16px' })
+                }
+                // if(instruction.extraRow){
+                //     this.allTexts[index].setY(20)
+                // }
+            })
+
+            this.pointsHeaders.forEach((pointHeader, index) => {
+                pointHeader.setStyle({ fontSize: '23px' })
+            })
+            this.allTableItems.forEach((tableItem, index) => {
+                tableItem.setStyle({ fontSize: '15px' })
+            })
+
         }
     }
+
+
 
     closeInfoScene() {
         this.scene.start('StartScene');
