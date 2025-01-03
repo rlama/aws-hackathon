@@ -12,16 +12,6 @@ export default class AudioManager {
         this.pausedSounds = new Set(); // Track paused sounds
     }
 
-    // preload() {
-    //     // Load your sound files
-    //     this.load.audio('win', 'assets/sounds/SndWin.mp3');
-    //     this.load.audio('onion', 'assets/sounds/SndOnion.mp3');
-    //     this.load.audio('loose', 'assets/sounds/SndLoose.mp3');
-    //     this.load.audio('pluspoints', 'assets/sounds/SndEatGood.mp3');
-    //     this.load.audio('minuspoints', 'assets/sounds/SndEatBad.mp3');
-
-    // }
-
     create() {
         // Create sound instances
         this.sounds.set('win', this.scene.sound.add('win'));
@@ -35,7 +25,6 @@ export default class AudioManager {
         this.sounds.set('onionopp', this.scene.sound.add('onionopp'));
         this.sounds.set('statewin', this.scene.sound.add('statewin'));
         this.sounds.set('statewinopp', this.scene.sound.add('statewinopp'));
-
     }
 
     play(key, config = {}) {
@@ -53,8 +42,18 @@ export default class AudioManager {
         }
     }
 
-      // Pause all playing sounds
-      pauseAll() {
+    isPlaying(key) {
+        const sound = this.scene.sound.get(key);
+        return sound && sound.isPlaying;
+    }
+    // Pause all playing sounds
+    pauseAll() {// In AudioManager.js
+        class AudioManager {
+            isPlaying(key) {
+                return this.sounds[key] && this.sounds[key].isPlaying;
+            }
+        }
+
         this.playingSounds.forEach(sound => {
             if (sound.isPlaying) {
                 sound.pause();
@@ -72,8 +71,8 @@ export default class AudioManager {
     }
 
 
-      // Pause specific sound
-      pause(key) {
+    // Pause specific sound
+    pause(key) {
         const sound = this.sounds.get(key);
         if (sound && sound.isPlaying) {
             sound.pause();

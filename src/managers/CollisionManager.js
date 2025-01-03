@@ -46,7 +46,6 @@ export default class CollisionManager {
             const points = this.scoreManager.calculatePoints(extra.type);
             const extraType = extra.getData('type');
 
-
             const { chad, barry } = this.characterManager.getCharacters();
             const characterType = character === chad ? 'chad' : 'barry';
 
@@ -56,12 +55,11 @@ export default class CollisionManager {
 
             if (extraType !== 'Onion' && characterType === this.gameStateManager.selectedCharacter) {
                 this.gameStateManager.playSound('eating', { volume: 0.3 });
-                // this.gameStateManager.playSound('pluspoints');
             }
 
             this.handleCharacterAnimationOnCollision(character, extraType);
 
-            // Handle collision for state
+            // Handle collision for US states
             this.scene.extraManager.handleCollisionForState(character, extra,);
 
             this.scoreManager.updateScore(character, extraType, currentState);

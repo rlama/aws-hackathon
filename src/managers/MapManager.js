@@ -5,7 +5,7 @@
  */
 
 
-import { MAP_CONFIG } from "../config/gameConfig";
+import { MAP_CONFIG, MAX_MOBILE_WIDTH } from "../config/gameConfig";
 
 export default class MapManager {
     constructor(scene, scaleOffset = 1, yOffset = 0, idleColor) {
@@ -89,7 +89,7 @@ export default class MapManager {
         const padding = 80;
         const scaleX = ((this.gameWidth - padding * 2) / mapWidth) / this.scaleOffset;
         const scaleY = ((this.gameHeight - padding * 2) / mapHeight) / this.scaleOffset;
-        this.scale = Math.min(scaleX, scaleY);
+        this.scale = Math.min(scaleX, scaleY) * (this.gameWidth < MAX_MOBILE_WIDTH ? 1.7 : 1);
 
         this.offsetX = (this.gameWidth - mapWidth * this.scale) / 2;
         this.offsetY = (this.gameHeight - mapHeight * this.scale) / 2;

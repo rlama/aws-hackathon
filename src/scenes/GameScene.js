@@ -6,15 +6,19 @@
 
 
 import Phaser from 'phaser';
-import CharacterManager from '../components/CharacterManager';
-import PlayPauseButton from '../objects/PlayPauseButton';
-import FocusManager from '../components/FocusManager';
-import CollisionManager from '../components/CollisionManager';
-import GameStateManager from '../components/GameStateManager';
-import ExtraManager from '../components/ExtraManager';
-import ScoreManager from '../components/ScoreManager';
-import MapManager from '../components/MapManager';
-import MemoryMonitor from '../components/MemoryMonitor';
+import CharacterManager from '../managers/CharacterManager';
+import StandardButton from '../objects/StandardButton';
+import FocusManager from '../managers/FocusManager';
+import CollisionManager from '../managers/CollisionManager';
+import GameStateManager from '../managers/GameStateManager';
+import ExtraManager from '../managers/ExtraManager';
+import ScoreManager from '../managers/ScoreManager';
+import MapManager from '../managers/MapManager';
+import MemoryMonitor from '../managers/MemoryMonitor';
+import { BackgroundManager } from '../managers/BackgroundManager';
+import { MAX_MOBILE_WIDTH } from '../config/gameConfig';
+import SettingsButton from '../objects/SettingsButton';
+import { isIphone } from '../utils/helpers';
 
 
 // import CursorManager from '../components/CursorManager';
@@ -36,8 +40,8 @@ export default class GameScene extends Phaser.Scene {
 
     }
 
-
     create() {
+
         this.input.setDefaultCursor('crosshair');
 
 
@@ -63,7 +67,17 @@ export default class GameScene extends Phaser.Scene {
 
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
-        addBackground(this, this.gameWidth, this.gameHeight, false, 'gamescene')
+        // addBackground(this, this.gameWidth, this.gameHeight, false, 'gamescene')
+
+        // Create background manager
+        this.backgroundManager = new BackgroundManager(this);
+
+        // Add background with options
+        this.backgroundManager.addBackground({
+            isGameScene: false,
+            addOverlay: false,
+            type: 'default'
+        });
 
 
         //create map
@@ -76,11 +90,10 @@ export default class GameScene extends Phaser.Scene {
         this.characterManager = new CharacterManager(this);
         this.scoreManager = new ScoreManager(this);
         this.extraManager = new ExtraManager(this, this.mapManager);
-        this.playPauseButton = new PlayPauseButton(this);
         this.collisionManager = new CollisionManager(this, this.scoreManager);
         this.focusManager = new FocusManager(this);
 
-       
+
         // Create the map
         this.mapManager.createStateMap();
 
@@ -92,7 +105,6 @@ export default class GameScene extends Phaser.Scene {
         // this.characterManager.addGlowEffect();
         this.characterManager.addTint();
 
-        this.playPauseButton.createButtons();
         this.characterManager.setCharacterControlsKeyInputs();
 
         this.gameStateManager.initializeFlyingText(this)
@@ -102,9 +114,16 @@ export default class GameScene extends Phaser.Scene {
 
         this.focusManager.initialize();
 
+        // Add settings button
+        let ypos = width < MAX_MOBILE_WIDTH ?  55 : 23;
+        ypos = isIphone() ? ypos + 50 : ypos;
+
+        this.settingsButton = new SettingsButton(this, width/2, ypos, true)
+        
+        this.eventListeners()
     }
 
-
+    
     // Add cleanup management
     addCleanupCallback(callback) {
         this.cleanupCallbacks.push(callback);
@@ -116,8 +135,9 @@ export default class GameScene extends Phaser.Scene {
     }
 
     resumeGame() {
+        this.gameStateManager.isGamePaused = false;
         this.scene.resume();
-        this.gameStateManager.resumeSound('background');
+        // this.gameStateManager.resumeSound('background');
     }
 
     update(time, delta) {
@@ -127,6 +147,44 @@ export default class GameScene extends Phaser.Scene {
             this.characterManager.updateAutoPlaying();
         }
     }
+
+    eventListeners() {
+        this.game.events.on('widthchange', this.hadleResize, this);
+
+        // Listen for viewport updates
+        this.game.events.on('viewportupdate', this.handleViewportUpdate, this);
+        this.hadleResize();
+
+    }
+
+    hadleResize(newWidth) {
+        const width = newWidth || this.cameras.main.width;
+        const height = this.cameras.main.height;
+        if (width < MAX_MOBILE_WIDTH) {
+            // this.selectCandidate.setY(height * 0.22)
+            // this.selectCandidate.setStyle({fontSize:'22px'})
+
+            // this.chadTxt.setX(width * 0.25)
+            // this.barryTxt.setX(width * 0.75)
+
+            // this.chadTxt.setY(height * 0.55)
+            // this.barryTxt.setY(height * 0.55)
+
+        }
+    }
+
+    handleViewportUpdate = ({ width, height, safeArea }) => {
+        // Adjust your UI elements to account for safe areas
+        const { top, bottom } = safeArea;
+
+        console.log(top, bottom)
+
+    }
+
+    shutdown() {
+        this.game.events.removeListener('viewportupdate', this.handleViewportUpdate);
+    }
+
 
 }
 

@@ -107,3 +107,14 @@ export function cssColor(phaserColor)
        return '#' + phaserColor.toString(16).padStart(6, '0');
 
     }
+
+
+
+export const checkIfMobile=()=>{
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+
+    export const isIphone=()=>{
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }

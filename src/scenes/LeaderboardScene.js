@@ -5,16 +5,17 @@
  */
 
 
-import { addBackground, createCloseButton, capitalizeWords } from "../utils/helpers";
+import { createCloseButton, capitalizeWords } from "../utils/helpers";
 import { FONT_FAMILY } from "../config/gameConfig";
 import { fetchLeaderboard } from "../api/api";
-import GameStateManager from "../components/GameStateManager";
+import GameStateManager from "../managers/GameStateManager";
+import {BackgroundManager} from "../managers/BackgroundManager";
 
 export default class LeaderboardScene extends Phaser.Scene {
     constructor() {
         super({ key: 'LeaderboardScene' });
         this.gameStateManager = GameStateManager.getInstance();
-        this.loadingText=null;
+        this.loadingText = null;
     }
 
     init(data) {
@@ -25,96 +26,87 @@ export default class LeaderboardScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        addBackground(this, width, height);
+        // Add background with options
+        this.backgroundManager = new BackgroundManager(this);
+        this.backgroundManager.addBackground({
+            isGameScene: false,
+            addOverlay: true,
+            type: 'default'
+        });
 
-        // Add title
-        const titleTxt = `Top Ten "${this.gameStateManager.difficultyLevel}" Winner`;
-        this.add.text(width / 2, 50, titleTxt, {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontFamily: FONT_FAMILY,
-            fontWeight: 'bold'
-        }).setOrigin(0.5)
-            .setDepth(1)
+        // Get the loaded content
+        this.htmlContent = this.cache.text.get('leaderboardHTML');
 
+        this.element = document.createElement('div');
 
-        // Loading Text
-        const loadingTxt = `Loading ...`;
-        this.loadingText = this.add.text(width / 2, 300, loadingTxt, {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontFamily: FONT_FAMILY,
-            fontWeight: 'bold'
-        }).setOrigin(0.5)
-            .setDepth(0)
-            .setVisible(true)
+        this.element.innerHTML = this.htmlContent;
+        this.element.style.width = '100%';
+        this.element.style.height = '100%';
 
+        // Add click handler for close button
+        const closeButton = this.element.querySelector('.close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                // Close the scene or return to previous scene
+                console.log("aadfadsfsdf")
+                this.closeScene(this, this.parentScene)
+            });
+        }
 
-        // Define table structure with percentages
-        this.tableConfig = {
-            x: width * 0.05, // 5% margin from left
-            y: 100,
-            width: width * 0.9, // 90% of game width
-            columns: [
-                { key: 'rank', title: 'Rank', width: 0.10 }, // 15%
-                { key: 'playerName', title: 'Player', width: 0.18 }, // 20% of table width
-                { key: 'selectedCharacter', title: 'Character', width: 0.15 }, // 15%
-                { key: 'statesWon', title: 'States won', width: 0.15 }, // 15%
-                { key: 'yourScore', title: 'Opponent score', width: 0.15 }, // 15%
-                { key: 'date', title: 'Date', width: 0.20 } // 20%
-            ],
-            rowHeight: 40,
-            headerHeight: 50
-        };
+        // Add to scene
+        this.add.dom(width / 2, height / 2,this.element)
+            .setOrigin(0.5);
 
-        // Create table
-        this.createTable();
+        // Clean up when scene is shut down
+        this.events.on('shutdown', () => {
+
+        });
+
 
         try {
             const scores = await fetchLeaderboard(this.gameStateManager.difficultyLevel);
 
-            console.log(scores)
+            let tr = "";
 
-            // Display scores
             scores.forEach((score, index) => {
-                this.createScoreRow(score, index);
-            });
+                const date = new Date(score.timestamp);
+                const formattedDate = date.toLocaleDateString() + ' ' +
+                    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            createCloseButton(this, this.parentScene);
+                tr = tr + `<tr>
+                        <td data-label="Rank">${index + 1}</td>
+                        <td data-label="Player">${score.playerName}</td>
+                        <td data-label="Character">${score.selectedCharacter}</td>
+                        <td data-label="States">${score.statesWon}</td>
+                        <td data-label="Opponent">${score.opponent}</td>
+                        <td data-label="Date">${formattedDate}</td>
+                    </tr>`
+            });
+            const tBody = `<tbody>
+                            ${tr}
+                            </tbody>`;
+
+            this.element.querySelector('#tbody').innerHTML = tBody;
+
+            this.element.querySelector('.header-title').innerHTML = `Leaderboard "${ this.gameStateManager.difficultyLevel}"`
+            this.element.querySelector('.loading').style.padding = "20% 0";
+            this.element.querySelector('.loading').innerHTML = "";
+
 
         } catch (error) {
-
-            this.add.text(width / 2, 200, error, {
-                fontSize: '15px',
-                color: '#ff8735'
-            }).setOrigin(0.5, 0.5);
-
-            this.loadingText.setVisible(false)
-            createCloseButton(this, this.parentScene);
-
+            this.element.querySelector('.loading').innerHTML = error
         }
-
     }
 
-    createTable() {
-        const { x, y, width, columns, headerHeight } = this.tableConfig;
 
-        // Create header background
-        this.add.rectangle(x, y, width, headerHeight, 0x2c3e50)
-            .setOrigin(0, 0);
-
-        // Add header texts
-        let currentX = x;
-        columns.forEach(column => {
-            const columnWidth = width * column.width;
-            this.add.text(currentX + 10, y + headerHeight / 2, column.title, {
-                fontSize: '15px',
-                color: 'gold',
-                fontFamily: 'Arial'
-            }).setOrigin(0, 0.5);
-            currentX += columnWidth;
-        });
+    closeScene(scene, parentScene) {
+        if (parentScene) {
+            scene.scene.start(parentScene);
+        }
+        scene.scene.sleep();
     }
+
+
 
     createScoreRow(scoreData, index) {
         const { x, y, width, columns, rowHeight, headerHeight } = this.tableConfig;

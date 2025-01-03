@@ -8,12 +8,17 @@ import PreloadScene from '../scenes/PreloadScene';
 import IntroScene from '../scenes/IntroScene';
 import GameScene from '../scenes/GameScene';
 import StartScene from '../scenes/StartScene';
-import OverlayScene from '../scenes/OverlayScene';
+import SettingsScene from '../scenes/SettingsScene';
 import FinishScene from '../scenes/FinishScene';
 import GameInfoScene from '../scenes/GameInfoScene';
 import LeaderboardScene from '../scenes/LeaderboardScene'
 import DebugAtlasScene from '../scenes/DebugAtlasScene';
+import { OrientationManager } from '../managers/OrientationManager';
+import { ViewportManager } from '../managers/ViewportManager';
 
+export const MUSIC_ON = false;
+export const SOUND_ON = false;
+export const MAX_MOBILE_WIDTH = 650;
 export const EXTRA_SCALE = 0.4;
 export const RESET_TO_IDLE_TIME = 3500; // adds delay when onion is eaten
 export const EXTRA_SPAWN_TIME = 1000;
@@ -21,15 +26,48 @@ export const EXTRA_TYPE_CHANGE_INTERVAL_TIME = [300, 800];
 export const PRIMARY_TEXT_COLOR = "#74b40a";
 export const SEC_TEXT_COLOR = "#358bc0";
 export const FONT_FAMILY = "Lagome";// "Arcade";// "Impact";
-
 export const GAME_FRAME_RATE = 60;
 
 export const AWS_API_GATEWAY_ENDPOINT = "https://api.goondrook.com/hackathon"
 
-
 export const AVAILABLE_EXTRAS = ['dragon_fly', 'bird_fly', 'gold_box', 'five_coin', 'fruit', 'onion', 'star_emoji'];
 
 export const EXTRA_TYPES = ['onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion'];
+
+
+export const DEFAULT_INITIAL_SCORE = {
+    chad: 0,
+    barry: 0
+}
+
+export const NAME_ALREADY_EXIST_MSG = [
+    "Sorry, Name’s off the market!",
+    "Sorry, Taken! Like Liam Neeson.",
+    "Sorry, that name's a celebrity now.",
+    "Already in the cool kids' club. Sorry.",
+    "Name’s retired, pick a rookie.",
+    "Name reserved! Try remixing it.",
+    "Sorry, that name’s got a twin!",
+    "Sorry, this one’s a classic hit!"
+]
+
+
+export const GAMEOVER_TEXT_WON = [
+    "Game Over, Champ!",
+    "Endgame Glory",
+    "Ultimate Victory",
+    "Nice Try, Hero!",
+    "Victory Unlocked",
+]
+
+export const GAMEOVER_TEXT_LOST = [
+    "Game Over, Champ!",
+    "Better Luck Next Time!",
+    "Whoops! Down You Go!",
+    "Nice Try, Hero!",
+    "Mission Failed!",
+    "That's All Folks!",
+]
 
 
 export const MAP_CONFIG = {
@@ -211,12 +249,6 @@ export const DUMMY_SCORE = {
 }
 
 
-export const DEFAULT_INITIAL_SCORE = {
-    chad: 0,
-    barry: 0
-}
-
-
 export const _DEFAULT_INITIAL_SCORE = {
     chad: { score: 220, winner: "" },
     barry: { score: 220, winner: "" },
@@ -290,7 +322,22 @@ export const gameConfig = {
         parent: 'game',
         width: window.innerWidth,
         height: window.innerHeight,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        orientation: {
+            // Force landscape for all devices
+            forceOrientation: true,
+            // Or specify which orientation you want
+            forceLandscape: false,  // or forceLandscape: false for portrait
+        },
+        // Add min/max boundaries
+        min: {
+            width: 375,
+            height: 500
+        },
+        max: {
+            width: 1920,
+            height: 1080
+        }
     },
     physics: {
         default: 'arcade',
@@ -310,7 +357,7 @@ export const gameConfig = {
         createContainer: true  // This is crucial!
     },
     backgroundColor: '#ffffff',
-    scene: [PreloadScene, IntroScene, StartScene, GameScene, OverlayScene, GameInfoScene, FinishScene, LeaderboardScene, DebugAtlasScene],
+    scene: [PreloadScene, IntroScene, StartScene, GameScene, SettingsScene, GameInfoScene, FinishScene, LeaderboardScene, DebugAtlasScene],
     fps: {
         target: GAME_FRAME_RATE,
         forceSetTimeOut: false
@@ -333,7 +380,6 @@ const destroyGame = () => {
             // First remove all scenes safely
             game.scene.scenes.forEach(scene => {
                 try {
-                    // Remove all scene event listeners first
                     scene.events.removeAllListeners();
                     scene.scene.stop();
                     scene.scene.remove();
@@ -372,7 +418,6 @@ const destroyGame = () => {
             });
         } catch (e) {
             console.warn('Game cleanup error:', e);
-            // Force cleanup if normal destroy fails
             game = null;
             const gameContainer = document.getElementById('game');
             if (gameContainer) {
@@ -383,27 +428,34 @@ const destroyGame = () => {
 };
 
 
-// Add resize handler with debounce
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-    }
+// // Add resize handler with debounce
+// let resizeTimeout;
+// window.addEventListener('resize', () => {
+//     if (resizeTimeout) {
+//         clearTimeout(resizeTimeout);
+//     }
 
-    resizeTimeout = setTimeout(() => {
-        // Destroy existing game
-        destroyGame();
+//     resizeTimeout = setTimeout(() => {
+//         destroyGame();
 
-        // Create new game instance after a short delay
-        setTimeout(() => {
-            game = new Phaser.Game(gameConfig);
-        }, 100);
-    }, 250);
-});
+//         setTimeout(() => {
+//             game = new Phaser.Game(gameConfig);
+//             // const orientationManager = OrientationManager.getInstance(game);
+//             // orientationManager.initialize();
+//         }, 100);
+//     }, 250);
+// });
+
 
 // Initial game creation
 if (!game) {
     game = new Phaser.Game(gameConfig);
+    // Initialize orientation manager
+    const orientationManager = OrientationManager.getInstance(game);
+    orientationManager.initialize();
+
+    const viewportManager = new ViewportManager(game);
+
 }
 
 export { game };
