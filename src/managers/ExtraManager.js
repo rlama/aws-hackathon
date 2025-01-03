@@ -480,7 +480,7 @@ export default class ExtraManager {
         this.stopSpawnTimer();
         this.extras.clear(true, true);
 
-        const finalScores = this.gameStateManager.getFinalScore();
+        let finalScores = this.gameStateManager.getFinalScore();
 
         finalScores = {...finalScores, uid: this.gameStateManager.uid}
 
