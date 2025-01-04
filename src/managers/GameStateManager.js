@@ -43,6 +43,9 @@ export default class GameStateManager {
         this._musicOn = MUSIC_ON;
         this._soundOn = SOUND_ON;
 
+        this._rankDataFetching = false;
+        this._rankData = undefined;
+
         this.loadAudioLsSettings();
 
         // Store the instance
@@ -141,6 +144,12 @@ export default class GameStateManager {
 
     set winner(value) { this._winner = value; }
     get winner() { return this._winner; }
+
+    set rankDataFetching(value) { this._rankDataFetching = value; }
+    get rankDataFetching() { return this._rankDataFetching; }
+
+    set rankData(value) { this._rankData = value; }
+    get rankData() { return this._rankData; }
 
     set musicOn(value) { this._musicOn = value; }
     get musicOn() { return this._musicOn; }

@@ -22,6 +22,27 @@ export default class FinishScene extends Phaser.Scene {
 
     init(data) {
         this.gameEnd = data.gameEnd;
+        this.checkRankData();
+    }
+
+    // In FinishScene.js
+    checkRankData() {
+        if (this.gameStateManager.rankDataFetching) {
+            // Check every 100ms until rankDataFetching is false
+            setTimeout(() => {
+                this.checkRankData();
+            }, 100);
+        } else {
+            // rankData is ready, update UI or perform necessary actions
+            const rankData = this.gameStateManager.rankData;
+
+            let rankDataEle = this.element.querySelector('#f-rank');
+            const msg = `You are ranked ${rankData.rank} out of ${rankData.totalPlayers} players`;
+            console.log(msg)
+            if (rankDataEle) {
+                rankDataEle.innerHTML = msg;
+            }
+        }
     }
 
     create() {
@@ -72,7 +93,6 @@ export default class FinishScene extends Phaser.Scene {
 
         const player = 'Hey ' + this.gameStateManager.playerName + "!";
         const winLostText = didWon ? player + ' You Won !!!' : player + ' You Lost !';
-        // const winLostText = 'Hey Matt, you won'
 
         let title = this.element.querySelector('#f-title');
         if (title) {
@@ -103,7 +123,14 @@ export default class FinishScene extends Phaser.Scene {
             // barryState.innerHTML = `States: 25`;
         }
 
-
+        const leaderboardButton = this.element.querySelector('#leaderboard');
+        if (leaderboardButton) {
+            leaderboardButton.addEventListener('click', (e) => {
+                this.scene.start('LeaderboardScene', {
+                    parentScene: this.scene.key
+                });
+            })
+        }
 
         const replayButton = this.element.querySelector('#replay');
         if (replayButton) {
