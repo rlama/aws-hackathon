@@ -10,6 +10,16 @@ import './assets/styles/gameLevel.css';
 import './assets/styles/leaderboard.css';
 import Phaser from 'phaser';
 import './config/gameConfig'; 
+import Game from './game/Game';
 
-// const game =  new Phaser.Game(gameConfig);
+let game = null;
 
+function createGame() {
+    if (game) {
+        game.destroy();
+    }
+    game = new Game();
+    return game;
+}
+
+export default createGame();

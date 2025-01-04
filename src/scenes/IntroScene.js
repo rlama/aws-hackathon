@@ -26,6 +26,7 @@ export default class IntroScene extends Phaser.Scene {
         this.inputElement = null;
         this.boundHandleInput = null;
         this.boundHandleOutsideClick = null;
+        this.checking = false;
     }
 
     create() {
@@ -231,12 +232,15 @@ export default class IntroScene extends Phaser.Scene {
     }
 
     async handleStartClick() {
+        if(this.checking) return;
+        this.checking = true
         try {
             const uid = await getFingerprint();
             this.gameStateManager.uid = uid;
             this.startButton.setText('Checking...');
 
             const exists = await checkNameAlreadyExists(this.playerName, uid);
+            this.checking = false;
             
             if (exists) {
                 this.handleNameExists();

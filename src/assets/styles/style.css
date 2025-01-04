@@ -103,6 +103,10 @@ body::after {
   text-shadow: 2px 2px #000000;
 }
 
+.points-list{
+  display:flex;
+}
+
 .info-text {
   font-size: 18px;
   line-height: 1.6;
