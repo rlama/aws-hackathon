@@ -47,8 +47,6 @@ export default class LeaderboardScene extends Phaser.Scene {
         const closeButton = this.element.querySelector('.close-button');
         if (closeButton) {
             closeButton.addEventListener('click', () => {
-                // Close the scene or return to previous scene
-                console.log("aadfadsfsdf")
                 this.closeScene(this, this.parentScene)
             });
         }

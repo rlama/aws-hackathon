@@ -72,6 +72,11 @@
     background-color:  rgba(90, 86, 122, 0.2);
 }
 
+.leaderboard-table td:first-child {
+    text-align: center;
+}
+
+
 
 
 /* Mobile styles */
@@ -132,7 +137,14 @@
         color: #ffd700;
     }
 
-    
+    .leaderboard-table td:first-child {
+        text-align: right;
+    }
+
+    .leaderboard-table td:first-child:before {
+        text-align: left;
+    }
+
 
     .leaderboard-table tbody tr:nth-child(even) {
         background-color: rgba(255, 255, 255, 0.1);

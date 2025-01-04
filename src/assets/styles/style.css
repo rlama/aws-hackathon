@@ -277,13 +277,6 @@ input:checked+.slider .text.off {
   margin: 6% 0;
 }
 
-.finish-wrapper h3 {
-  text-align: center;
-  font-family: 'Lagome', sans-serif;
-  font-size: 25px;
-  margin: 20px;
-  color: #474e4f;
-}
 
 .finish-container {
   font-family: 'Lagome', sans-serif;
@@ -485,4 +478,24 @@ input:checked+.slider .text.off {
   padding: 20% 0;
   font-family: 'Lagome', sans-serif;
   font-size: 25px;
+}
+
+
+#f-title{
+  text-align: center;
+  font-family: 'Lagome', sans-serif;
+  font-size: 25px;
+  color: #474e4f;
+  margin: 20px 0 4px;
+}
+
+
+
+#f-rank{
+  text-align: center;
+  font-family: 'Lagome', sans-serif;
+  color: #474e4f;
+  margin: 5px 0 20px;
+  font-size: 15px;
+  font-weight: bold;
 }

@@ -476,7 +476,7 @@ export default class ExtraManager {
     }
 
 
-    endGame() {
+    async endGame() {
         this.stopSpawnTimer();
         this.extras.clear(true, true);
 
@@ -488,8 +488,16 @@ export default class ExtraManager {
         this.scene.scene.pause();
 
         //Save score to leaderboard, only if player score is 270 or if player wins.
+        let rankData = undefined;
         if (finalScores.score >= 270) {
-            saveToLeaderboard(finalScores)
+            this.gameStateManager.rankDataFetching = true;
+            saveToLeaderboard(finalScores).then((data) => {
+                this.gameStateManager.rankData = data;
+                this.gameStateManager.rankDataFetching = false;
+            }).catch(error => {
+                console.error('Error saving scores:', error);
+            });
+            
         }
 
         // Play sound

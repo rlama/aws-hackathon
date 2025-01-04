@@ -38,7 +38,7 @@ export const checkNameAlreadyExists = async (name, uid) => {
     try {
         const options = {
             data: {
-                name,
+                playerName:name,
                 uid
             },
             type: 'check'
@@ -75,7 +75,8 @@ export const saveToLeaderboard = async(_score) => {
                 opponent: _score.opponent,
                 statesWon: _score.statesWon,
                 level: _score.level,
-                gameId: "cb-01"
+                gameId: "cb-01",
+                uid: _score.uid
             },
             type: 'save'
         }
