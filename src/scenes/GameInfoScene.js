@@ -10,7 +10,6 @@ import { BackgroundManager } from "../managers/BackgroundManager";
 import { FONT_FAMILY, EMOJI_TYPES, ALL_STATES, MAX_MOBILE_WIDTH } from "../config/gameConfig";
 
 
-
 // Game instructions
 const instructions = [
     { type: 'h', text: "- Pick Your Candidate:" },

@@ -16,7 +16,7 @@ export class BackgroundManager {
             this.background.destroy();
         }
 
-        if(!overlayOnly){
+        if (!overlayOnly) {
             // Determine background image based on screen width and type
             let backgroundKey = this.getBackgroundKey(type);
 
@@ -34,7 +34,7 @@ export class BackgroundManager {
             this.addDarkOverlay();
         }
 
-        if(header) {
+        if (header) {
             this.addHeaderBar();
         }
 
@@ -65,18 +65,18 @@ export class BackgroundManager {
     }
 
     addHeaderBar() {
-            // Create the main score box
-            const titleBg = this.scene.add.rectangle(
-                0,           // x position (left aligned)
-                0,           // y position (top aligned)
-                this.gameWidth,   // width matches game width
-                140,   // height of 60px
-                0x28383e,   // black color
-                1        // 70% opacity
-            );
+        // Create the main score box
+        const titleBg = this.scene.add.rectangle(
+            0,           // x position (left aligned)
+            0,           // y position (top aligned)
+            this.gameWidth,   // width matches game width
+            140,   // height of 60px
+            0x28383e,   // black color
+            1        // 70% opacity
+        );
 
-            titleBg.setOrigin(0, 0); // Align to top-left
-            titleBg.setDepth(1); // Align to top-left
+        titleBg.setOrigin(0, 0); // Align to top-left
+        titleBg.setDepth(1); // Align to top-left
     }
 
     /**

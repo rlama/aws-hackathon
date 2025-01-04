@@ -1,109 +1,338 @@
-[
-    {
-        "playerName": "Les12",
-        "selectedCharacter": "barry",
-        "score": 270,
-        "opponent": 123,
-        "statesWon": 18,
-        "level": "beginner",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"cDZmdfdhOTQ5"
-    },
-    {
-        "playerName": "Rich",
-        "selectedCharacter": "barry",
-        "score": 270,
-        "opponent": 144,
-        "statesWon": 20,
-        "level": "beginner",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"ZDZmNjdhOTQ5"
-    },
-    {
-        "playerName": "Tom23",
-        "selectedCharacter": "chad",
-        "score": 270,
-        "opponent": 220,
-        "statesWon": 15,
-        "level": "expert",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"cDZmdfdhOTQ5"
-    },
-    {
-        "playerName": "Alpha10",
-        "selectedCharacter": "barry",
-        "score": 270,
-        "opponent": 157,
-        "statesWon": 20,
-        "level": "expert",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"ZDZmNjdhOTQ5"
-    },
-    {
-        "playerName": "May66",
-        "selectedCharacter": "chad",
-        "score": 270,
-        "opponent": 240,
-        "statesWon": 12,
-        "level": "intermediate",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"cDZmdfdhOTQ5"
-    },
-    {
-        "playerName": "Julu00",
-        "selectedCharacter": "barry",
-        "score": 270,
-        "opponent": 244,
-        "statesWon": 20,
-        "level": "intermediate",
-        "timestamp": "2024-12-14T19:26:08.253000Z",
-        "gameId": "cb-01",
-        "uid":"ZDZmNjdhOTQ5"
-    }
-]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{
+    "type": "savebulk",
+    "env": "test",
+    "data": [
+        {
+            "playerName": "Blade547",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 156,
+            "statesWon": 15,
+            "level": "beginner",
+            "timestamp": "2025-01-12T14:23:45.253000Z",
+            "gameId": "cb-01",
+            "uid": "cKLmN7dhP3Q8"
+        },
+        {
+            "playerName": "Phoenix92",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 189,
+            "statesWon": 22,
+            "level": "beginner",
+            "timestamp": "2025-01-12T18:45:12.253000Z",
+            "gameId": "cb-01",
+            "uid": "bRTkL9dhM5Q2"
+        },
+        {
+            "playerName": "Crypto233",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 145,
+            "statesWon": 19,
+            "level": "beginner",
+            "timestamp": "2025-01-13T09:15:33.253000Z",
+            "gameId": "cb-01",
+            "uid": "aWXnP4dhJ7Q1"
+        },
+        {
+            "playerName": "Dragon876",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 178,
+            "statesWon": 21,
+            "level": "beginner",
+            "timestamp": "2025-01-13T11:34:22.253000Z",
+            "gameId": "cb-01",
+            "uid": "dHYmQ8dhR4T5"
+        },
+        {
+            "playerName": "Shadow445",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 134,
+            "statesWon": 17,
+            "level": "beginner",
+            "timestamp": "2025-01-13T16:28:55.253000Z",
+            "gameId": "cb-01",
+            "uid": "eJKpL2dhN8W3"
+        },
+        {
+            "playerName": "Ninja789",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 198,
+            "statesWon": 24,
+            "level": "beginner",
+            "timestamp": "2025-01-14T08:12:44.253000Z",
+            "gameId": "cb-01",
+            "uid": "fMNqR5dhB6Y7"
+        },
+        {
+            "playerName": "Viper321",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 167,
+            "statesWon": 20,
+            "level": "beginner",
+            "timestamp": "2025-01-14T13:45:19.253000Z",
+            "gameId": "cb-01",
+            "uid": "gPQsT7dhC9X4"
+        },
+        {
+            "playerName": "Ghost654",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 143,
+            "statesWon": 16,
+            "level": "beginner",
+            "timestamp": "2025-01-14T17:22:08.253000Z",
+            "gameId": "cb-01",
+            "uid": "hSTuV9dhF2Z8"
+        },
+        {
+            "playerName": "Storm112",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 187,
+            "statesWon": 23,
+            "level": "beginner",
+            "timestamp": "2025-01-15T10:17:36.253000Z",
+            "gameId": "cb-01",
+            "uid": "iVWxY3dhH5A1"
+        },
+        {
+            "playerName": "Titan998",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 156,
+            "statesWon": 18,
+            "level": "beginner",
+            "timestamp": "2025-01-15T15:49:27.253000Z",
+            "gameId": "cb-01",
+            "uid": "jYZaB4dhK7C9"
+        },
+        {
+            "playerName": "Omega476",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 234,
+            "statesWon": 22,
+            "level": "intermediate",
+            "timestamp": "2025-01-12T12:33:41.253000Z",
+            "gameId": "cb-01",
+            "uid": "kBCdE6dhM9F2"
+        },
+        {
+            "playerName": "Raider234",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 245,
+            "statesWon": 19,
+            "level": "intermediate",
+            "timestamp": "2025-01-12T16:55:14.253000Z",
+            "gameId": "cb-01",
+            "uid": "lFGhI8dhP1J4"
+        },
+        {
+            "playerName": "Cyber567",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 212,
+            "statesWon": 24,
+            "level": "intermediate",
+            "timestamp": "2025-01-13T08:27:59.253000Z",
+            "gameId": "cb-01",
+            "uid": "mJKlN2dhR3L7"
+        },
+        {
+            "playerName": "Pulse889",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 223,
+            "statesWon": 21,
+            "level": "intermediate",
+            "timestamp": "2025-01-13T14:42:33.253000Z",
+            "gameId": "cb-01",
+            "uid": "nMNpQ5dhT6S9"
+        },
+        {
+            "playerName": "Echo432",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 199,
+            "statesWon": 17,
+            "level": "intermediate",
+            "timestamp": "2025-01-13T19:18:47.253000Z",
+            "gameId": "cb-01",
+            "uid": "oRStU7dhV8W2"
+        },
+        {
+            "playerName": "Vector765",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 256,
+            "statesWon": 25,
+            "level": "intermediate",
+            "timestamp": "2025-01-14T09:36:22.253000Z",
+            "gameId": "cb-01",
+            "uid": "pVWxY9dhX1Z4"
+        },
+        {
+            "playerName": "Alpha143",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 234,
+            "statesWon": 20,
+            "level": "intermediate",
+            "timestamp": "2025-01-14T15:51:08.253000Z",
+            "gameId": "cb-01",
+            "uid": "qBCdE2dhA3F6"
+        },
+        {
+            "playerName": "Delta876",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 245,
+            "statesWon": 23,
+            "level": "intermediate",
+            "timestamp": "2025-01-14T19:24:55.253000Z",
+            "gameId": "cb-01",
+            "uid": "rGHiJ4dhK5L8"
+        },
+        {
+            "playerName": "Sigma521",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 221,
+            "statesWon": 18,
+            "level": "intermediate",
+            "timestamp": "2025-01-15T11:47:39.253000Z",
+            "gameId": "cb-01",
+            "uid": "sMNpQ6dhR7T1"
+        },
+        {
+            "playerName": "Beta309",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 233,
+            "statesWon": 21,
+            "level": "intermediate",
+            "timestamp": "2025-01-15T16:29:14.253000Z",
+            "gameId": "cb-01",
+            "uid": "tUVwX8dhY9Z3"
+        },
+        {
+            "playerName": "Elite754",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 259,
+            "statesWon": 24,
+            "level": "expert",
+            "timestamp": "2025-01-12T13:22:18.253000Z",
+            "gameId": "cb-01",
+            "uid": "uABcD1dhE3F5"
+        },
+        {
+            "playerName": "Master187",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 248,
+            "statesWon": 22,
+            "level": "expert",
+            "timestamp": "2025-01-12T17:48:33.253000Z",
+            "gameId": "cb-01",
+            "uid": "vGHiJ2dhK4L7"
+        },
+        {
+            "playerName": "Legend432",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 252,
+            "statesWon": 25,
+            "level": "expert",
+            "timestamp": "2025-01-13T10:15:47.253000Z",
+            "gameId": "cb-01",
+            "uid": "wMNpQ3dhR5T9"
+        },
+        {
+            "playerName": "Pro965",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 260,
+            "statesWon": 23,
+            "level": "expert",
+            "timestamp": "2025-01-13T15:39:22.253000Z",
+            "gameId": "cb-01",
+            "uid": "xUVwX4dhY6Z2"
+        },
+        {
+            "playerName": "Champion543",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 257,
+            "statesWon": 21,
+            "level": "expert",
+            "timestamp": "2025-01-13T20:11:55.253000Z",
+            "gameId": "cb-01",
+            "uid": "yABcD5dhE7F4"
+        },
+        {
+            "playerName": "Ace876",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 245,
+            "statesWon": 24,
+            "level": "expert",
+            "timestamp": "2025-01-14T11:28:44.253000Z",
+            "gameId": "cb-01",
+            "uid": "zGHiJ6dhK8L1"
+        },
+        {
+            "playerName": "Supreme321",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 258,
+            "statesWon": 22,
+            "level": "expert",
+            "timestamp": "2025-01-14T16:52:19.253000Z",
+            "gameId": "cb-01",
+            "uid": "AMNpQ7dhR9T3"
+        },
+        {
+            "playerName": "Ultimate654",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 251,
+            "statesWon": 25,
+            "level": "expert",
+            "timestamp": "2025-01-14T20:17:36.253000Z",
+            "gameId": "cb-01",
+            "uid": "BUVwX8dhY1Z5"
+        },
+        {
+            "playerName": "Apex198",
+            "selectedCharacter": "barry",
+            "score": 270,
+            "opponent": 256,
+            "statesWon": 23,
+            "level": "expert",
+            "timestamp": "2025-01-15T12:45:28.253000Z",
+            "gameId": "cb-01",
+            "uid": "CABcD9dhE2F7"
+        },
+        {
+            "playerName": "Grand432",
+            "selectedCharacter": "chad",
+            "score": 270,
+            "opponent": 249,
+            "statesWon": 24,
+            "level": "expert",
+            "timestamp": "2025-01-15T17:33:52.253000Z",
+            "gameId": "cb-01",
+            "uid": "DGHiJ1dhK3L9"
+        }
+    ]
+    
+  }
 

@@ -9,7 +9,7 @@ import { createCloseButton, capitalizeWords } from "../utils/helpers";
 import { FONT_FAMILY } from "../config/gameConfig";
 import { fetchLeaderboard } from "../api/api";
 import GameStateManager from "../managers/GameStateManager";
-import {BackgroundManager} from "../managers/BackgroundManager";
+import { BackgroundManager } from "../managers/BackgroundManager";
 
 export default class LeaderboardScene extends Phaser.Scene {
     constructor() {
@@ -52,7 +52,7 @@ export default class LeaderboardScene extends Phaser.Scene {
         }
 
         // Add to scene
-        this.add.dom(width / 2, height / 2,this.element)
+        this.add.dom(width / 2, height / 2, this.element)
             .setOrigin(0.5);
 
         // Clean up when scene is shut down
@@ -86,7 +86,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
             this.element.querySelector('#tbody').innerHTML = tBody;
 
-            this.element.querySelector('.header-title').innerHTML = `Leaderboard "${ this.gameStateManager.difficultyLevel}"`
+            this.element.querySelector('.header-title').innerHTML = `Leaderboard "${this.gameStateManager.difficultyLevel}"`
             this.element.querySelector('.loading').style.padding = "20% 0";
             this.element.querySelector('.loading').innerHTML = "";
 
