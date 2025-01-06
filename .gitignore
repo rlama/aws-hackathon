@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 note.txt
+assets/data/hackathon-scores.json
 
 # Editor directories and files
 .vscode/*
