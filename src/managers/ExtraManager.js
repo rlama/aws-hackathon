@@ -504,8 +504,10 @@ export default class ExtraManager {
         const didWon = this.gameStateManager.winner === this.gameStateManager.selectedCharacter;
         if (didWon) {
             this.gameStateManager.playSound("win");
+            this.gameStateManager.didWon = true
         } else {
             this.gameStateManager.playSound("loose");
+            this.gameStateManager.didWon = false
         }
 
         this.scene.scene.start('FinishScene', {

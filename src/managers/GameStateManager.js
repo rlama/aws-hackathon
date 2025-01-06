@@ -37,6 +37,7 @@ export default class GameStateManager {
         this._audioManager = null;
         this._flyingText = null;
         this._uid = null;
+        this._didWon = false;
 
         this._soundInitialized = false;
 
@@ -163,6 +164,9 @@ export default class GameStateManager {
 
     set winner(value) { this._winner = value; }
     get winner() { return this._winner; }
+
+    set didWon(value) { this._didWon = value; }
+    get didWon() { return this._didWon; }
 
     set rankDataFetching(value) { this._rankDataFetching = value; }
     get rankDataFetching() { return this._rankDataFetching; }

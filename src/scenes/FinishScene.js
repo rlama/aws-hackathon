@@ -26,20 +26,23 @@ export default class FinishScene extends Phaser.Scene {
 
     // In FinishScene.js
     checkRankData() {
-            if (this.gameStateManager.rankDataFetching) {
-                // Check every 100ms until rankDataFetching is false
-                setTimeout(() => {
-                    this.checkRankData();
-                }, 100);
-            } else {
-                // rankData is ready, update UI or perform necessary actions
+        if (this.gameStateManager.rankDataFetching) {
+            // Check every 100ms until rankDataFetching is false
+            setTimeout(() => {
+                this.checkRankData();
+            }, 100);
+        } else {
+            // rankData is ready, update UI or perform necessary actions
+
+            if (this.element) {
                 const rankData = this.gameStateManager.rankData;
                 let rankDataEle = this.element.querySelector('#f-rank');
                 const msg = `Your rank: ${rankData.rank} -  out of ${rankData.totalPlayers} players`;
                 if (rankDataEle) {
                     rankDataEle.innerHTML = msg;
                 }
-            }
+            } 
+        }
     }
 
     create() {
@@ -60,7 +63,7 @@ export default class FinishScene extends Phaser.Scene {
                 fillStyle: 0xcff3ff
             }
         }
-        
+
         this.mapManager = new MapManager(this, 1.4, height * 0.1);
         // Create the map
         this.mapManager.createStateMap();
@@ -120,6 +123,11 @@ export default class FinishScene extends Phaser.Scene {
             // barryState.innerHTML = `States: 25`;
         }
 
+        const rankDiv = this.element.querySelector('#f-rank');
+        if(!this.gameStateManager.didWon){
+            rankDiv.innerHTML = "Sorry you did not make it to leaderboard"
+        }
+
         const leaderboardButton = this.element.querySelector('#leaderboard');
         if (leaderboardButton) {
             leaderboardButton.addEventListener('click', (e) => {
@@ -143,12 +151,12 @@ export default class FinishScene extends Phaser.Scene {
             .setOrigin(0.5);
     }
 
-    addPointsStats(element){
+    addPointsStats(element) {
         const data = this.gameStateManager.analytics;
-        
+
         let tBodyStr = "";
-        EMOJI_TYPES.forEach((item, index)=>{
-            tBodyStr= `${tBodyStr}
+        EMOJI_TYPES.forEach((item, index) => {
+            tBodyStr = `${tBodyStr}
             <tr>
             <td>${data.chad[item.type]}</td>
             <td>${item.emoji}</td>
@@ -158,7 +166,7 @@ export default class FinishScene extends Phaser.Scene {
         })
         const tBody = element.querySelector('#st-tbody');
         tBody.innerHTML = tBodyStr;
-     
+
     }
 
     restartGame() {
