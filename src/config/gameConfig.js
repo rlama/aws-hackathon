@@ -35,10 +35,17 @@ export const AVAILABLE_EXTRAS = ['dragon_fly', 'bird_fly', 'gold_box', 'five_coi
 export const EXTRA_TYPES = ['onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_box', 'five_coin', 'onion', 'fruit', 'onion'];
 
 
-export const DEFAULT_INITIAL_SCORE = {
+export const DEFAULT_INITIAL_SCORE_PROD = {
+    chad: 0,
+    barry: 0
+}
+export const DEFAULT_INITIAL_SCORE_DEV = {
     chad: 169,
     barry: 230
 }
+
+export const DEFAULT_INITIAL_SCORE = process.env.NODE_ENV === 'production' ? DEFAULT_INITIAL_SCORE_PROD : DEFAULT_INITIAL_SCORE_DEV;
+
 
 export const NAME_ALREADY_EXIST_MSG = [
     "Sorry, Name’s off the market!",

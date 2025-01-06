@@ -210,8 +210,6 @@ export default class GameStateManager {
             // Set the value
             this._analytics[character][key] = this._analytics[character][key] + 1;
 
-            console.log(this._analytics)
-
             return true;
 
         } catch (error) {
