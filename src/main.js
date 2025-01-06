@@ -8,6 +8,7 @@ import './assets/styles/style.css';
 import './assets/styles/header.css';
 import './assets/styles/gameLevel.css';
 import './assets/styles/leaderboard.css';
+import './assets/styles/finish.css';
 import Phaser from 'phaser';
 import './config/gameConfig'; 
 import Game from './game/Game';

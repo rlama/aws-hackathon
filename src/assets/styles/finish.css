@@ -1,0 +1,173 @@
+
+.stats-container {
+  max-width: 800px;
+  margin: 10px auto;
+  background-color: rgba(0, 0, 0, 0.75);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  font-family: 'Lagome', sans-serif;
+  height: 97%;
+
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #1a1a2e;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+}
+
+.team-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.team-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  margin: 0 10px;
+}
+
+.score-txt-chad, .score-txt-barry {
+  color: #f91515;
+  /* font-size: 28px; */
+
+}
+
+.st-count{
+  font-size: 34px;
+  font-weight: bold;
+}
+
+.score-txt-barry {
+  color: #6dbef7;
+}
+
+.score-txt-a {
+  color: rgb(225, 225, 225);
+  font-size: 14px;
+}
+
+.stats-header .header-title {
+  font-size: 2.3rem;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+.stats {
+  text-align: center;
+  padding: 20px;
+}
+
+.stats h2 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #86fc2f;
+}
+
+.stats h3 {
+  margin: 5px 0 10px;
+  color: white;
+}
+
+.st-buttons{
+  font-family: 'Lagome', sans-serif;
+    padding: 10px 20px;
+    font-size: 17px;
+  border-radius: 6px;
+  background: none;
+  border: 1px solid #6dbef7;
+  color: #82ec35;
+  cursor: pointer;
+}
+.st-buttons:hover{
+  background: #3b3b3b;
+}
+
+.stats table {
+  width: 100%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  color: white;
+}
+
+.stats table tbody tr td {
+  font-weight: bold;
+  font-size: 19px;
+  padding: 10px 43px;
+  text-align: center;
+  border-bottom: 1px solid #515151;
+}
+
+.stats table tbody tr td:nth-child(2) {
+  font-weight: bold;
+  font-size: 26px;
+  text-transform: uppercase;
+}
+
+.stats table tbody tr td:nth-child(1) {
+  color:#f91515;
+}
+
+.stats table tbody tr td:nth-child(3) {
+  color:#6dbef7;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9rem;
+  background-color: #111;
+}
+
+footer a {
+  color: #00d4ff;
+  text-decoration: none;
+}
+
+
+
+
+@media screen and (max-width: 650px) {
+
+  .stats-header{
+  padding: 20px 5px;
+}
+
+.stats-header .header-title{
+  display: none;
+}
+  .score-txt-chad, .score-txt-barry {
+    font-size: 18px;
+  }
+
+  .score{
+    margin:0;
+  }
+  .stats h2 {
+    font-size: 1.5rem;
+  }
+  .stats h3 {
+    font-size: 15px;
+  }
+  
+  .timer {
+    display: none;
+  }
+
+}

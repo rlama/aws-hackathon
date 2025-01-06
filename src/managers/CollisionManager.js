@@ -57,6 +57,8 @@ export default class CollisionManager {
                 this.gameStateManager.playSound('eating', { volume: 0.3 });
             }
 
+            this.gameStateManager.setAnalytics(extraType, characterType )
+
             this.handleCharacterAnimationOnCollision(character, extraType);
 
             // Handle collision for US states

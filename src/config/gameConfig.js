@@ -36,8 +36,8 @@ export const EXTRA_TYPES = ['onion', 'dragon_fly', 'bird_fly', 'onion', 'gold_bo
 
 
 export const DEFAULT_INITIAL_SCORE = {
-    chad: 0,
-    barry: 0
+    chad: 169,
+    barry: 230
 }
 
 export const NAME_ALREADY_EXIST_MSG = [

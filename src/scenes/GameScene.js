@@ -15,6 +15,7 @@ import ExtraManager from '../managers/ExtraManager';
 import ScoreManager from '../managers/ScoreManager';
 import MapManager from '../managers/MapManager';
 import MemoryMonitor from '../managers/MemoryMonitor';
+import AnalyticsManager from '../managers/AnalyticsManager';
 import { BackgroundManager } from '../managers/BackgroundManager';
 import { MAX_MOBILE_WIDTH } from '../config/gameConfig';
 import SettingsButton from '../objects/SettingsButton';
@@ -29,6 +30,7 @@ export default class GameScene extends Phaser.Scene {
         super({ key: 'GameScene' });
         // Use singleton pattern more efficiently
         this.gameStateManager = GameStateManager.getInstance();
+        this.analyticsManager = null;
         this.gameStateManager.scene = this;
         this.states = [];
         this.stateData = null;

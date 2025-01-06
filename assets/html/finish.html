@@ -1,35 +1,65 @@
-
-<div class="finish-container">
-    
-
-    <div class="finish-wrapper">
-        <h1 class="header-title">Game Over</h1>
-        <h3 id="f-title">Hey Richard ! You Won</h3>
-        <h3 id="f-rank">Loading your rank ...</h3>
-        
-        <div class="finish-container">
-            
-            <div class="finish-gr left">
-                <p id="chad-score">Chad: 120</p>
-                <p id="chad-states">States: 12</p>
+<div class="stats-container">
+    <div class="stats-header">
+        <div class="team">
+            <img src="../assets/images/chad.png" alt="Chad Logo" class="team-logo">
+            <!-- <span class="team-name">CHAD</span> -->
+            <div class="score">
+                <span class="score-txt-chad"><span class="st-count" id="chad-states">0</span> States</span>
+                <span class="score-txt-a" id="chad-score">0 Votes</span>
             </div>
-
-            <div class="vertical-line"></div>
-
-            <div class="finish-gr right">
-                <p id="barry-score">Barry: 270</p>
-                <p id="barry-states">States: 18</p>
-            </div>
-
         </div>
+        <div class="header-title">Game Over</div>
+        <div class="team">
+            <div class="score">
+                <span class="score-txt-barry"><span class="st-count" id="barry-states">0</span> States</span>
+                <span class="score-txt-a" id="barry-score">0 Votes</span>
+            </div>
 
-
-        <div class="li-buttons finish-btns">
-            <ul>
-                <li id="leaderboard">Leaderboard</li>
-                <li id="replay">Play Again</li>
-            </ul>
-
+            <!-- <span class="score">230</span> -->
+            <!-- <span class="team-name">BARRY</span> -->
+            <img src="../assets/images/barry.png" alt="Barry Logo" class="team-logo">
         </div>
     </div>
+    <div class="stats">
+        <h2 id="f-title">You have conquered</h2>
+        <h3 id="f-rank">Loading your rank ...</h3>
+        <table>
+            <tbody id="st-tbody">
+                <tr>
+                    <td>9</td>
+                    <td>🍔</td>
+                    <td>4</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>🍕</td>
+                    <td>2</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>🌭</td>
+                    <td>20</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>🍟</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>🍪</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>🧅</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <footer>
+        <button class="st-buttons" id="leaderboard">Leaderboard</button>
+        <button class="st-buttons" id="replay">Play Again</button>
+    </footer>
 </div>
