@@ -238,9 +238,6 @@ export default class IntroScene extends Phaser.Scene {
             const uid = await getFingerprint();
             this.gameStateManager.uid = uid;
             this.startButton.setText('Checking...');
-
-            console.log(uid)
-
             const exists = await checkNameAlreadyExists(this.playerName, uid);
             this.checking = false;
             
