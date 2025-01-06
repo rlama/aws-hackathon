@@ -40,7 +40,7 @@ export const DEFAULT_INITIAL_SCORE_PROD = {
     barry: 0
 }
 export const DEFAULT_INITIAL_SCORE_DEV = {
-    chad: 169,
+    chad: 240,
     barry: 230
 }
 
