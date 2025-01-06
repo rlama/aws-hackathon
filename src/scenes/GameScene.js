@@ -163,9 +163,9 @@ export default class GameScene extends Phaser.Scene {
         events.once('shutdown', this.cleanup, this);
         events.on('widthchange', this.handleResize, this);
         events.on('viewportupdate', this.handleViewportUpdate, this);
-        this.handleResize();
+        this.handleResize(); 
 
-    }
+    } 
 
     /// pause/resume game with spacebar press in desktop
     addSpacebarKeyListener(){
@@ -173,7 +173,7 @@ export default class GameScene extends Phaser.Scene {
         keySpace.on('down', () => {
             this.pauseGame()
             this.scene.launch('PauseScene', {
-                parentScene: this.scene,
+                parentScene: this,
                 isGameScene: true
             });
         })
