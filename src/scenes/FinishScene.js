@@ -34,7 +34,7 @@ export default class FinishScene extends Phaser.Scene {
         } else {
             // rankData is ready, update UI or perform necessary actions
 
-            if (this.element) {
+            if (this.element && this.gameStateManager.rankData) {
                 const rankData = this.gameStateManager.rankData;
                 let rankDataEle = this.element.querySelector('#f-rank');
                 const msg = `Your rank: ${rankData.rank} -  out of ${rankData.totalPlayers} players`;
@@ -125,7 +125,7 @@ export default class FinishScene extends Phaser.Scene {
 
         const rankDiv = this.element.querySelector('#f-rank');
         if(!this.gameStateManager.didWon){
-            rankDiv.innerHTML = "Sorry you did not make it to leaderboard"
+            rankDiv.innerHTML = "Good Luck next time"
         }
 
         const leaderboardButton = this.element.querySelector('#leaderboard');

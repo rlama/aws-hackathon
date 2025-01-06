@@ -58,6 +58,7 @@ export default class IntroScene extends Phaser.Scene {
         this.createHeaders(width, height);
         this.createInputField(width, height);
         this.createStartButton(width, height);
+        this.onEnterKeyPress()
     }
 
     createHeaders(width, height) {
@@ -229,6 +230,13 @@ export default class IntroScene extends Phaser.Scene {
             onClick: this.handleStartClick.bind(this),
             visible: false
         });
+    }
+
+    onEnterKeyPress(){
+        // Add keyboard input
+        this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        // Add the event listener for ENTER key
+        this.enterKey.on('down', this.handleStartClick.bind(this));
     }
 
     async handleStartClick() {

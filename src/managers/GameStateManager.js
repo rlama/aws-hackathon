@@ -29,7 +29,7 @@ export default class GameStateManager {
         this._velocityIncrement = 20;
         this._selectedCharacter = '';
         this._playerName = '';
-        this._difficultyLevel = 'beginner'
+        this._difficultyLevel = StorageManager.getProperty('level') || "beginner";
         this._scores = DEFAULT_INITIAL_SCORE
         this._winner = "";
         this._wonStates = [];
