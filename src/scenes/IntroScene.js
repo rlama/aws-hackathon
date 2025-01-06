@@ -239,6 +239,8 @@ export default class IntroScene extends Phaser.Scene {
             this.gameStateManager.uid = uid;
             this.startButton.setText('Checking...');
 
+            console.log(uid)
+
             const exists = await checkNameAlreadyExists(this.playerName, uid);
             this.checking = false;
             
@@ -258,11 +260,16 @@ export default class IntroScene extends Phaser.Scene {
         // const alreadyExistTxt = NAME_ALREADY_EXIST_MSG[
         //     Phaser.Math.Between(0, NAME_ALREADY_EXIST_MSG.length - 1)
         // ];
-        this.labelbtn.setText('Sorry that name is taken, try another one.');
+        this.labelbtn.setText("Name's taken, try another one.");
         this.startButton.setText('Start');
     }
 
     startGame() {
+
+        // this.scene.start('FinishScene',{
+        //     checkRankData: true;
+        // })
+
         this.scene.start('StartScene', {
             parentScene: this,
             playerName: this.playerName

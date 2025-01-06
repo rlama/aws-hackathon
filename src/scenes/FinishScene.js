@@ -6,11 +6,10 @@
 
 import { addBackground, cssColor } from "../utils/helpers";
 import MapManager from "../managers/MapManager";
-import { MAP_CONFIG, FONT_FAMILY, GAMEOVER_TEXT_WON, GAMEOVER_TEXT_LOST } from "../config/gameConfig";
+import { MAP_CONFIG, FONT_FAMILY, GAMEOVER_TEXT_WON, GAMEOVER_TEXT_LOST, EMOJI_TYPES } from "../config/gameConfig";
 import StandardButton from "../objects/StandardButton";
 import GameStateManager from "../managers/GameStateManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
-
 
 
 export default class FinishScene extends Phaser.Scene {
@@ -27,22 +26,23 @@ export default class FinishScene extends Phaser.Scene {
 
     // In FinishScene.js
     checkRankData() {
-        if (this.gameStateManager.rankDataFetching) {
-            // Check every 100ms until rankDataFetching is false
-            setTimeout(() => {
-                this.checkRankData();
-            }, 100);
-        } else {
-            // rankData is ready, update UI or perform necessary actions
-            const rankData = this.gameStateManager.rankData;
-
-            let rankDataEle = this.element.querySelector('#f-rank');
-            const msg = `You are ranked ${rankData.rank} out of ${rankData.totalPlayers} players`;
-            console.log(msg)
-            if (rankDataEle) {
-                rankDataEle.innerHTML = msg;
+            if (this.gameStateManager.rankDataFetching) {
+                // Check every 100ms until rankDataFetching is false
+                setTimeout(() => {
+                    this.checkRankData();
+                }, 100);
+            } else {
+                // rankData is ready, update UI or perform necessary actions
+                const rankData = this.gameStateManager.rankData;
+                console.log("-----rankData----")
+                console.log(rankData)
+                let rankDataEle = this.element.querySelector('#f-rank');
+                const msg = `Your rank: ${rankData.rank} -  out of ${rankData.totalPlayers} players`;
+                console.log(msg)
+                if (rankDataEle) {
+                    rankDataEle.innerHTML = msg;
+                }
             }
-        }
     }
 
     create() {
@@ -63,8 +63,8 @@ export default class FinishScene extends Phaser.Scene {
                 fillStyle: 0xcff3ff
             }
         }
-
-        this.mapManager = new MapManager(this, 1.4, height * 0.29);
+        
+        this.mapManager = new MapManager(this, 1.4, height * 0.1);
         // Create the map
         this.mapManager.createStateMap();
 
@@ -88,8 +88,8 @@ export default class FinishScene extends Phaser.Scene {
 
         const didWon = this.gameStateManager.winner === this.gameStateManager.selectedCharacter;
 
-        const gameOverTxt = didWon ? gameOverWonTxt : gameOverLostTxt
-        this.element.querySelector('.header-title').innerHTML = gameOverTxt;
+        // const gameOverTxt = didWon ? gameOverWonTxt : gameOverLostTxt
+        // this.element.querySelector('.header-title').innerHTML = gameOverTxt;
 
         const player = 'Hey ' + this.gameStateManager.playerName + "!";
         const winLostText = didWon ? player + ' You Won !!!' : player + ' You Lost !';
@@ -101,25 +101,25 @@ export default class FinishScene extends Phaser.Scene {
 
         let chadScore = this.element.querySelector('#chad-score');
         if (chadScore) {
-            chadScore.innerHTML = `Chad: ${this.gameStateManager.getScore("chad")}`;
+            chadScore.innerHTML = `${this.gameStateManager.getScore("chad")} Votes`;
         }
 
         const chadStateCount = this.gameStateManager.wonStates.filter(item => item.character === 'chad').length;
         let chadState = this.element.querySelector('#chad-states');
         if (chadState) {
-            chadState.innerHTML = `States: ${chadStateCount}`;
+            chadState.innerHTML = `${chadStateCount}`;
             // chadState.innerHTML = `States: 13`;
         }
 
         let barryScore = this.element.querySelector('#barry-score');
         if (barryScore) {
-            barryScore.innerHTML = `Barry: ${this.gameStateManager.getScore("barry")}`;
+            barryScore.innerHTML = `${this.gameStateManager.getScore("barry")} Votes`;
         }
 
         const barryStateCount = this.gameStateManager.wonStates.filter(item => item.character === 'barry').length;
         let barryState = this.element.querySelector('#barry-states');
         if (barryState) {
-            barryState.innerHTML = `States: ${barryStateCount}`;
+            barryState.innerHTML = `${barryStateCount}`;
             // barryState.innerHTML = `States: 25`;
         }
 
@@ -139,10 +139,29 @@ export default class FinishScene extends Phaser.Scene {
             })
         }
 
+        this.addPointsStats(this.element)
+
         // Add to scene
         this.add.dom(width / 2, height / 2, this.element)
             .setOrigin(0.5);
+    }
 
+    addPointsStats(element){
+        const data = this.gameStateManager.analytics;
+        
+        let tBodyStr = "";
+        EMOJI_TYPES.forEach((item, index)=>{
+            tBodyStr= `${tBodyStr}
+            <tr>
+            <td>${data.chad[item.type]}</td>
+            <td>${item.emoji}</td>
+            <td>${data.barry[item.type]}</td>
+            </tr>
+            `
+        })
+        const tBody = element.querySelector('#st-tbody');
+        tBody.innerHTML = tBodyStr;
+     
     }
 
     restartGame() {

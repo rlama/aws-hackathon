@@ -4,7 +4,7 @@
  * Last Updated:    December 22, 2024
  * Version:         1.0.0
  */
-import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE, MUSIC_ON, SOUND_ON } from "../config/gameConfig";
+import { EXTRA_TYPES, DEFAULT_INITIAL_SCORE, MUSIC_ON, SOUND_ON, EMOJI_TYPES } from "../config/gameConfig";
 import { capitalizeWords } from "../utils/helpers";
 import StorageManager from "./StorageManager";
 import AudioManager from "./AudioManager";
@@ -47,6 +47,25 @@ export default class GameStateManager {
         this._rankData = undefined;
 
         this.loadAudioLsSettings();
+
+        this._analytics = {
+            chad: {
+                "Burger": 0,
+                "Pizza": 0,
+                "Hot Dog": 0,
+                "Fries": 0,
+                "Cookie": 0,
+                "Onion": 0
+            },
+            barry: {
+                "Burger": 0,
+                "Pizza": 0,
+                "Hot Dog": 0,
+                "Fries": 0,
+                "Cookie": 0,
+                "Onion": 0
+            }
+        }
 
         // Store the instance
         GameStateManager.instance = this;
@@ -114,7 +133,7 @@ export default class GameStateManager {
     incrementScore(character, amount = 1) {
         if (character in this._scores) {
             this._scores[character] += amount;
-            if (this._scores[character] > 270) this._scores[character] = 270;            return this._scores[character];
+            if (this._scores[character] > 270) this._scores[character] = 270; return this._scores[character];
         }
         return false;
     }
@@ -169,12 +188,59 @@ export default class GameStateManager {
     set difficultyLevel(value) { this._difficultyLevel = value; }
     get difficultyLevel() { return this._difficultyLevel; }
 
+    get analytics() { return this._analytics; }
+
     set scene(value) {
         this._scene = value;
     }
 
     // Add this method to get the current game time
     get gameTime() { return this._gameTime; }
+
+
+    setAnalytics(key, character) {
+        // Valid keys for analytics
+        const validKeys = EMOJI_TYPES.map(item => item.type);
+
+        try {
+            // Check if key is valid
+            if (!validKeys.includes(key)) {
+                throw new Error(`Invalid analytics key: ${key}. Valid keys are: ${validKeys.join(', ')}`);
+            }
+            // Set the value
+            this._analytics[character][key] = this._analytics[character][key] + 1;
+
+            console.log(this._analytics)
+
+            return true;
+
+        } catch (error) {
+            console.error('Error setting analytics:', error.message);
+            return false;
+        }
+    }
+
+
+    getAnalytics(key, character) {
+        // Valid keys for analytics
+        const validKeys = EMOJI_TYPES.map(item => item.type);
+
+        try {
+            // Check if key is valid
+            if (!validKeys.includes(key)) {
+                throw new Error(`Invalid analytics key: ${key}. Valid keys are: ${validKeys.join(', ')}`);
+            }
+
+            // Return the value (if key doesn't exist, return 0)
+            return this._analytics[character][key] || 0;
+
+        } catch (error) {
+            console.error('Error getting analytics:', error.message);
+            return 0;
+        }
+    }
+
+
 
     // Update method to track game time
     update(time, delta) {
