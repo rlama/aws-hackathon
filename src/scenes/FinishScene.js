@@ -34,11 +34,8 @@ export default class FinishScene extends Phaser.Scene {
             } else {
                 // rankData is ready, update UI or perform necessary actions
                 const rankData = this.gameStateManager.rankData;
-                console.log("-----rankData----")
-                console.log(rankData)
                 let rankDataEle = this.element.querySelector('#f-rank');
                 const msg = `Your rank: ${rankData.rank} -  out of ${rankData.totalPlayers} players`;
-                console.log(msg)
                 if (rankDataEle) {
                     rankDataEle.innerHTML = msg;
                 }
