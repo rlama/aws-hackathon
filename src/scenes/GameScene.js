@@ -16,10 +16,11 @@ import ScoreManager from '../managers/ScoreManager';
 import MapManager from '../managers/MapManager';
 import MemoryMonitor from '../managers/MemoryMonitor';
 import AnalyticsManager from '../managers/AnalyticsManager';
+import LongPressHandler from '../managers/LongPressHandler';
 import { BackgroundManager } from '../managers/BackgroundManager';
 import { MAX_MOBILE_WIDTH } from '../config/gameConfig';
 import SettingsButton from '../objects/SettingsButton';
-import { isIphone } from '../utils/helpers';
+import { isIphone, checkIfMobile } from '../utils/helpers';
 // import CursorManager from '../components/CursorManager';
 import { EXTRA_SCALE, EXTRA_TYPES, GAME_FRAME_RATE } from '../config/gameConfig';
 import { addBackground } from "../utils/helpers";
@@ -36,6 +37,7 @@ export default class GameScene extends Phaser.Scene {
         this.stateData = null;
         this.playerPoints = '';
         this.cleanupCallbacks = [];
+
     }
 
     // Implement initialization method to separate concerns
@@ -43,6 +45,7 @@ export default class GameScene extends Phaser.Scene {
         this.gameWidth = this.cameras.main.width;
         this.gameHeight = this.cameras.main.height;
         this.setupPhysics();
+
     }
 
     // Separate physics setup
@@ -66,7 +69,42 @@ export default class GameScene extends Phaser.Scene {
 
         // Set up event listeners
         this.setupEventListeners();
+
+        // Set up analytics
+        this.setupAnalytics();
+
+        this.initializeLongPressControls();
     }
+
+
+    initializeLongPressControls() {
+        // Initialize for desktop
+        if (!checkIfMobile()) {
+            this.addSpacebarKeyListener();
+        } else {
+            // Initialize for mobile
+            this.longPressHandler = new LongPressHandler(this);
+        }
+    }
+
+
+    setupAnalytics() {
+        this.analyticsManager = new AnalyticsManager(this);
+
+        // Example of tracking player actions
+        this.input.on('pointerdown', () => {
+            this.analyticsManager.startAction();
+        });
+
+        // Periodically log analytics
+        this.time.addEvent({
+            delay: 60000, // Every minute
+            callback: this.logAnalytics,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
 
     // Separate manager initialization
     initializeManagers() {
@@ -126,6 +164,19 @@ export default class GameScene extends Phaser.Scene {
         events.on('widthchange', this.handleResize, this);
         events.on('viewportupdate', this.handleViewportUpdate, this);
         this.handleResize();
+
+    }
+
+    /// pause/resume game with spacebar press in desktop
+    addSpacebarKeyListener(){
+        const keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        keySpace.on('down', () => {
+            this.pauseGame()
+            this.scene.launch('PauseScene', {
+                parentScene: this.scene,
+                isGameScene: true
+            });
+        })
     }
 
     // Optimize resize handler

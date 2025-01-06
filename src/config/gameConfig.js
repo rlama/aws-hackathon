@@ -15,6 +15,7 @@ import LeaderboardScene from '../scenes/LeaderboardScene'
 import DebugAtlasScene from '../scenes/DebugAtlasScene';
 import { OrientationManager } from '../managers/OrientationManager';
 import { ViewportManager } from '../managers/ViewportManager';
+import PauseScene from '../scenes/PauseScene';
 
 export const MUSIC_ON = false;
 export const SOUND_ON = false;
@@ -364,7 +365,7 @@ export const gameConfig = {
         createContainer: true  // This is crucial!
     },
     backgroundColor: '#ffffff',
-    scene: [PreloadScene, IntroScene, StartScene, GameScene, SettingsScene, GameInfoScene, FinishScene, LeaderboardScene, DebugAtlasScene],
+    scene: [PreloadScene, IntroScene, StartScene, GameScene, SettingsScene, GameInfoScene, FinishScene, LeaderboardScene, DebugAtlasScene, PauseScene],
     fps: {
         target: GAME_FRAME_RATE,
         forceSetTimeOut: false

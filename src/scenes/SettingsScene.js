@@ -138,6 +138,14 @@ export default class SettingsScene extends Phaser.Scene {
                 closeButton.style.display = 'none';
             }
         }
+
+        const keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        keySpace.on('down', () => {
+            const sc = this.parentScene.resumeGame();
+            this.scene.stop();
+        })
+
+
     }
 
 
