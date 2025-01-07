@@ -49,17 +49,15 @@ export default class PauseScene extends Phaser.Scene {
 
         }else{
             const keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-            keySpace.on('down', () => {
-                const sc = this.parentScene.resumeGame();
-                this.scene.stop();
-            })
+            keySpace.on('down', this.handleSceneClick)
         }
     }
 
 
-    handleSceneClick(){
+    handleSceneClick=()=>{
         event.stopPropagation();
         const sc = this.parentScene.resumeGame();
+        this.gameStateManager.resumeSound('background');
         this.scene.stop();
     }
 
