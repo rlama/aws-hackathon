@@ -112,11 +112,11 @@ export default class IntroScene extends Phaser.Scene {
 
     createInputLabel(width, height, yOffset) {
         return this.add.text(
-            width / 2 - 120, 
+            width / 2 - 109, 
             height * 0.45 + yOffset, 
-            'Enter your name', 
+            'Enter a username', 
             {
-                fontSize: '24px',
+                fontSize: '21px',
                 color: '#1873ab',
                 fontFamily: FONT_FAMILY
             }
