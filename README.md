@@ -6,6 +6,14 @@ A simple catch-and-collect game with a twist. Amazon Q is pushed to its limit to
 
 Chad & Barry is an exciting arcade-style game where players race to reach 270 electoral votes by collecting falling items while avoiding obstacles, the onions. Choose your candidate and compete against an opponent in this political-themed adventure!
 
+## Live Game
+Check out the live game here: [Live Game](https://goondrook.com/chad-barry/index.html)
+
+
+## Blog
+Check out the game blog here: [Live Demo](https://community.aws/content/2qFJPAMoUqJmSJ7jOab0Yj9f6JW/chad-barry-the-candidates-a-game-with-amazon-q-developer)
+
+
 ## 🚀 Installation
 
 [Add installation instructions here, for example:]
@@ -41,8 +49,16 @@ It user several services from AWS.
 - The unselected character becomes your robot opponent
 
 ### Game Controls
-- **Mouse Click** or **'M' key**: Open your character's mouth to collect items
-- **Spacebar** or **⚙️ Gear Icon**: Pause game and access settings
+
+Click mouse or press 'm' key in desktop or Tap screen in mobile to open your character's mouth and collect falling items to score points. Press 'Spacebar' key in desktop or Tap and hold in mobile to pause and resume game. Modify game settings by pressing the 'Gear ⚙' icon.
+
+- Open your character's mouth to collect items 
+    + in desktop **Mouse Click** or press **'m' key**
+    + in mobile **Tap screen**
+
+- Pause/resume game
+    + in desktop press **Spacebar**
+    + in mobile **Tap and Hold** 
 
 ### Gameplay Mechanics
 1. **Vote Collection**: Catch falling objects to score points "votes"
