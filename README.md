@@ -4,7 +4,7 @@ A simple catch-and-collect game with a twist. Amazon Q is pushed to its limit to
 
 ## 🎮 Game Overview
 
-Chad & Barry is an exciting arcade-style game where players race to reach 270 electoral votes by collecting falling items while avoiding obstacles, the onions. Choose your candidate and compete against an opponent in this political-themed adventure!
+Chad & Barry is an exciting arcade-style game where players race to reach 270 electoral votes by collecting falling items while avoiding obstacles, the onions. Choose your candidate and compete against an opponent in this political-themed adventure! 
 
 ## Live Game
 Check out the live game here: [Live Game](https://goondrook.com/chad-barry/index.html)
